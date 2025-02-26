@@ -20,10 +20,6 @@ npm install bun -g
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## About Project
-This is a blockchain based AI integrated Platform where the market gap between developers and Investors are resolved
-
-
 ### Built With
 
 
@@ -33,7 +29,6 @@ This is a blockchain based AI integrated Platform where the market gap between d
     <img alt="NextJS" src="https://img.shields.io/badge/-NextJS-000000?style=flat-square&logo=nextdotjs&logoColor=white" />
     <img alt="Bun" src="https://img.shields.io/badge/-Bun.js-000000?style=flat-square&logo=bun&logoColor=white" />
     <img alt="TailwindCSS" src="https://img.shields.io/badge/-Tailwind CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-    <img alt="Supabase" src="https://img.shields.io/badge/-Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white" />
     <img alt="Cloudflare" src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=Cloudflare&logoColor=white" />
     <img alt="git" src="https://img.shields.io/badge/-Git-F05032?style=flat-square&logo=git&logoColor=white" />
   </p>
