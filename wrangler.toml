@@ -1,0 +1,7 @@
+name = "restaurant-template-1"
+compatibility_date = "2025-02-26"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+[vars]
+NODE_VERSION = "20.0.0"
