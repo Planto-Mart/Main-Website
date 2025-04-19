@@ -15,10 +15,10 @@ function Featured() {
           </div>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { title: "Monstera Deliciosa", price: "₹1,299", image: "/api/placeholder/300/300", tag: "Bestseller" },
-              { title: "Self-Watering Ceramic Pot", price: "₹899", image: "/api/placeholder/300/300", tag: "New" },
-              { title: "Snake Plant", price: "₹749", image: "/api/placeholder/300/300", tag: "Popular" },
-              { title: "Organic Plant Food", price: "₹499", image: "/api/placeholder/300/300", tag: "Eco-friendly" }
+              { title: "Monstera Deliciosa", price: "₹1,299", image: "/assets/products/monstra.png", tag: "Bestseller" },
+              { title: "Self-Watering Ceramic Pot", price: "₹899", image: "/assets/products/self-watering.png", tag: "New" },
+              { title: "Snake Plant", price: "₹749", image: "/assets/products/snake-plant.png", tag: "Popular" },
+              { title: "Organic Plant Food", price: "₹499", image: "/assets/products/organic-plant-food.png", tag: "Eco-friendly" }
             ].map((product, index) => (
               <div key={index} className="overflow-hidden rounded-xl border border-gray-100 bg-white transition-all hover:shadow-xl">
                 <div className="relative">
