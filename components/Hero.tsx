@@ -28,7 +28,7 @@ function Hero() {
               <div className="relative">
                 <div className="absolute bottom-0 right-0 -z-10 size-80 rounded-full bg-green-100"></div>
                 <img 
-                  src="/window.svg" 
+                  src="/assets/Hero_section.png" 
                   alt="Plants collection" 
                   className="relative z-10 h-auto max-w-full rounded-2xl shadow-xl"
                 />

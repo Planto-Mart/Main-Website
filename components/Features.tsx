@@ -14,10 +14,10 @@ function Features() {
           </div>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { title: "Indoor Plants", image: "/api/placeholder/400/300", description: "Perfect for purifying air and adding natural beauty" },
-              { title: "Outdoor Plants", image: "/api/placeholder/400/300", description: "Transform your garden into a vibrant ecosystem" },
-              { title: "Eco-friendly Planters", image: "/api/placeholder/400/300", description: "Sustainable containers for your green companions" },
-              { title: "Green Essentials", image: "/api/placeholder/400/300", description: "Plant-based products for a sustainable lifestyle" }
+              { title: "Indoor Plants", image: "/assets/indoor_plants.png", description: "Perfect for purifying air and adding natural beauty" },
+              { title: "Outdoor Plants", image: "/assets/outdoor_plants.png", description: "Transform your garden into a vibrant ecosystem" },
+              { title: "Eco-friendly Planters", image: "/assets/eco-friendly-features.png", description: "Sustainable containers for your green companions" },
+              { title: "Green Essentials", image: "/assets/green_essentials_oil.png", description: "Plant-based products for a sustainable lifestyle" }
             ].map((category, index) => (
               <div key={index} className="overflow-hidden rounded-xl bg-green-50 shadow-md transition-transform hover:scale-105 hover:shadow-lg">
                 <img 
