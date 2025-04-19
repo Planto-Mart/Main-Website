@@ -1,5 +1,6 @@
 import React from 'react'
 import { ArrowRight } from 'lucide-react'
+import Image from 'next/image'
 
 function Features() {
   return (
@@ -20,7 +21,9 @@ function Features() {
               { title: "Green Essentials", image: "/assets/green_essentials_oil.png", description: "Plant-based products for a sustainable lifestyle" }
             ].map((category, index) => (
               <div key={index} className="overflow-hidden rounded-xl bg-green-50 shadow-md transition-transform hover:scale-105 hover:shadow-lg">
-                <img 
+                <Image
+                  width={500}
+                  height={500} 
                   src={category.image} 
                   alt={category.title} 
                   className="h-48 w-full object-cover"

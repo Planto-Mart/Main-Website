@@ -1,5 +1,6 @@
 import React from 'react'
 import { Truck, Leaf, UserPlus } from 'lucide-react'
+import Image from 'next/image'
 
 function About() {
   return (
@@ -10,7 +11,9 @@ function About() {
             <div className="md:w-1/2">
               <div className="relative">
                 <div className="absolute left-0 top-0 -z-10 size-64 rounded-full bg-green-200"></div>
-                <img 
+                <Image
+                  width={500}
+                  height={500} 
                   src="/api/placeholder/600/500" 
                   alt="About Plantomart" 
                   className="relative z-10 h-auto max-w-full rounded-2xl shadow-xl"

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Heart } from 'lucide-react'
+import Image from 'next/image'
 
 function Featured() {
   return (
@@ -21,7 +22,9 @@ function Featured() {
             ].map((product, index) => (
               <div key={index} className="overflow-hidden rounded-xl border border-gray-100 bg-white transition-all hover:shadow-xl">
                 <div className="relative">
-                  <img 
+                  <Image
+                    width={500}
+                    height={500} 
                     src={product.image} 
                     alt={product.title} 
                     className="h-64 w-full object-cover"

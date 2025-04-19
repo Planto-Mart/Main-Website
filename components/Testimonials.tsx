@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import React from 'react'
 
 function Testimonials() {
@@ -34,7 +35,9 @@ function Testimonials() {
             ].map((testimonial, index) => (
               <div key={index} className="rounded-xl bg-white p-8 shadow-md">
                 <div className="mb-6 flex items-center">
-                  <img 
+                  <Image
+                    width={500}
+                    height={500} 
                     src={testimonial.image} 
                     alt={testimonial.name} 
                     className="mr-4 size-12 rounded-full object-cover"
