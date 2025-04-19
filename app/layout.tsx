@@ -1,9 +1,10 @@
 import Head from "next/head";
+import "./globals.css";
 
 export const metadata = {
   title: "Plantomart | Eco-Friendly Plants & Sustainable Living Essentials",
   description:
-    "Plantomart brings nature’s best to your doorstep. Discover indoor plants, eco-friendly home products, and sustainable living solutions curated by local vendors.",
+    "Plantomart brings nature's best to your doorstep. Discover indoor plants, eco-friendly home products, and sustainable living solutions curated by local vendors.",
   keywords:
     "Plantomart, indoor plants, sustainable living, eco-friendly products, Hyderabad, green lifestyle, plant delivery, home gardening, plant-based products, local vendors, eco-conscious shopping",
   og: {
@@ -73,25 +74,27 @@ export default function PlantomartLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Head>
-        <title>{metadata.title}</title>
-        <meta name="description" content={metadata.description} />
-        <meta name="keywords" content={metadata.keywords} />
-        {/* Open Graph Meta Tags */}
-        <meta property="og:title" content={metadata.og.title} />
-        <meta property="og:description" content={metadata.og.description} />
-        <meta property="og:url" content={metadata.og.url} />
-        <meta property="og:type" content={metadata.og.type} />
-        <meta property="og:image" content={metadata.og.image} />
-        {/* Twitter Meta Tags */}
-        <meta name="twitter:card" content={metadata.twitter.card} />
-        <meta name="twitter:site" content={metadata.twitter.site} />
-        <meta name="twitter:title" content={metadata.twitter.title} />
-        <meta name="twitter:description" content={metadata.twitter.description} />
-        <meta name="twitter:image" content={metadata.twitter.image} />
-      </Head>
-      <div>{children}</div>
-    </>
+    <html lang="en">
+      <body>
+        <Head>
+          <title>{metadata.title}</title>
+          <meta name="description" content={metadata.description} />
+          <meta name="keywords" content={metadata.keywords} />
+          {/* Open Graph Meta Tags */}
+          <meta property="og:title" content={metadata.og.title} />
+          <meta property="og:description" content={metadata.og.description} />
+          <meta property="og:url" content={metadata.og.url} />
+          <meta property="og:type" content={metadata.og.type} />
+          <meta property="og:image" content={metadata.og.image} />
+          {/* Twitter Meta Tags */}
+          <meta name="twitter:card" content={metadata.twitter.card} />
+          <meta name="twitter:site" content={metadata.twitter.site} />
+          <meta name="twitter:title" content={metadata.twitter.title} />
+          <meta name="twitter:description" content={metadata.twitter.description} />
+          <meta name="twitter:image" content={metadata.twitter.image} />
+        </Head>
+        <div>{children}</div>
+      </body>
+    </html>
   );
 }
