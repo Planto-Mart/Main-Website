@@ -2,7 +2,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { FaLeaf, FaMapMarkerAlt } from 'react-icons/fa';
-import { motion } from 'framer-motion';
 
 function Hero() {
   return (
@@ -24,92 +23,29 @@ function Hero() {
       <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white md:items-end md:pr-16 md:text-right lg:pr-24">
         <div className="mb-4 flex flex-col items-center md:items-end">
           {/* Mobile text has text-shadow for better visibility */}
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="mb-2 text-2xl font-medium tracking-widest drop-shadow-md md:drop-shadow-none"
-          >
-            Bring
-          </motion.p>
-          <motion.h1 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ 
-              duration: 0.8, 
-              delay: 0.4,
-              type: "spring",
-              stiffness: 50
-            }}
-            className="mb-6 text-6xl font-bold tracking-wide drop-shadow-lg md:text-7xl md:drop-shadow-none lg:text-8xl"
-          >
+          <p className="mb-2 text-2xl font-medium tracking-widest drop-shadow-md md:drop-shadow-none">Bring</p>
+          <h1 className="mb-6 text-6xl font-bold tracking-wide drop-shadow-lg md:text-7xl md:drop-shadow-none lg:text-8xl">
             Nature
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.6 }}
-            className="mb-6 text-lg drop-shadow-md md:text-xl md:drop-shadow-none lg:text-2xl"
-          >
+          </h1>
+          <p className="mb-6 text-lg drop-shadow-md md:text-xl md:drop-shadow-none lg:text-2xl">
             Into your Home
-          </motion.p>
-          {/* Decorative leaf element using react-icons with floating animation */}
-          <motion.div 
-            className="mb-8 flex items-center drop-shadow-md md:drop-shadow-none"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
-          >
+          </p>
+          {/* Decorative leaf element using react-icons */}
+          <div className="mb-8 flex items-center drop-shadow-md md:drop-shadow-none">
             <div className="h-px w-12 bg-white"></div>
-            <motion.div
-              animate={{ 
-                y: [0, -5, 0],
-                rotate: [0, 5, 0, -5, 0]
-              }}
-              transition={{ 
-                duration: 4, 
-                repeat: Infinity,
-                ease: "easeInOut" 
-              }}
-            >
-              <FaLeaf className="mx-4 text-white" />
-            </motion.div>
+            <FaLeaf className="mx-4 text-white" />
             <div className="h-px w-12 bg-white"></div>
-          </motion.div>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 1 }}
-            className="drop-shadow-md md:drop-shadow-none"
-          >
+          </div>
+          <p className="drop-shadow-md md:drop-shadow-none">
             Green Space Upgrades
-          </motion.p>
-          <motion.button 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ 
-              scale: 1.05,
-              boxShadow: "0px 0px 8px rgba(255,255,255,0.5)"
-            }}
-            transition={{ duration: 0.5, delay: 1.2 }}
-            className="mt-4 flex items-center rounded bg-green-600 px-8 py-3 font-medium text-white transition-all hover:bg-green-700"
-          >
+          </p>
+          <button className="mt-4 flex items-center rounded bg-green-600 px-8 py-3 font-medium text-white transition-all hover:bg-green-700">
             Shop Now <FaMapMarkerAlt className="ml-2" />
-          </motion.button>
+          </button>
         </div>
       </div>
-      {/* SVG for nature-themed jagged bottom edge with grow-up animation */}
-      <motion.div 
-        className="absolute bottom-0 left-0 w-full"
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        transition={{ 
-          duration: 1.2,
-          delay: 0.3,
-          type: "spring",
-          stiffness: 30
-        }}
-      >
+      {/* SVG for nature-themed jagged bottom edge */}
+      <div className="absolute bottom-0 left-0 w-full">
         <svg 
           viewBox="0 0 1200 120" 
           preserveAspectRatio="none" 
@@ -182,7 +118,7 @@ function Hero() {
             fill="white"
           />
         </svg>
-      </motion.div>
+      </div>
     </div>
   );
 }
