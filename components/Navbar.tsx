@@ -106,14 +106,16 @@ function Navbar() {
             </div>
             {/* Desktop Navigation - Hidden on mobile - ADJUSTED POSITIONING */}
             <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:space-x-6">
-              {/* Vendors Dropdown */}
+              {/* Vendors Dropdown - FIXED DROPDOWN POSITIONING */}
               <div className="group relative">
                 <Link href="#" className="flex items-center text-gray-700 hover:text-green-600">
                   Vendors
                   <ChevronDown className="ml-1 size-4" />
                 </Link>
-                {/* Vendors Dropdown Menu */}
-                <div className="absolute left-0 top-full z-50 mt-4 hidden w-screen max-w-5xl rounded-xl border border-gray-200 bg-white p-6 shadow-2xl transition-all duration-300 group-hover:flex">
+                {/* Vendors Dropdown Menu - FIXED GAP AND POSITION */}
+                <div className="absolute left-1/2 top-full z-50 mt-0 hidden w-screen max-w-5xl -translate-x-1/2 transform rounded-xl border border-gray-200 bg-white p-6 shadow-2xl group-hover:block">
+                  {/* Added invisible padding bridge to prevent hover loss */}
+                  <div className="absolute -top-4 left-0 h-4 w-full"></div>
                   <div className="flex w-full gap-10">
                     {/* Vendor List Column */}
                     <div className="w-1/3 border-r border-gray-100 pr-6">
@@ -156,12 +158,33 @@ function Navbar() {
                   Blog
                   <ChevronDown className="ml-1 size-4" />
                 </Link>
+                {/* Added dropdown container for Blog dropdown */}
+                <div className="absolute left-0 top-full z-50 mt-0 hidden w-48 rounded-lg border border-gray-200 bg-white p-4 shadow-xl group-hover:block">
+                  {/* Added invisible padding bridge to prevent hover loss */}
+                  <div className="absolute -top-4 left-0 h-4 w-full"></div>
+                  <ul className="space-y-2">
+                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Blog Grid</Link></li>
+                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Blog List</Link></li>
+                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Blog Details</Link></li>
+                  </ul>
+                </div>
               </div>
               <div className="group relative">
                 <Link href="#" className="flex items-center text-gray-700 hover:text-green-600">
                   Page
                   <ChevronDown className="ml-1 size-4" />
                 </Link>
+                {/* Added dropdown container for Page dropdown */}
+                <div className="absolute left-0 top-full z-50 mt-0 hidden w-48 rounded-lg border border-gray-200 bg-white p-4 shadow-xl group-hover:block">
+                  {/* Added invisible padding bridge to prevent hover loss */}
+                  <div className="absolute -top-4 left-0 h-4 w-full"></div>
+                  <ul className="space-y-2">
+                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">About Us</Link></li>
+                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">FAQ</Link></li>
+                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Contact</Link></li>
+                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">404 Page</Link></li>
+                  </ul>
+                </div>
               </div>
               <Link href="#" className="text-gray-700 hover:text-green-600">Contact</Link>
             </div>
