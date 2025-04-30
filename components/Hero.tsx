@@ -1,14 +1,78 @@
 /* eslint-disable tailwindcss/migration-from-tailwind-2 */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaLeaf, FaMapMarkerAlt } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 function Hero() {
+  // Categories data
+  const categories = [
+    {
+      id: 1,
+      name: "Indoor Plants",
+      image: "/assets/indoor_plants.png",
+      color: "from-green-400 to-green-600"
+    },
+    {
+      id: 2,
+      name: "Garden Essentials",
+      image: "/assets/outdoor_plants.png",
+      color: "from-emerald-400 to-emerald-600"
+    },
+    {
+      id: 3,
+      name: "Water Features",
+      image: "/assets/green_essentials_oil.png",
+      color: "from-blue-400 to-blue-600"
+    },
+    {
+      id: 4,
+      name: "Landscaping",
+      image: "/assets/products/organic-plant-food.png",
+      color: "from-amber-400 to-amber-600"
+    }
+  ];
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6 }
+    }
+  };
+
+  // Handle scroll for parallax effect
+  const [scrollY, setScrollY] = useState(0);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    
+    window.addEventListener("scroll", handleScroll);
+    
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Hero image container with height increased only on desktop */}
-      <div className="absolute inset-0 bg-gray-900 md:h-[120vh]">
+      {/* Hero image container with parallax effect */}
+      <div 
+        className="absolute inset-0 bg-gray-900 md:h-[120vh]"
+        style={{ transform: `translateY(${scrollY * 0.2}px)` }}
+      >
         <Image 
           src="/assets/image.png"
           alt="Camping in nature"
@@ -20,45 +84,33 @@ function Hero() {
       </div>
       {/* Text shadow overlay for mobile only */}
       <div className="absolute inset-0 bg-black bg-opacity-30 md:bg-opacity-0"></div>
-      {/* Overlay content - centered on mobile, right-aligned on desktop */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white md:items-end md:pr-16 md:text-right lg:pr-24">
-        <div className="mb-4 flex flex-col items-center md:items-end">
-          {/* Mobile text has text-shadow for better visibility */}
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="mb-2 text-2xl font-medium tracking-widest drop-shadow-md md:drop-shadow-none"
-          >
-            Bring
-          </motion.p>
+      {/* Main content container */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-4">
+        {/* Title and Categories Section Combined */}
+        <motion.div 
+          className="container mx-auto px-4 text-center text-white"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
           <motion.h1 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ 
-              duration: 0.8, 
-              delay: 0.4,
+              duration: 0.8,
               type: "spring",
               stiffness: 50
             }}
-            className="mb-6 text-6xl font-bold tracking-wide drop-shadow-lg md:text-7xl md:drop-shadow-none lg:text-8xl"
+            className="py-2 text-5xl font-bold tracking-wide drop-shadow-lg md:text-7xl lg:text-8xl"
           >
-            Nature
+            Bring Nature Home
           </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.6 }}
-            className="mb-6 text-lg drop-shadow-md md:text-xl md:drop-shadow-none lg:text-2xl"
-          >
-            Into your Home
-          </motion.p>
-          {/* Decorative leaf element using react-icons with floating animation */}
+          {/* Decorative leaf element with floating animation */}
           <motion.div 
-            className="mb-8 flex items-center drop-shadow-md md:drop-shadow-none"
+            className="mb-8 flex items-center justify-center drop-shadow-md md:drop-shadow-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.8 }}
+            transition={{ duration: 1, delay: 0.4 }}
           >
             <div className="h-px w-12 bg-white"></div>
             <motion.div
@@ -76,29 +128,72 @@ function Hero() {
             </motion.div>
             <div className="h-px w-12 bg-white"></div>
           </motion.div>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 1 }}
-            className="drop-shadow-md md:drop-shadow-none"
-          >
-            Green Space Upgrades
-          </motion.p>
-          <motion.button 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            whileHover={{ 
-              scale: 1.05,
-              boxShadow: "0px 0px 8px rgba(255,255,255,0.5)"
-            }}
-            transition={{ duration: 0.5, delay: 1.2 }}
-            className="mt-4 flex items-center rounded bg-green-600 px-8 py-3 font-medium text-white transition-all hover:bg-green-700"
-          >
-            Shop Now <FaMapMarkerAlt className="ml-2" />
-          </motion.button>
-        </div>
+          {/* Categories in curved layout */}
+          <div className="relative">
+            <motion.div 
+              className="mx-auto mb-12 flex flex-wrap items-center justify-center"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {categories.map((category, index) => {
+                // Calculate positions for curved layout
+                const isOdd = index % 2 !== 0;
+                const translateY = isOdd ? 'translate-y-8 md:translate-y-12' : '';
+                
+                // Adjust x-position based on index
+                let positionClass;
+                if (index === 0) {
+                  positionClass = "md:-ml-12 lg:-ml-16";
+                } else if (index === categories.length - 1) {
+                  positionClass = "md:-mr-12 lg:-mr-16";
+                }
+                
+                return (
+                  <motion.div
+                    key={category.id}
+                    className={`group mx-1 mb-4 flex transform cursor-pointer justify-center sm:mx-4 md:mx-6 ${translateY} ${positionClass || ''}`}
+                    variants={itemVariants}
+                    whileHover={{ scale: 1.08, transition: { duration: 0.3 } }}
+                  >
+                    <div className="relative size-20 overflow-hidden rounded-full shadow-lg sm:size-24 md:size-28">
+                      {/* Placeholder image with color gradient */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${category.color}`}></div>
+                      {/* Actual image */}
+                      <Image 
+                        src={category.image}
+                        alt={category.name}
+                        layout="fill"
+                        objectFit="cover"
+                        className="transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-10">
+                        <h3 className="px-1 text-center text-xs font-bold text-white drop-shadow-lg sm:px-2 sm:text-sm md:text-base">{category.name}</h3>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+          {/* Call to action button */}
+          <div className="flex justify-center">
+            <motion.button 
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: "0px 0px 8px rgba(255,255,255,0.5)"
+              }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="flex items-center rounded bg-green-600 px-6 py-3 font-medium text-white transition-all hover:bg-green-700 md:px-8"
+            >
+              Shop Now <FaMapMarkerAlt className="ml-2" />
+            </motion.button>
+          </div>
+        </motion.div>
       </div>
-      {/* SVG for nature-themed jagged bottom edge with grow-up animation */}
+      {/* SVG for nature-themed wavy bottom edge with grow-up animation */}
       <motion.div 
         className="absolute bottom-0 left-0 w-full"
         initial={{ y: 100 }}
@@ -113,7 +208,7 @@ function Hero() {
         <svg 
           viewBox="0 0 1200 120" 
           preserveAspectRatio="none" 
-          className="h-24 w-full md:h-32"
+          className="h-16 w-full sm:h-20 md:h-24 lg:h-32"
         >
           {/* Forest green base layer */}
           <path 
