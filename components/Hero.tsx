@@ -69,18 +69,33 @@ function Hero() {
   return (
     <div className="relative h-screen w-full overflow-hidden">
       {/* Hero image container with parallax effect */}
+      {/* Background for mobile */}
       <div 
-        className="absolute inset-0 bg-gray-900 md:h-[120vh]"
-        style={{ transform: `translateY(${scrollY * 0.2}px)` }}
-      >
+  className="absolute inset-0 md:hidden"
+  style={{ transform: `translateY(${scrollY * 0.2}px)` }}
+>
         <Image 
-          src="/assets/image.png"
-          alt="Camping in nature"
-          layout="fill"
-          objectFit="cover"
-          className="brightness-85 md:brightness-100" // Brighten image on mobile
-          priority
-        />
+    src="/assets/image.png" // mobile image
+    alt="Hero mobile"
+    layout="fill"
+    objectFit="cover"
+    className="brightness-85"
+    priority
+  />
+      </div>
+      {/* Background for desktop */}
+      <div 
+      className="absolute inset-0 hidden md:block"
+      style={{ transform: `translateY(${scrollY * 0.2}px)` }}
+    >
+        <Image 
+        src="/desktopIM-2.png" // desktop image
+        alt="Hero desktop"
+        layout="fill"
+        objectFit="cover"
+        className="brightness-100"
+        priority
+      />
       </div>
       {/* Text shadow overlay for mobile only */}
       <div className="absolute inset-0 bg-black bg-opacity-30 md:bg-opacity-0"></div>
