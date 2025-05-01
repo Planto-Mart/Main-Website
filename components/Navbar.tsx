@@ -28,12 +28,12 @@ function Navbar() {
 
   useEffect(() => {
     // Prevent body scrolling when drawer is open
-    if (isCartOpen || isWishlistOpen) {
+    if (isCartOpen || isWishlistOpen || isMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
     }
-  }, [isCartOpen, isWishlistOpen]);
+  }, [isCartOpen, isWishlistOpen, isMenuOpen]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -72,7 +72,7 @@ function Navbar() {
   const displayCount = (count:any) => {
     if (count > 5) return "5+";
     
-    return count.toString();
+    return count.toString(); 
   };
   
   return (
@@ -86,7 +86,7 @@ function Navbar() {
                 className="text-gray-700 hover:text-green-600" 
                 onClick={toggleMenu}
                 aria-label="Toggle menu"
-            >
+              >
                 <Menu className="size-6" />
               </button>
             </div>
@@ -99,7 +99,7 @@ function Navbar() {
                     alt="Plantomart Logo" 
                     fill
                     className="object-contain"
-                />
+                  />
                 </div>
                 <span className="text-lg font-bold text-green-800 md:text-xl lg:ml-2 lg:text-2xl">plantomart</span>
               </Link>
@@ -213,7 +213,7 @@ function Navbar() {
                     className="text-gray-700 hover:text-green-600"
                     onClick={toggleCart}
                     aria-label="Cart"
-                >
+                  >
                     {cartItems > 0 && (
                     <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-yellow-500 text-xs text-white">
                         {displayCount(cartItems)}
@@ -227,7 +227,7 @@ function Navbar() {
                     className="text-gray-700 hover:text-green-600"
                     onClick={toggleWishlist}
                     aria-label="Wishlist"
-                >
+                  >
                     {wishlistItems > 0 && (
                     <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-yellow-500 text-xs text-white">
                         {displayCount(wishlistItems)}
@@ -249,7 +249,7 @@ function Navbar() {
                 className="relative text-gray-700 hover:text-green-600"
                 onClick={toggleCart}
                 aria-label="Cart"
-            >
+              >
                 {cartItems > 0 && (
                 <span className="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full bg-yellow-500 text-xs text-white">
                     {displayCount(cartItems)}
@@ -260,109 +260,160 @@ function Navbar() {
             </div>
           </div>
         </div>
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Navigation Menu - UPDATED with better header and UX */}
         {isMenuOpen && (
-          <div className="fixed inset-0 z-50 mt-16 overflow-y-auto bg-white lg:hidden">
-            <div className="h-full p-4">
-              <div className="flex flex-col space-y-4">
-                {/* Search bar */}
-                <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
-                  <Search className="mr-2 size-5 text-gray-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Search products..." 
-                    className="flex-1 bg-transparent text-gray-700 outline-none"
-                  />
+          <>
+            {/* Overlay that covers the rest of the screen */}
+            <div 
+              className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity lg:hidden"
+              onClick={toggleMenu}
+            ></div>
+            {/* Side drawer menu that slides in from the left with improved header */}
+            <div className="fixed inset-y-0 left-0 z-50 w-4/5 max-w-sm overflow-hidden bg-white shadow-xl transition-transform lg:hidden">
+              {/* Menu Header with close button */}
+              <div className="flex items-center justify-between border-b border-gray-100 bg-green-50 px-4 py-3">
+                <div className="flex items-center">
+                  <div className="relative mr-2 size-8">
+                    <Image 
+                      src="/assets/logo_Without_Text.png" 
+                      alt="Plantomart Logo" 
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <span className="text-lg font-bold text-green-800">plantomart</span>
                 </div>
-                {/* Account shortcuts */}
-                <div className="flex flex-wrap gap-2 rounded-lg bg-gray-50 p-3">
-                  <Link href="/account" className="flex items-center rounded-md bg-white p-2 text-gray-700 shadow-sm">
-                    <User className="mr-2 size-4" />
-                    <span>Account</span>
-                  </Link>
-                  <Link href="/wishlist" className="flex items-center rounded-md bg-white p-2 text-gray-700 shadow-sm">
-                    <Heart className="mr-2 size-4" />
-                    <span>Wishlist</span>
-                    {wishlistItems > 0 && (
-                      <span className="ml-1 rounded-full bg-yellow-500 px-1.5 text-xs text-white">
-                        {displayCount(wishlistItems)}
-                      </span>
-                    )}
-                  </Link>
-                </div>
-                {/* Mobile navigation items */}
-                <div className="mt-2">
-                  {/* Mobile Vendors Dropdown */}
-                  <div>
-                    <button 
-                      onClick={toggleMobileVendor}
-                      className="flex w-full items-center justify-between border-b border-gray-100 py-3 text-gray-700 hover:text-green-600"
-                    >
-                      Vendors
-                      <ChevronRight 
-                        className={`size-4 transition-transform ${isMobileVendorOpen ? 'rotate-90' : ''}`} 
+                <button 
+                  onClick={toggleMenu}
+                  className="rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                  aria-label="Close menu"
+                >
+                  <X className="size-6" />
+                </button>
+              </div>
+              {/* Menu content with scrollable area */}
+              <div className="h-[calc(100%-56px)] overflow-y-auto">
+                <div className="p-4">
+                  <div className="flex flex-col space-y-4">
+                    {/* Search bar with improved styling */}
+                    <div className="flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                      <Search className="mr-2 size-5 text-gray-400" />
+                      <input 
+                        type="text" 
+                        placeholder="Search products..." 
+                        className="flex-1 bg-transparent text-gray-700 outline-none"
                       />
-                    </button>
-                    {/* Mobile Vendors Submenu */}
-                    {isMobileVendorOpen && (
-                      <div className="mt-2 pl-4">
-                        <div className="mb-4">
-                          <h3 className="mb-2 text-sm font-medium uppercase text-gray-500">VENDOR LIST</h3>
-                          <ul className="space-y-2 pl-2">
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Show Bageecha</Link></li>
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Super Saaf</Link></li>
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Leaf Grid</Link></li>
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Plantify</Link></li>
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Surface Gauge (Coming soon)</Link></li>
-                          </ul>
-                        </div>
-                        <div className="mb-4">
-                          <h3 className="mb-2 text-sm font-medium uppercase text-gray-500">PRODUCT</h3>
-                          <ul className="space-y-2 pl-2">
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Product Sidebar</Link></li>
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Bought Together</Link></li>
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Product Countdown</Link></li>
-                            <li><Link href="#" className="text-gray-800 hover:text-green-600">Grouped Product</Link></li>
-                          </ul>
-                        </div>
-                        <div className="relative mb-4 h-32 w-full overflow-hidden rounded-lg bg-green-800">
-                          <div className="absolute inset-0 bg-gradient-to-b from-green-700/80 to-green-900/80"></div>
-                          <div className="absolute inset-0 bg-[url('/api/placeholder/500/300')] bg-cover bg-center opacity-50"></div>
-                          <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
-                            <h3 className="mb-1 text-2xl font-bold">Sale 25%</h3>
-                            <p className="text-base font-medium">Shop Plant-O-Mart today</p>
+                    </div>
+                    {/* Account shortcuts with improved visual design */}
+                    <div className="flex flex-wrap gap-2 rounded-lg bg-gray-50 p-3">
+                      <Link href="/account" className="flex items-center rounded-md bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-green-50 hover:text-green-600">
+                        <User className="mr-2 size-4" />
+                        <span>Account</span>
+                      </Link>
+                      <Link href="/wishlist" className="flex items-center rounded-md bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-green-50 hover:text-green-600">
+                        <Heart className="mr-2 size-4" />
+                        <span>Wishlist</span>
+                        {wishlistItems > 0 && (
+                          <span className="ml-1 rounded-full bg-yellow-500 px-1.5 text-xs text-white">
+                            {displayCount(wishlistItems)}
+                          </span>
+                        )}
+                      </Link>
+                      <Link href="/cart" className="flex items-center rounded-md bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-green-50 hover:text-green-600">
+                        <ShoppingCart className="mr-2 size-4" />
+                        <span>Cart</span>
+                        {cartItems > 0 && (
+                          <span className="ml-1 rounded-full bg-yellow-500 px-1.5 text-xs text-white">
+                            {displayCount(cartItems)}
+                          </span>
+                        )}
+                      </Link>
+                    </div>
+                    {/* Mobile navigation items with improved visual feedback */}
+                    <div className="mt-2">
+                      {/* Mobile Vendors Dropdown with animation */}
+                      <div>
+                        <button 
+                          onClick={toggleMobileVendor}
+                          className="flex w-full items-center justify-between border-b border-gray-100 py-3 text-gray-700 transition-colors hover:text-green-600"
+                        >
+                          <span className="font-medium">Vendors</span>
+                          <ChevronRight 
+                            className={`size-4 transition-transform duration-300 ${isMobileVendorOpen ? 'rotate-90' : ''}`} 
+                          />
+                        </button>
+                        {/* Mobile Vendors Submenu with smooth animation */}
+                        {isMobileVendorOpen && (
+                          <div className="mt-2 overflow-hidden pl-4">
+                            <div className="mb-4">
+                              <h3 className="mb-2 text-sm font-medium uppercase text-gray-500">VENDOR LIST</h3>
+                              <ul className="space-y-2 pl-2">
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Show Bageecha</Link></li>
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Super Saaf</Link></li>
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Leaf Grid</Link></li>
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Plantify</Link></li>
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Surface Gauge <span className="text-xs italic text-gray-400">(Coming soon)</span></Link></li>
+                              </ul>
+                            </div>
+                            <div className="mb-4">
+                              <h3 className="mb-2 text-sm font-medium uppercase text-gray-500">PRODUCT</h3>
+                              <ul className="space-y-2 pl-2">
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Product Sidebar</Link></li>
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Bought Together</Link></li>
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Product Countdown</Link></li>
+                                <li><Link href="#" className="block py-1 text-gray-800 transition-colors hover:text-green-600">Grouped Product</Link></li>
+                              </ul>
+                            </div>
+                            {/* Promotional banner with improved visual appeal */}
+                            <div className="relative mb-4 h-32 w-full overflow-hidden rounded-lg">
+                              <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-green-800"></div>
+                              <div className="absolute inset-0 bg-[url('/api/placeholder/500/300')] bg-cover bg-center opacity-20"></div>
+                              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-white">
+                                <h3 className="mb-1 text-2xl font-bold">25% OFF</h3>
+                                <p className="text-base font-medium">Shop Plant-O-Mart today</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {/* Other menu items with improved hover effects */}
+                      <Link href="#" className="block border-b border-gray-100 py-3 font-medium text-gray-700 transition-colors hover:text-green-600">Menu</Link>
+                      <Link href="#" className="block border-b border-gray-100 py-3 font-medium text-gray-700 transition-colors hover:text-green-600">About</Link>
+                      {/* Blog dropdown with improved visual feedback */}
+                      <button 
+                        className="flex w-full items-center justify-between border-b border-gray-100 py-3 font-medium text-gray-700 transition-colors hover:text-green-600"
+                        onClick={() => {/* Toggle blog submenu */}}
+                      >
+                        Blog
+                        <ChevronRight className="size-4" />
+                      </button>
+                      {/* Page dropdown with improved visual feedback */}
+                      <button 
+                        className="flex w-full items-center justify-between border-b border-gray-100 py-3 font-medium text-gray-700 transition-colors hover:text-green-600"
+                        onClick={() => {/* Toggle page submenu */}}
+                      >
+                        Page
+                        <ChevronRight className="size-4" />
+                      </button>
+                      <Link href="#" className="block border-b border-gray-100 py-3 font-medium text-gray-700 transition-colors hover:text-green-600">Contact</Link>
+                      {/* Mobile Contact Info with improved visual design */}
+                      <div className="mt-6 rounded-lg bg-gradient-to-r from-green-50 to-green-100 p-4">
+                        <div className="flex items-center">
+                          <div className="mr-3 flex size-10 items-center justify-center rounded-full bg-white shadow-sm">
+                            <Phone className="size-5 text-green-600" />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-xs text-gray-500">Reach Out At</span>
+                            <Link href="tel:+918331801000" className="font-bold text-yellow-500 hover:underline">+91 833 180 1000</Link>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                  <Link href="#" className="block border-b border-gray-100 py-3 text-gray-700 hover:text-green-600">Menu</Link>
-                  <Link href="#" className="block border-b border-gray-100 py-3 text-gray-700 hover:text-green-600">About</Link>
-                  <Link href="#" className="flex items-center justify-between border-b border-gray-100 py-3 text-gray-700 hover:text-green-600">
-                    Blog
-                    <ChevronRight className="size-4" />
-                  </Link>
-                  <Link href="#" className="flex items-center justify-between border-b border-gray-100 py-3 text-gray-700 hover:text-green-600">
-                    Page
-                    <ChevronRight className="size-4" />
-                  </Link>
-                  <Link href="#" className="block border-b border-gray-100 py-3 text-gray-700 hover:text-green-600">Contact</Link>
-                  {/* Mobile Contact Info */}
-                  <div className="mt-4 rounded-lg bg-gray-50 p-4">
-                    <div className="flex items-center">
-                      <div className="mr-3 flex size-10 items-center justify-center rounded-full bg-green-100">
-                        <Truck className="size-5 text-green-600" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-gray-500">Reach Out At</span>
-                        <Link href="tel:+918331801000" className="font-bold text-yellow-500">+91 833 180 1000</Link>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
         )}
       </nav>
       {/* Cart Drawer */}
@@ -517,7 +568,7 @@ function Navbar() {
                     className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                     onClick={closeDrawers}
                   >
-                    Browse Plants
+                    Explore Products
                   </Link>
                 </div>
               </div>
