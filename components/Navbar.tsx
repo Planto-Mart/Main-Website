@@ -197,7 +197,7 @@ function Navbar() {
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs text-gray-500">Reach Out At</span>
-                  <span className="font-bold text-yellow-500">+91 833 180 1000</span>
+                  <span className="font-bold text-black">+91 833 180 1000</span>
                 </div>
               </div>
               {/* Action Icons - With divider for visual separation */}
@@ -404,7 +404,7 @@ function Navbar() {
                           </div>
                           <div className="flex flex-col">
                             <span className="text-xs text-gray-500">Reach Out At</span>
-                            <Link href="tel:+918331801000" className="font-bold text-yellow-500 hover:underline">+91 833 180 1000</Link>
+                            <Link href="tel:+918331801000" className="font-bold text-black hover:underline">+91 833 180 1000</Link>
                           </div>
                         </div>
                       </div>
