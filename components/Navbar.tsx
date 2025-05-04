@@ -2,9 +2,23 @@
 /* eslint-disable tailwindcss/migration-from-tailwind-2 */
 "use client";
 import { useEffect, useState } from 'react';
-import { ShoppingCart, User, Search, Truck, Heart, X, Menu, ChevronDown, ChevronRight, Phone } from "lucide-react";
+import { ShoppingCart, User, Search, Truck, Heart, X, Menu, ChevronDown, ChevronRight, Phone, Minus, Plus } from "lucide-react";
 import Image from 'next/image';
 import Link from 'next/link';
+
+// Define types for our products and cart/wishlist items
+interface Product {
+  id: string;
+  title: string;
+  price: string;
+  image: string;
+  tag: string;
+  numericPrice: number;
+}
+
+interface CartItem extends Product {
+  quantity: number;
+}
 
 function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,9 +26,58 @@ function Navbar() {
   const [isMobileVendorOpen, setIsMobileVendorOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
-  const [cartItems, setCartItems] = useState(3); // Default set to 3 for demo
-  const [wishlistItems, setWishlistItems] = useState(2); // Default set to 2 for demo
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+  const [isClient, setIsClient] = useState(false);
   
+  // Initialize state from localStorage on component mount
+  useEffect(() => {
+    setIsClient(true);
+    loadCartAndWishlist();
+
+    // Add event listeners for cart and wishlist updates
+    window.addEventListener('cartUpdated', loadCartAndWishlist);
+    window.addEventListener('wishlistUpdated', loadCartAndWishlist);
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('cartUpdated', loadCartAndWishlist);
+      window.removeEventListener('wishlistUpdated', loadCartAndWishlist);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
+  // Handle localStorage changes from other tabs/windows
+  const handleStorageChange = (event: StorageEvent) => {
+    if (event.key === 'plantomartCart' || event.key === 'plantomartWishlist') {
+      loadCartAndWishlist();
+    }
+  };
+
+  // Load cart and wishlist data from localStorage
+  const loadCartAndWishlist = () => {
+    const storedCart = localStorage.getItem('plantomartCart');
+    const storedWishlist = localStorage.getItem('plantomartWishlist');
+    
+    if (storedCart) {
+      try {
+        setCartItems(JSON.parse(storedCart));
+      } catch (e) {
+        console.error("Failed to parse cart data:", e);
+        setCartItems([]);
+      }
+    }
+    
+    if (storedWishlist) {
+      try {
+        setWishlistItems(JSON.parse(storedWishlist));
+      } catch (e) {
+        console.error("Failed to parse wishlist data:", e);
+        setWishlistItems([]);
+      }
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -69,10 +132,80 @@ function Navbar() {
   };
 
   // Helper function to display cart/wishlist count
-  const displayCount = (count:any) => {
+  const displayCount = (count: number) => {
     if (count > 5) return "5+";
     
-    return count.toString(); 
+return count.toString(); 
+  };
+
+  // Calculate cart subtotal
+  const calculateSubtotal = () => {
+    return cartItems.reduce((total, item) => total + (item.numericPrice * item.quantity), 0);
+  };
+
+  // Update item quantity in cart
+  const updateCartItemQuantity = (productId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    
+    const updatedCart = cartItems.map(item => 
+      item.id === productId ? { ...item, quantity: newQuantity } : item
+    );
+    
+    setCartItems(updatedCart);
+    localStorage.setItem('plantomartCart', JSON.stringify(updatedCart));
+    
+    // Dispatch event for other components
+    const event = new CustomEvent('cartUpdated', { detail: updatedCart });
+    window.dispatchEvent(event);
+  };
+
+  // Remove item from cart
+  const removeFromCart = (productId: string) => {
+    const updatedCart = cartItems.filter(item => item.id !== productId);
+    
+    setCartItems(updatedCart);
+    localStorage.setItem('plantomartCart', JSON.stringify(updatedCart));
+    
+    // Dispatch event for other components
+    const event = new CustomEvent('cartUpdated', { detail: updatedCart });
+    window.dispatchEvent(event);
+  };
+
+  // Remove item from wishlist
+  const removeFromWishlist = (productId: string) => {
+    const updatedWishlist = wishlistItems.filter(item => item.id !== productId);
+    
+    setWishlistItems(updatedWishlist);
+    localStorage.setItem('plantomartWishlist', JSON.stringify(updatedWishlist));
+    
+    // Dispatch event for other components
+    const event = new CustomEvent('wishlistUpdated', { detail: updatedWishlist });
+    window.dispatchEvent(event);
+  };
+
+  // Add wishlist item to cart
+  const addWishlistItemToCart = (product: Product) => {
+    // Check if product already exists in cart
+    const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
+    
+    let updatedCart;
+    if (existingItemIndex >= 0) {
+      // Increase quantity if already in cart
+      updatedCart = cartItems.map(item => 
+        item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+      );
+    } else {
+      // Add new item with quantity 1
+      const newItem: CartItem = { ...product, quantity: 1 };
+      updatedCart = [...cartItems, newItem];
+    }
+    
+    setCartItems(updatedCart);
+    localStorage.setItem('plantomartCart', JSON.stringify(updatedCart));
+    
+    // Dispatch event for other components
+    const event = new CustomEvent('cartUpdated', { detail: updatedCart });
+    window.dispatchEvent(event);
   };
   
   return (
@@ -214,9 +347,9 @@ function Navbar() {
                     onClick={toggleCart}
                     aria-label="Cart"
                   >
-                    {cartItems > 0 && (
+                    {cartItems.length > 0 && (
                     <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-yellow-500 text-xs text-white">
-                        {displayCount(cartItems)}
+                        {displayCount(cartItems.length)}
                     </span>
                     )}
                     <ShoppingCart className="size-5" />
@@ -228,9 +361,9 @@ function Navbar() {
                     onClick={toggleWishlist}
                     aria-label="Wishlist"
                   >
-                    {wishlistItems > 0 && (
+                    {wishlistItems.length > 0 && (
                     <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-yellow-500 text-xs text-white">
-                        {displayCount(wishlistItems)}
+                        {displayCount(wishlistItems.length)}
                     </span>
                     )}
                     <Heart className="size-5" />
@@ -250,9 +383,9 @@ function Navbar() {
                 onClick={toggleCart}
                 aria-label="Cart"
               >
-                {cartItems > 0 && (
+                {cartItems.length > 0 && (
                 <span className="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full bg-yellow-500 text-xs text-white">
-                    {displayCount(cartItems)}
+                    {displayCount(cartItems.length)}
                 </span>
                 )}
                 <ShoppingCart className="size-5" />
@@ -313,18 +446,18 @@ function Navbar() {
                       <Link href="/wishlist" className="flex items-center rounded-md bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-green-50 hover:text-green-600">
                         <Heart className="mr-2 size-4" />
                         <span>Wishlist</span>
-                        {wishlistItems > 0 && (
+                        {wishlistItems.length > 0 && (
                           <span className="ml-1 rounded-full bg-yellow-500 px-1.5 text-xs text-white">
-                            {displayCount(wishlistItems)}
+                            {displayCount(wishlistItems.length)}
                           </span>
                         )}
                       </Link>
                       <Link href="/cart" className="flex items-center rounded-md bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-green-50 hover:text-green-600">
                         <ShoppingCart className="mr-2 size-4" />
                         <span>Cart</span>
-                        {cartItems > 0 && (
+                        {cartItems.length > 0 && (
                           <span className="ml-1 rounded-full bg-yellow-500 px-1.5 text-xs text-white">
-                            {displayCount(cartItems)}
+                            {displayCount(cartItems.length)}
                           </span>
                         )}
                       </Link>
@@ -425,7 +558,7 @@ function Navbar() {
           ></div>
           <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto bg-white p-6 shadow-xl transition-transform sm:max-w-lg">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-              <h2 className="text-xl font-bold text-gray-800">Shopping Cart ({cartItems})</h2>
+              <h2 className="text-xl font-bold text-gray-800">Shopping Cart ({cartItems.length})</h2>
               <button 
                 onClick={closeDrawers}
                 className="rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
@@ -433,45 +566,71 @@ function Navbar() {
                 <X className="size-6" />
               </button>
             </div>
-            {cartItems > 0 ? (
+            {cartItems.length > 0 ? (
               <div className="mt-6">
-                {/* Sample cart items - can be dynamically generated */}
-                {[...Array(cartItems)].map((_, index) => (
-                  <div key={index} className="mb-4 flex items-center border-b border-gray-100 pb-4">
+                {/* Dynamically generated cart items */}
+                {cartItems.map((item) => (
+                  <div key={item.id} className="mb-4 flex items-center border-b border-gray-100 pb-4">
                     <div className="relative mr-4 size-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                       <Image 
-                        src="/api/placeholder/100/100" 
-                        alt={`Product ${index + 1}`}
+                        src={item.image} 
+                        alt={item.title} 
                         fill
                         className="object-cover"
                       />
                     </div>
                     <div className="flex flex-1 flex-col">
-                      <h3 className="text-sm font-medium text-gray-800">Plant Product {index + 1}</h3>
-                      <p className="mt-1 text-sm text-gray-500">Quantity: 1</p>
-                      <p className="mt-1 text-sm font-medium text-green-600">₹999</p>
+                      <h3 className="text-sm font-medium text-gray-800">{item.title}</h3>
+                      <p className="mt-1 text-sm font-medium text-green-600">{item.price}</p>
+                      <div className="mt-2 flex items-center">
+                        <button 
+                          onClick={() => updateCartItemQuantity(item.id, Math.max(1, item.quantity - 1))}
+                          className="flex size-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100"
+                        >
+                          <Minus className="size-3" />
+                        </button>
+                        <span className="mx-2 w-8 text-center text-sm text-black">{item.quantity}</span>
+                        <button 
+                          onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
+                          className="flex size-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100"
+                        >
+                          <Plus className="size-3" />
+                        </button>
+                      </div>
                     </div>
-                    <button className="ml-4 text-gray-400 hover:text-red-500">
-                      <X className="size-5" />
-                    </button>
+                    <div className="ml-4">
+                      <button 
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-gray-400 hover:text-red-500"
+                      >
+                        <X className="size-5" />
+                      </button>
+                    </div>
                   </div>
                 ))}
-                <div className="mt-6 border-t border-gray-200 pt-4">
-                  <div className="flex justify-between text-base font-medium text-gray-900">
-                    <p>Subtotal</p>
-                    <p>₹{999 * cartItems}</p>
+                <div className="mt-6 space-y-4">
+                  <div className="flex justify-between border-t border-gray-200 pt-4">
+                    <span className="text-base font-medium text-gray-600">Subtotal</span>
+                    <span className="text-base font-medium text-gray-900">₹{calculateSubtotal().toLocaleString()}</span>
                   </div>
-                  <p className="mt-1 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
-                  <div className="mt-6">
+                  <p className="text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Link
+                      href="/cart"
+                      className="rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                      onClick={closeDrawers}
+                    >
+                      View Cart
+                    </Link>
                     <Link
                       href="/checkout"
-                      className="flex w-full items-center justify-center rounded-md bg-green-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700"
+                      className="rounded-md bg-green-600 px-4 py-2 text-center text-sm font-medium text-white shadow-sm hover:bg-green-700"
                       onClick={closeDrawers}
                     >
                       Checkout
                     </Link>
                   </div>
-                  <div className="mt-4 flex justify-center text-center text-sm text-gray-500">
+                  <div className="mt-4 text-center text-sm text-gray-500">
                     <button
                       type="button"
                       className="font-medium text-green-600 hover:text-green-500"
@@ -486,14 +645,14 @@ function Navbar() {
               <div className="mt-16 flex flex-col items-center justify-center">
                 <ShoppingCart className="size-16 text-gray-300" />
                 <h3 className="mt-4 text-lg font-medium text-gray-900">Your cart is empty</h3>
-                <p className="mt-1 text-gray-500">Looks like you haven't added any plants to your cart yet.</p>
+                <p className="mt-1 text-gray-500">Looks like you haven't added anything to your cart yet.</p>
                 <div className="mt-6">
                   <Link
                     href="/products"
                     className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                     onClick={closeDrawers}
                   >
-                    Continue Shopping
+                    Start Shopping
                   </Link>
                 </div>
               </div>
@@ -505,12 +664,12 @@ function Navbar() {
       {isWishlistOpen && (
         <>
           <div 
-            className="fixed inset-0 z-50 bg-black bg-opacity-50 transition-opacity" 
+            className="fixed inset-0 z-50 bg-black bg-opacity-50 transition-opacity"
             onClick={closeDrawers}
           ></div>
           <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md overflow-y-auto bg-white p-6 shadow-xl transition-transform sm:max-w-lg">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-              <h2 className="text-xl font-bold text-gray-800">Your Wishlist ({wishlistItems})</h2>
+              <h2 className="text-xl font-bold text-gray-800">Wishlist ({wishlistItems.length})</h2>
               <button 
                 onClick={closeDrawers}
                 className="rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
@@ -518,28 +677,34 @@ function Navbar() {
                 <X className="size-6" />
               </button>
             </div>
-            {wishlistItems > 0 ? (
+            {wishlistItems.length > 0 ? (
               <div className="mt-6">
-                {/* Sample wishlist items - can be dynamically generated */}
-                {[...Array(wishlistItems)].map((_, index) => (
-                  <div key={index} className="mb-4 flex items-center border-b border-gray-100 pb-4">
+                {/* Dynamically generated wishlist items */}
+                {wishlistItems.map((item, index) => (
+                  <div key={item.id} className="mb-4 flex items-center border-b border-gray-100 pb-4">
                     <div className="relative mr-4 size-16 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                       <Image 
-                        src="/api/placeholder/100/100" 
-                        alt={`Wishlist Item ${index + 1}`}
+                        src={item.image} 
+                        alt={item.title} 
                         fill
                         className="object-cover"
                       />
                     </div>
                     <div className="flex flex-1 flex-col">
-                      <h3 className="text-sm font-medium text-gray-800">Favorite Plant {index + 1}</h3>
-                      <p className="mt-1 text-sm font-medium text-green-600">₹899</p>
+                      <h3 className="text-sm font-medium text-gray-800">{item.title}</h3>
+                      <p className="mt-1 text-sm font-medium text-green-600">{item.price}</p>
                     </div>
                     <div className="ml-4 flex flex-col gap-2">
-                      <button className="rounded-md bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700">
+                      <button 
+                        className="rounded-md bg-green-600 px-3 py-1 text-xs text-white hover:bg-green-700"
+                        onClick={() => addWishlistItemToCart(item)}
+                      >
                         Add to Cart
                       </button>
-                      <button className="text-gray-400 hover:text-red-500">
+                      <button 
+                        className="text-gray-400 hover:text-red-500"
+                        onClick={() => removeFromWishlist(item.id)}
+                      >
                         <X className="size-5" />
                       </button>
                     </div>
