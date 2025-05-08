@@ -26,7 +26,6 @@ export default function Home() {
       <Testimonials/>
       {/* Call to Action */}
       <CTA/>
-      {/* FAQ Section */}
       <FAQ/>
       {/* Footer */}
       <Footer/>
