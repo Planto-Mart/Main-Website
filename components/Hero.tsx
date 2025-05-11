@@ -12,6 +12,7 @@ interface CategoryItem {
   image: string;
   price?: string;
   subtitle?: string;
+  link: string | '/';
 }
 
 interface CategoryCard {
@@ -56,10 +57,10 @@ function Hero() {
       subtitle: "Up to 55% off",
       image: "/assets/products/monstra.png",
       items: [
-        { name: "Monstra", image: "/assets/products/monstra.png" },
-        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png" },
-        { name: "Snake plant", image: "/assets/products/snake-plant.png" },
-        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png" }
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
+        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
       ]
     },
     {
@@ -68,10 +69,10 @@ function Hero() {
       subtitle: "with nature inspired decor",
       image: "/assets/products/self-watering.png",
       items: [
-        { name: "monstra decor", image: "/assets/products/monstra.png" },
-        { name: "Water decor", image: "/assets/products/self-watering.png" },
-        { name: "Snake plant", image: "/assets/products/snake-plant.png" },
-        { name: "Soil", image: "/assets/products/organic-plant-food.png" }
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
+        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
       ]
     },
     {
@@ -80,10 +81,10 @@ function Hero() {
       subtitle: "PlantoMart Brands & more",
       image: "/assets/products/snake-plant.png",
       items: [
-        { name: "Bedsheets", image: "/assets/products/monstra.png", price: "₹199" },
-        { name: "Curtains", image: "/assets/products/self-watering.png", price: "₹199" },
-        { name: "Minimum 40% off", image: "/assets/products/snake-plant.png", subtitle: "Home decor & more" },
-        { name: "Up to 60% off", image: "/assets/products/organic-plant-food.png", subtitle: "Home decor" }
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
+        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
       ]
     },
     {
@@ -92,10 +93,10 @@ function Hero() {
       subtitle: "plants",
       image: "/assets/products/organic-plant-food.png",
       items: [
-        { name: "plants", image: "/assets/products/monstra.png", price: "₹249" },
-        { name: "water plants", image: "/assets/products/self-watering.png", price: "₹349" },
-        { name: "snake plants", image: "/assets/products/snake-plant.png", price: "₹649" },
-        { name: "plant food", image: "/assets/products/organic-plant-food.png", price: "₹149" }
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
+        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
       ]
     }
   ];
@@ -281,7 +282,7 @@ function Hero() {
                   <p className="text-sm text-gray-600">{card.subtitle}</p>
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     {card.items.map((item, idx) => (
-                      <Link href="#" key={idx} className="group">
+                      <Link href={item.link} key={idx} className="group">
                         <div className="overflow-hidden rounded-md">
                           <div className="relative h-24 w-full overflow-hidden bg-gray-100">
                             <Image
