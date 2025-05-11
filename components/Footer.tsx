@@ -198,6 +198,13 @@ function Footer() {
             </Link>
           </div>
         </div>
+        {/* Developer Attribution with HR */}
+        <hr className="mx-auto my-3 w-full max-w-6xl border-t border-green-800/50" />
+        <div className="container mx-auto px-4 pb-2 text-center">
+          <p className="text-sm text-green-400">
+            Developed by <Link href="https://adnanthecoder.com" target="_blank" rel="noopener noreferrer" className="font-medium text-green-300 underline decoration-green-500 underline-offset-2 hover:text-white">Adnan</Link>
+          </p>
+        </div>
       </div>
     </footer>
   )
