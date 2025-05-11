@@ -4,7 +4,7 @@ import About from "@/components/About";
 import CTA from "@/components/CTA";
 import FAQ from "@/components/FAQ";
 import Featured from "@/components/Featured";
-import Features from "@/components/Features";
+import Features from "@/components/Categories_Featured";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import Navbar from "@/components/Navbar";
