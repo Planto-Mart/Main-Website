@@ -1,14 +1,31 @@
-## PlantoMart Main-Website
-### Built With
-<div>
-  <p>
-    <img alt="TypeScript" src="https://img.shields.io/badge/-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white" />
-    <img alt="NextJS" src="https://img.shields.io/badge/-NextJS-000000?style=flat-square&logo=nextdotjs&logoColor=white" />
-    <img alt="Bun" src="https://img.shields.io/badge/-Bun.js-000000?style=flat-square&logo=bun&logoColor=white" />
-    <img alt="TailwindCSS" src="https://img.shields.io/badge/-Tailwind CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
-    <img alt="Cloudflare" src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=Cloudflare&logoColor=white" />
-    <img alt="git" src="https://img.shields.io/badge/-Git-F05032?style=flat-square&logo=git&logoColor=white" />
-  </p>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+  <h2>PlantoMart Main-Website</h2>
+  <img alt="Status" src="https://img.shields.io/badge/status-production-brightgreen" />
+</div>
+
+<div style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: flex-start;">
+  <div style="flex: 1; min-width: 250px;">
+    <h3>Table of Contents</h3>
+    <ul>
+      <li><a href="#key-features-of-plantomart">Key Features</a></li>
+      <li><a href="#getting-started">Getting Started</a></li>
+      <li><a href="#working-guidelines">Working Guidelines</a></li>
+      <li><a href="#benefits-of-this-platform">Benefits</a></li>
+      <li><a href="#use-cases">Use Cases</a></li>
+    </ul>
+  </div>
+
+  <div style="flex: 1; min-width: 250px;">
+    <h3>Built With</h3>
+    <p>
+      <img alt="TypeScript" src="https://img.shields.io/badge/-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white" />
+      <img alt="NextJS" src="https://img.shields.io/badge/-NextJS-000000?style=flat-square&logo=nextdotjs&logoColor=white" />
+      <img alt="Bun" src="https://img.shields.io/badge/-Bun.js-000000?style=flat-square&logo=bun&logoColor=white" />
+      <img alt="TailwindCSS" src="https://img.shields.io/badge/-Tailwind CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
+      <img alt="Cloudflare" src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=Cloudflare&logoColor=white" />
+      <img alt="git" src="https://img.shields.io/badge/-Git-F05032?style=flat-square&logo=git&logoColor=white" />
+    </p>
+  </div>
 </div>
 
 Planto-Mart is a robust, full-stack eCommerce platform built for multi-vendor operations. It allows multiple vendors to create and manage their own online stores within a unified marketplace. Customers can browse products from various vendors, make purchases across different shops, and have a seamless experience on a single platform.
@@ -88,12 +105,12 @@ npm install bun -g
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 
-# Contributing Guidelines
+# Working Guidelines
 
 ## 1. Branching Strategy
 Start from dev branch: When starting any work, always create your branch from the dev branch.
 Branch naming convention:
-* For new features: feat/featurename
+* For new features: feat/feature-name
 * For bug fixes: fix/whatyouarefixing
 * For updating content: update/whereyouareupdating
 * For documentation updates: docs/whatyouupdated
@@ -124,15 +141,13 @@ source ~/.bashrc
 ```
 bun --version
 ```
-**Now test the deployement locally**
+**Now test the deployment locally**
 ```
 bun run deploy
 ```
 
 ### Step 3: Production
 After successful testing, create a PR from the test branch to the main branch.
-This PR must be approved by [Adnan](https://github.com/Adnan-The-Coder).
-Once approved, the changes will be deployed to production.
 ## 3. Commit Message Guidelines
 Use the following prefixes for clear and consistent commit messages:
 
