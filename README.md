@@ -1,6 +1,9 @@
 <div style="display: flex; justify-content: space-between; align-items: center;">
   <h2>PlantoMart Main-Website</h2>
-  <img alt="Status" src="https://img.shields.io/badge/status-production-brightgreen" />
+  <!-- <img alt="Status" src="https://img.shields.io/badge/status-production-brightgreen" /> -->
+  <!-- <img alt="Status" src="https://img.shields.io/badge/status-under--development-orange" /> -->
+  <img alt="Status" src="https://img.shields.io/badge/status-production--in--progress-yellow" />
+  <!-- <img alt="Status" src="https://img.shields.io/badge/status-beta-blue" /> -->
 </div>
 
 <div style="display: flex; justify-content: space-between; flex-wrap: wrap; align-items: flex-start;">
@@ -16,7 +19,11 @@
     </ul>
   </div>
 
-  <div style="flex: 1; min-width: 250px;">
+Planto-Mart is a robust, full-stack eCommerce platform built for multi-vendor operations. It allows multiple vendors to create and manage their own online stores within a unified marketplace. Customers can browse products from various vendors, make purchases across different shops, and have a seamless experience on a single platform.
+
+The platform is built with scalability, security, and ease of use in mind, enabling a wide range of businesses to set up their online presence, sell products, and track performance.
+
+<div style="flex: 1; min-width: 250px;">
     <h3>Built With</h3>
     <p>
       <img alt="TypeScript" src="https://img.shields.io/badge/-TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white" />
@@ -28,10 +35,6 @@
     </p>
   </div>
 </div>
-
-Planto-Mart is a robust, full-stack eCommerce platform built for multi-vendor operations. It allows multiple vendors to create and manage their own online stores within a unified marketplace. Customers can browse products from various vendors, make purchases across different shops, and have a seamless experience on a single platform.
-
-The platform is built with scalability, security, and ease of use in mind, enabling a wide range of businesses to set up their online presence, sell products, and track performance.
 
 ## Built and Maintained by **[Adnan](https://Github.com/Adnan-The-Coder)**
 
