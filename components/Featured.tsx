@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Heart, ShoppingCart, Check, Loader2 } from 'lucide-react';
+import { Heart, ShoppingCart, Check, Loader2, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { toast, Toaster } from 'react-hot-toast';
 
 // Define types for our products and cart/wishlist items
@@ -12,6 +13,7 @@ interface Product {
   image: string;
   tag: string;
   numericPrice: number; // For calculations
+  slug?: string; // For URL friendly product name
 }
 
 // Define cart item type with quantity
@@ -20,12 +22,44 @@ interface CartItem extends Product {
 }
 
 function Featured() {
-  // Sample products with unique IDs
+  // Sample products with unique IDs and slugs
   const products: Product[] = [
-    { id: "prod-1", title: "Monstera Deliciosa", price: "₹1,299", numericPrice: 1299, image: "/assets/products/monstra.png", tag: "Bestseller" },
-    { id: "prod-2", title: "Self-Watering Ceramic Pot", price: "₹899", numericPrice: 899, image: "/assets/products/self-watering.png", tag: "New" },
-    { id: "prod-3", title: "Snake Plant", price: "₹749", numericPrice: 749, image: "/assets/products/snake-plant.png", tag: "Popular" },
-    { id: "prod-4", title: "Organic Plant Food", price: "₹499", numericPrice: 499, image: "/assets/products/organic-plant-food.png", tag: "Eco-friendly" }
+    { 
+      id: "prod-1", 
+      title: "Monstera Deliciosa", 
+      price: "₹1,299", 
+      numericPrice: 1299, 
+      image: "/assets/products/monstra.png", 
+      tag: "Bestseller",
+      slug: "monstera-deliciosa"
+    },
+    { 
+      id: "prod-2", 
+      title: "Self-Watering Ceramic Pot", 
+      price: "₹899", 
+      numericPrice: 899, 
+      image: "/assets/products/self-watering.png", 
+      tag: "New",
+      slug: "self-watering-ceramic-pot"
+    },
+    { 
+      id: "prod-3", 
+      title: "Snake Plant", 
+      price: "₹749", 
+      numericPrice: 749, 
+      image: "/assets/products/snake-plant.png", 
+      tag: "Popular",
+      slug: "snake-plant"
+    },
+    { 
+      id: "prod-4", 
+      title: "Organic Plant Food", 
+      price: "₹499", 
+      numericPrice: 499, 
+      image: "/assets/products/organic-plant-food.png", 
+      tag: "Eco-friendly",
+      slug: "organic-plant-food"
+    }
   ];
 
   // State for cart and wishlist
@@ -107,7 +141,7 @@ function Featured() {
           // Show toast AFTER state update
           setTimeout(() => toast.success(`${product.title} removed from cart`), 0);
           
-return newItems;
+          return newItems;
         } else {
           // Add to cart with quantity 1
           const newItem: CartItem = { ...product, quantity: 1 };
@@ -115,7 +149,7 @@ return newItems;
           // Show toast AFTER state update
           setTimeout(() => toast.success(`${product.title} added to cart`), 0);
           
-return newItems;
+          return newItems;
         }
       });
       setLoadingCart(null);
@@ -137,14 +171,14 @@ return newItems;
           // Show toast AFTER state update
           setTimeout(() => toast.success(`${product.title} removed from wishlist`), 0);
           
-return newItems;
+          return newItems;
         } else {
           // Add to wishlist
           const newItems = [...prevItems, product];
           // Show toast AFTER state update
           setTimeout(() => toast.success(`${product.title} added to wishlist`), 0);
           
-return newItems;
+          return newItems;
         }
       });
       setLoadingWishlist(null);
@@ -182,7 +216,7 @@ return newItems;
             {products.map((product) => (
               <div 
                 key={product.id} 
-                className="group overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-300 hover:shadow-xl"
+                className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-300 hover:shadow-xl"
               >
                 <div className="relative">
                   <div className="aspect-square overflow-hidden">
@@ -220,9 +254,18 @@ return newItems;
                     )}
                   </button>
                 </div>
-                <div className="p-4 md:p-6">
+                <div className="flex grow flex-col p-4 md:p-6">
                   <h3 className="mb-2 line-clamp-1 text-base font-bold text-gray-900 md:text-lg">{product.title}</h3>
                   <p className="mb-4 font-bold text-green-600">{product.price}</p>
+                  {/* View Details Button - NEW */}
+                  <Link 
+                    href={`/featured/products/${product.slug}`} 
+                    className="mb-3 flex items-center justify-center rounded-lg border border-green-600 bg-white px-4 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 md:text-base"
+                  >
+                    View Details
+                    <ArrowRight className="ml-2 size-4" />
+                  </Link>
+                  {/* Add to Cart Button */}
                   <button 
                     className={`flex w-full items-center justify-center rounded-lg px-4 py-2.5 font-medium transition-all duration-200 ${
                       isInCart(product.id)
