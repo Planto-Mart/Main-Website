@@ -75,10 +75,9 @@ bun --version
 bun run deploy
 ```
 
-At least 2 members must review and approve the PR before merging into the test branch.
 ### Step 3: Production
 After successful testing, create a PR from the test branch to the main branch.
-This PR must be approved by the CTO and at least 1 other member.
+This PR must be approved by [Adnan](https://github.com/Adnan-The-Coder).
 Once approved, the changes will be deployed to production.
 ## 3. Commit Message Guidelines
 Use the following prefixes for clear and consistent commit messages:
@@ -99,7 +98,7 @@ Example: feat: add user authentication to login page.
 The CI/CD pipeline must run error-free.
 Both ESLint checks and Next.js build must pass successfully for the PR to be valid.
 ## 5. Conflict Resolution
-If any merge conflicts arise, contributors should immediately contact the CTO for resolution.
+If any merge conflicts arise, contributors should immediately contact [Adnan](https://github.com/Adnan-The-Coder) for resolution.
 ## 6. PR Review Time
 All PRs should be reviewed and resolved within 5 days of submission.
 

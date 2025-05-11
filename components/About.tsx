@@ -22,7 +22,7 @@ function About() {
             </div>
             <div className="md:w-1/2">
               <h2 className="mb-6 text-3xl font-bold text-green-400 md:text-4xl">
-                Promoting Sustainable Living in Hyderabad
+                Promoting Sustainable Living across India
               </h2>
               <p className="mb-6 text-lg text-gray-300">
                 Plantomart collaborates with local horticulturists, nurseries, and eco-enthusiasts 
