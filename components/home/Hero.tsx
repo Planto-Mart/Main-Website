@@ -217,18 +217,20 @@ function Hero() {
               >
                 {slide.subtitle}
               </motion.p>
-              <motion.button 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: "0px 0px 8px rgba(255,255,255,0.5)"
-                }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-                className="flex items-center rounded-full bg-green-600 px-6 py-3 font-medium text-white transition-all hover:bg-green-700 md:px-8"
-              >
-                Shop Now <FaMapMarkerAlt className="ml-2" />
-              </motion.button>
+              <Link href="/marketplace">
+                <motion.button 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: "0px 0px 8px rgba(255,255,255,0.5)"
+                  }}
+                  transition={{ duration: 0.5, delay: 0.6 }}
+                  className="flex items-center rounded-full bg-green-600 px-6 py-3 font-medium text-white transition-all hover:bg-green-700 md:px-8"
+                >
+                  Shop Now <FaMapMarkerAlt className="ml-2" />
+                </motion.button>
+              </Link>
             </div>
           </motion.div>
         ))}
