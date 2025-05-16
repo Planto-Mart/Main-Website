@@ -2,7 +2,9 @@ import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images:{
+    domains:['lh3.googleusercontent.com']
+  }
 };
 
 async function setup() {
