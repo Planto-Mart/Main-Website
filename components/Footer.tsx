@@ -1,209 +1,182 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Leaf, Facebook, Instagram, Twitter, Youtube, MapPin, Phone, Mail, ChevronRight } from 'lucide-react'
+import { Leaf, Facebook, Instagram, Twitter, MapPin, Phone, Mail, Clock, HeartHandshake } from 'lucide-react'
 
 function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-gradient-to-b from-green-800 to-green-950 text-green-50">
-      {/* Decorative Elements */}
-      <div className="absolute left-0 top-0 h-8 w-full bg-[url('/assets/footer/leaf-pattern.png')] opacity-10"></div>
-      <div className="absolute bottom-0 right-0 size-48 opacity-5 md:size-64">
-        <Image 
-          src="/assets/footer/plant-illustration.png" 
-          alt="Decorative plant"
-          fill
-          className="object-contain"
-          priority={false}
-        />
-      </div>
+    <footer className="relative bg-gradient-to-b from-green-900 via-green-950 to-green-950 text-white">
+      {/* Decorative Leaf Pattern Top Border */}
+      <div className="h-1 w-full bg-gradient-to-r from-green-300 via-green-400 to-green-300"></div>
       {/* Main Content */}
-      <div className="container relative z-10 mx-auto px-4 py-16 md:px-6">
-        {/* Top Section with Logo and Newsletter */}
-        <div className="mb-12 flex flex-col items-center justify-between border-b border-green-700 pb-12 lg:flex-row">
-          <div className="mb-8 flex items-center lg:mb-0">
-            <div className="relative mr-3 size-12">
-              <Image 
-                src="/assets/logo_Without_Text.png" 
-                alt="Plantomart Logo"
-                fill
-                className="object-contain"
-                priority
-              />
+      <div className="container mx-auto px-4 py-8 md:px-6">
+        {/* Top Row with Logo and Newsletter */}
+        <div className="flex flex-col items-center justify-between gap-6 border-b border-green-700/40 pb-6 lg:flex-row">
+          {/* Logo and Tagline */}
+          <div className="max-w-xs text-center lg:text-left">
+            <div className="mb-2 flex items-center justify-center lg:justify-start">
+              <div className="relative mr-2 size-10">
+                <Image 
+                  src="/assets/logo_Without_Text.png" 
+                  alt="Plantomart Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <h2 className="bg-gradient-to-r from-green-200 to-green-100 bg-clip-text text-xl font-bold text-transparent">
+                plantomart
+              </h2>
             </div>
-            <span className="bg-gradient-to-r from-green-300 to-green-100 bg-clip-text text-3xl font-bold text-transparent">plantomart</span>
+            <p className="text-sm text-green-200">
+              India's premier multi-vendor marketplace for plant enthusiasts.
+            </p>
           </div>
-          <div className="w-full max-w-md">
-            <h3 className="mb-3 text-center text-lg font-semibold lg:text-left">Join our green community</h3>
-            <div className="flex">
-              <input 
-                type="email" 
-                placeholder="Your email address" 
-                className="grow rounded-l-md border border-green-700 bg-green-900/50 px-4 py-2 placeholder:text-green-400 focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-              <button className="rounded-r-md bg-gradient-to-r from-green-500 to-green-400 px-4 py-2 font-medium text-green-950 transition-all hover:from-green-400 hover:to-green-500">
-                Subscribe
-              </button>
+          {/* Newsletter */}
+          <div className="w-full max-w-sm">
+            <div className="rounded-lg bg-green-800/30 p-4">
+              <div className="flex overflow-hidden rounded-md">
+                <input 
+                  type="email" 
+                  placeholder="Your email address" 
+                  className="grow rounded-l-md border-y border-l border-green-600 bg-green-950/80 px-3 py-2 text-xs placeholder:text-green-500 focus:outline-none focus:ring-1 focus:ring-green-400"
+                />
+                <button className="rounded-r-md bg-gradient-to-r from-green-500 to-green-400 px-3 py-2 text-xs font-medium text-green-950 transition-all hover:from-green-400 hover:to-green-300">
+                  Subscribe
+                </button>
+              </div>
+              <p className="mt-2 text-center text-xs text-green-400">
+                Get exclusive offers and gardening tips
+              </p>
             </div>
-            <p className="mt-2 text-center text-sm text-green-400 lg:text-left">Get exclusive offers and gardening tips</p>
           </div>
         </div>
-        {/* Main Footer Grid */}
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-4">
+        {/* Main Grid Section */}
+        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* About Column */}
           <div>
-            <h3 className="mb-6 flex items-center text-xl font-bold">
-              <Leaf className="mr-2 size-5 text-green-400" />
-              About Us
+            <h3 className="mb-3 flex items-center text-base font-bold text-green-100">
+              <Leaf className="mr-2 size-4 text-green-400" />
+              About PlantoMart
             </h3>
-            <p className="mb-6 leading-relaxed text-green-300">
-              Plantomart connects plant lovers with sustainable vendors across India. 
-              We're dedicated to making green living accessible and enjoyable for everyone.
+            <p className="mb-4 text-xs leading-relaxed text-green-300">
+              PlantoMart connects plant lovers with sustainable vendors across India. Our multi-vendor platform empowers plant vendors while making green living accessible and enjoyable for everyone.
             </p>
-            <div className="flex space-x-4">
-              <Link href="#" className="rounded-full bg-green-800 p-2 transition-colors hover:bg-green-700">
-                <Facebook className="size-5 text-green-200" />
+            <div className="flex space-x-3">
+              <Link href="#" className="group flex size-8 items-center justify-center rounded-full bg-green-800/50 transition-all hover:bg-green-700">
+                <Facebook className="size-4 text-green-300 group-hover:text-white" />
               </Link>
-              <Link href="#" className="rounded-full bg-green-800 p-2 transition-colors hover:bg-green-700">
-                <Instagram className="size-5 text-green-200" />
+              <Link href="#" className="group flex size-8 items-center justify-center rounded-full bg-green-800/50 transition-all hover:bg-green-700">
+                <Instagram className="size-4 text-green-300 group-hover:text-white" />
               </Link>
-              <Link href="#" className="rounded-full bg-green-800 p-2 transition-colors hover:bg-green-700">
-                <Twitter className="size-5 text-green-200" />
-              </Link>
-              <Link href="#" className="rounded-full bg-green-800 p-2 transition-colors hover:bg-green-700">
-                <Youtube className="size-5 text-green-200" />
+              <Link href="#" className="group flex size-8 items-center justify-center rounded-full bg-green-800/50 transition-all hover:bg-green-700">
+                <Twitter className="size-4 text-green-300 group-hover:text-white" />
               </Link>
             </div>
           </div>
-          {/* Quick Links Column */}
+          {/* Support Column */}
           <div>
-            <h3 className="mb-6 border-l-4 border-green-400 pl-3 text-xl font-bold">Explore</h3>
-            <ul className="space-y-3">
-              {["Home", "Shop", "About Us", "Blog", "Vendors", "Contact"].map((link) => (
-                <li key={link} className="transition-transform hover:translate-x-2">
-                  <Link href="#" className="flex items-center text-green-200 transition-colors hover:text-white">
-                    <ChevronRight className="mr-2 size-4 text-green-400" />
-                    {link}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          {/* Categories Column */}
-          <div>
-            <h3 className="mb-6 border-l-4 border-green-400 pl-3 text-xl font-bold">Categories</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                "Indoor Plants", 
-                "Outdoor Plants", 
-                "Succulents", 
-                "Planters", 
-                "Plant Care", 
-                "Gardening Tools", 
-                "Seeds", 
-                "Gift Plants"
-              ].map((category) => (
-                <Link 
-                  href="#" 
-                  key={category}
-                  className="text-green-200 decoration-green-400 underline-offset-4 transition-colors hover:text-white hover:underline"
-                >
-                  {category}
-                </Link>
-              ))}
-            </div>
-          </div>
-          {/* Contact Column */}
-          <div className="rounded-lg bg-green-900/30 p-5 backdrop-blur-sm">
-            <h3 className="mb-6 text-center text-xl font-bold">Get In Touch</h3>
-            <ul className="space-y-5">
-              <li className="flex items-start">
-                <div className="mr-3 mt-1 rounded-full bg-green-700/30 p-2">
-                  <MapPin className="size-5 text-green-300" />
+            <h3 className="mb-3 flex items-center text-base font-bold text-green-100">
+              <HeartHandshake className="mr-2 size-4 text-green-400" />
+              Customer Support
+            </h3>
+            {/* Customer Support Box */}
+            <div className="rounded-lg bg-green-800/20 p-3">
+              <div className="flex items-start">
+                <div className="mr-2 rounded-full bg-green-700/30 p-1.5">
+                  <Clock className="size-4 text-green-300" />
                 </div>
                 <div>
-                  <p className="font-medium text-white">ShowBio Pvt.Ltd.,</p>
-                  <p className="text-green-300">Tolichowki, Hyderabad,</p>
-                  <p className="text-green-300">Telangana 500008</p>
+                  <h4 className="text-xs font-semibold text-green-100">Opening Hours</h4>
+                  <p className="text-xs text-green-300">Monday – Friday: 8am – 4pm</p>
+                  <p className="text-xs text-green-300">Saturday: 9am – 5pm</p>
                 </div>
-              </li>
-              <li className="flex items-center">
-                <div className="mr-3 rounded-full bg-green-700/30 p-2">
-                  <Phone className="size-5 text-green-300" />
-                </div>
-                <Link href="tel:+919876543210" className="text-green-200 hover:text-white">
-                  +91 833 180 1000
+              </div>
+              <div className="mt-3 rounded-md bg-green-700/20 p-2 text-center">
+                <Link href="#" className="inline-block rounded-full bg-gradient-to-r from-green-500 to-green-400 px-3 py-1 text-xs font-medium text-green-950 transition-all hover:from-green-400 hover:to-green-300">
+                  Contact Support
                 </Link>
-              </li>
-              <li className="flex items-center">
-                <div className="mr-3 rounded-full bg-green-700/30 p-2">
-                  <Mail className="size-5 text-green-300" />
-                </div>
-                <Link href="mailto:hello@plantomart.com" className="text-green-200 hover:text-white">
-                  hello@plantomart.com
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-        {/* Hours and Support Section */}
-        <div className="mt-12 grid grid-cols-1 gap-8 border-t border-green-700/50 pt-8 md:grid-cols-2">
-          <div className="flex flex-col items-center md:flex-row">
-            <div className="mb-4 rounded-full bg-green-800/50 p-3 md:mb-0 md:mr-5">
-              <svg className="size-8 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="text-center md:text-left">
-              <h4 className="mb-1 text-lg font-semibold">Opening Hours</h4>
-              <p className="text-green-300">Monday – Friday: 8am – 4pm</p>
-              <p className="text-green-300">Saturday: 9am – 5pm</p>
+              </div>
             </div>
           </div>
-          <div className="flex flex-col items-center md:flex-row">
-            <div className="mb-4 rounded-full bg-green-800/50 p-3 md:mb-0 md:mr-5">
-              <svg className="size-8 text-green-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.88 9.88a3 3 0 105.657 1.657" />
-              </svg>
-            </div>
-            <div className="text-center md:text-left">
-              <h4 className="mb-1 text-lg font-semibold">Customer Support</h4>
-              <p className="text-green-300">We're here to help with any questions</p>
-              <Link href="#" className="text-green-200 underline decoration-green-400 underline-offset-4 hover:text-white">
-                Support Center
-              </Link>
+          {/* Contact Information */}
+          <div>
+            <h3 className="mb-3 flex items-center text-base font-bold text-green-100">
+              <Mail className="mr-2 size-4 text-green-400" />
+              Get In Touch
+            </h3>
+            <div className="rounded-lg bg-gradient-to-br from-green-800/30 to-green-900/60 p-3">
+              <ul className="space-y-2">
+                <li className="flex items-start">
+                  <div className="mr-2 mt-1 rounded-full bg-green-700/30 p-1">
+                    <MapPin className="size-3 text-green-300" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium text-white">ShowBio Pvt.Ltd.,</p>
+                    <p className="text-xs text-green-300">Tolichowki, Hyderabad, 500008</p>
+                  </div>
+                </li>
+                <li className="flex items-center">
+                  <div className="mr-2 rounded-full bg-green-700/30 p-1">
+                    <Phone className="size-3 text-green-300" />
+                  </div>
+                  <Link href="tel:+918331801000" className="text-xs text-green-200 hover:text-white">
+                    +91 833 180 1000
+                  </Link>
+                </li>
+                <li className="flex items-center">
+                  <div className="mr-2 rounded-full bg-green-700/30 p-1">
+                    <Mail className="size-3 text-green-300" />
+                  </div>
+                  <Link href="mailto:hello@plantomart.com" className="text-xs text-green-200 hover:text-white">
+                    hello@plantomart.com
+                  </Link>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </div>
       {/* Bottom Bar */}
-      <div className="bg-green-950 py-4">
-        <div className="container mx-auto flex flex-col items-center justify-between px-4 md:flex-row md:px-6">
-          <p className="mb-4 text-sm text-green-400 md:mb-0">
-            &copy; {new Date().getFullYear()} Plantomart. All rights reserved.
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-            <Link href="#" className="text-sm text-green-400 transition-colors hover:text-white">
-              Privacy Policy
-            </Link>
-            <Link href="#" className="text-sm text-green-400 transition-colors hover:text-white">
-              Terms of Service
-            </Link>
-            <Link href="#" className="text-sm text-green-400 transition-colors hover:text-white">
-              Shipping Policy
-            </Link>
-            <Link href="#" className="text-sm text-green-400 transition-colors hover:text-white">
-              Refund Policy
-            </Link>
+      <div className="bg-green-950 py-3">
+        <div className="container mx-auto px-4">
+          {/* Payment Methods */}
+          <div className="mb-3 flex flex-wrap items-center justify-center gap-2 border-b border-green-800/30 pb-3">
+            <span className="text-xs text-green-400">Secure Payment:</span>
+            <div className="flex flex-wrap justify-center gap-2">
+              {['Visa', 'Mastercard', 'PayPal', 'UPI'].map((method) => (
+                <div key={method} className="rounded-md bg-green-900/50 px-2 py-0.5 text-xs text-green-300">
+                  {method}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        {/* Developer Attribution with HR */}
-        <hr className="mx-auto my-3 w-full max-w-6xl border-t border-green-800/50" />
-        <div className="container mx-auto px-4 pb-2 text-center">
-          <p className="text-sm text-green-400">
-            Developed by <Link href="https://adnanthecoder.com" target="_blank" rel="noopener noreferrer" className="font-medium text-green-300 underline decoration-green-500 underline-offset-2 hover:text-white">Adnan</Link>
-          </p>
+          {/* Footer Legal & Links */}
+          <div className="flex flex-col items-center justify-between gap-2 text-center md:flex-row md:text-left">
+            <p className="text-xs text-green-400">
+              &copy; {new Date().getFullYear()} PlantoMart. All rights reserved.
+            </p>
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+              <Link href="#" className="text-xs text-green-400 transition-colors hover:text-white">
+                Privacy
+              </Link>
+              <Link href="#" className="text-xs text-green-400 transition-colors hover:text-white">
+                Terms
+              </Link>
+              <Link href="#" className="text-xs text-green-400 transition-colors hover:text-white">
+                Shipping
+              </Link>
+              <Link href="#" className="text-xs text-green-400 transition-colors hover:text-white">
+                Refunds
+              </Link>
+            </div>
+          </div>
+          {/* Developer Attribution */}
+          <div className="mt-2 text-center">
+            <p className="text-xs text-green-500">
+              Developed by <Link href="https://adnanthecoder.com" target="_blank" rel="noopener noreferrer" className="font-medium text-green-400 hover:text-white">Adnan</Link>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
