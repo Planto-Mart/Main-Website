@@ -5,3 +5,4 @@ pages_build_output_dir = ".vercel/output/static"
 
 [vars]
 NODE_VERSION = "22.12.0"
+NEXT_PUBLIC_SUPABASE_URL= "https://tvmxilenpsrpxejhfxjs.supabase.co"
