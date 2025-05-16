@@ -153,9 +153,9 @@ function Hero() {
 
   return (
     <div className="relative w-full">
-      {/* Hero Slider Section */}
+      {/* Hero Slider Section - reduced height on mobile */}
       <div 
-        className="relative h-[70vh] w-full overflow-hidden md:h-[80vh]"
+        className="relative h-[40vh] w-full overflow-hidden sm:h-[50vh] md:h-[80vh]"
         onMouseEnter={pauseAutoplay}
         onMouseLeave={resumeAutoplay}
       >
@@ -171,7 +171,7 @@ function Hero() {
             }}
             transition={{ duration: 0.8 }}
           >
-            {/* Mobile Image */}
+            {/* Mobile Image - smaller height */}
             <div 
               className="absolute inset-0 md:hidden"
               style={{ transform: `translateY(${scrollY * 0.2}px)` }}
@@ -199,13 +199,13 @@ function Hero() {
                 priority={index === 0}
               />
             </div>
-            {/* Text Overlay */}
+            {/* Text Overlay - adjusted for mobile */}
             <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
               <motion.h1 
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="mb-2 text-4xl font-bold tracking-wide drop-shadow-lg md:text-6xl lg:text-7xl"
+                className="mb-1 text-2xl font-bold tracking-wide drop-shadow-lg sm:text-3xl md:mb-2 md:text-5xl lg:text-7xl"
               >
                 {slide.title}
               </motion.h1>
@@ -213,7 +213,7 @@ function Hero() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
-                className="mb-6 max-w-md text-lg drop-shadow-md md:text-xl"
+                className="mb-4 max-w-md text-sm drop-shadow-md sm:text-base md:mb-6 md:text-xl"
               >
                 {slide.subtitle}
               </motion.p>
@@ -226,7 +226,7 @@ function Hero() {
                     boxShadow: "0px 0px 8px rgba(255,255,255,0.5)"
                   }}
                   transition={{ duration: 0.5, delay: 0.6 }}
-                  className="flex items-center rounded-full bg-green-600 px-6 py-3 font-medium text-white transition-all hover:bg-green-700 md:px-8"
+                  className="flex items-center rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-green-700 md:px-6 md:py-3 md:text-base lg:px-8"
                 >
                   Shop Now <FaMapMarkerAlt className="ml-2" />
                 </motion.button>
@@ -234,23 +234,23 @@ function Hero() {
             </div>
           </motion.div>
         ))}
-        {/* Navigation Arrows */}
+        {/* Navigation Arrows - smaller on mobile */}
         <button 
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black bg-opacity-30 text-white transition-all hover:bg-opacity-50 md:size-12"
+          className="absolute left-2 top-1/2 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-black bg-opacity-30 text-white transition-all hover:bg-opacity-50 sm:left-4 md:size-12"
           aria-label="Previous slide"
         >
-          <FaChevronLeft className="text-xl md:text-2xl" />
+          <FaChevronLeft className="text-lg md:text-2xl" />
         </button>
         <button 
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black bg-opacity-30 text-white transition-all hover:bg-opacity-50 md:size-12"
+          className="absolute right-2 top-1/2 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-black bg-opacity-30 text-white transition-all hover:bg-opacity-50 sm:right-4 md:size-12"
           aria-label="Next slide"
         >
-          <FaChevronRight className="text-xl md:text-2xl" />
+          <FaChevronRight className="text-lg md:text-2xl" />
         </button>
-        {/* Slide Indicators */}
-        <div className="absolute inset-x-0 bottom-4 z-20 flex justify-center">
+        {/* Slide Indicators - smaller on mobile */}
+        <div className="absolute inset-x-0 bottom-2 z-20 flex justify-center md:bottom-4">
           {heroSlides.map((_, index) => (
             <button
               key={index}
@@ -259,7 +259,7 @@ function Hero() {
                 setIsAutoplay(false);
                 setTimeout(() => setIsAutoplay(true), 5000);
               }}
-              className={`mx-1 h-2 w-8 rounded-full transition-all ${
+              className={`mx-1 h-1 w-4 rounded-full transition-all md:h-2 md:w-8 ${
                 currentSlide === index ? 'bg-white' : 'bg-white bg-opacity-50'
               }`}
               aria-label={`Go to slide ${index + 1}`}
@@ -267,10 +267,100 @@ function Hero() {
           ))}
         </div>
       </div>
-      {/* Category Cards Section */}
-      <div className="relative z-10 -mt-16 px-4 md:-mt-24 lg:-mt-32">
+      {/* Category Cards Section - adjusted for mobile (moved up) */}
+      <div className="relative z-10 -mt-10 px-2 sm:px-3 md:-mt-24 md:px-4 lg:-mt-32">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Mobile Layout - 2x2 grid */}
+          <div className="grid grid-cols-2 gap-2 sm:hidden">
+            {categoryCards.map((card) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: card.id * 0.1 }}
+                className="overflow-hidden rounded-lg bg-white shadow-lg"
+              >
+                <div className="p-2">
+                  <h3 className="text-xs font-bold text-gray-800">{card.title}</h3>
+                  <p className="text-xs text-gray-600">{card.subtitle}</p>
+                  <div className="mt-2 grid grid-cols-2 gap-1">
+                    {card.items.slice(0, 4).map((item, idx) => (
+                      <Link href={item.link} key={idx} className="group">
+                        <div className="overflow-hidden rounded-md">
+                          <div className="relative h-16 w-full overflow-hidden bg-gray-100">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              layout="fill"
+                              objectFit="cover"
+                              className="transition-transform duration-300 group-hover:scale-110"
+                            />
+                          </div>
+                          <div className="mt-1">
+                            <p className="truncate text-xs font-medium text-gray-800">{item.name}</p>
+                            {item.price && (
+                              <p className="text-xs font-medium text-green-600">{item.price}</p>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link href="#" className="mt-1 block text-xs font-medium text-blue-600 hover:underline">
+                    See {card.id === 3 || card.id === 4 ? 'all offers' : 'more'}
+                  </Link>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          {/* Tablet Layout */}
+          <div className="hidden grid-cols-2 gap-3 sm:grid lg:hidden">
+            {categoryCards.map((card) => (
+              <motion.div
+                key={card.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: card.id * 0.1 }}
+                className="overflow-hidden rounded-lg bg-white shadow-lg"
+              >
+                <div className="p-3">
+                  <h3 className="text-sm font-bold text-gray-800">{card.title}</h3>
+                  <p className="text-xs text-gray-600">{card.subtitle}</p>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {card.items.map((item, idx) => (
+                      <Link href={item.link} key={idx} className="group">
+                        <div className="overflow-hidden rounded-md">
+                          <div className="relative h-20 w-full overflow-hidden bg-gray-100">
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              layout="fill"
+                              objectFit="cover"
+                              className="transition-transform duration-300 group-hover:scale-110"
+                            />
+                          </div>
+                          <div className="mt-1">
+                            <p className="text-xs font-medium text-gray-800">{item.name}</p>
+                            {item.price && (
+                              <p className="text-xs font-medium text-green-600">{item.price}</p>
+                            )}
+                            {item.subtitle && (
+                              <p className="text-xs text-gray-500">{item.subtitle}</p>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  <Link href="#" className="mt-2 block text-xs font-medium text-blue-600 hover:underline">
+                    See {card.id === 3 || card.id === 4 ? 'all offers' : 'more'}
+                  </Link>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          {/* Desktop Layout */}
+          <div className="hidden grid-cols-4 gap-4 lg:grid">
             {categoryCards.map((card) => (
               <motion.div
                 key={card.id}
