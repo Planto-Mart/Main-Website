@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@cloudflare/next-on-pages": "^1.13.5",
+    "@supabase/supabase-js": "^2.49.4",
     "core-js": "^3.42.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
