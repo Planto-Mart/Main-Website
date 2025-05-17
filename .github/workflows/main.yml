@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: "dcg3j8q4x5f2zq.supabase.co"
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
     steps:
       - name: Debug Environment Variables
