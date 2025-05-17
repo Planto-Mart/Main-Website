@@ -38,6 +38,9 @@ jobs:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
     steps:
+      - name: Debug Environment Variables
+        run: printenv | grep SUPABASE
+
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -51,6 +54,3 @@ jobs:
 
       - name: Build Next.js
         run: bun run build
-
-      - name: Debug Environment Variables
-        run: printenv | grep SUPABASE
