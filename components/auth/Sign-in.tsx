@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 /* eslint-disable no-unused-vars */
 /* eslint-disable tailwindcss/migration-from-tailwind-2 */
 "use client";
