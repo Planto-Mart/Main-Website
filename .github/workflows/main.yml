@@ -51,3 +51,6 @@ jobs:
 
       - name: Build Next.js
         run: bun run build
+
+      - name: Debug Environment Variables
+        run: printenv | grep SUPABASE
