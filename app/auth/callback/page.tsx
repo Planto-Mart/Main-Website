@@ -6,13 +6,58 @@ import { useRouter } from 'next/navigation'
 
 import { supabase } from '@/utils/supabase/client';
 
+// Interface for IP geolocation data
+interface GeoLocation {
+  ip: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  loc?: string;
+  org?: string;
+  postal?: string;
+  timezone?: string;
+}
+
 export default function AuthCallback() {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(true)
   const [message, setMessage] = useState('Processing login...')
+  const [ipInfo, setIpInfo] = useState<GeoLocation | null>(null)
 
+  // Function to get the user's IP address and geolocation
+  const getIpAndLocation = async (): Promise<GeoLocation | null> => {
+    try {
+      // First get the IP address
+      const ipResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipResponse.json();
+      const ip = ipData.ip;
+      
+      // Then get geolocation data
+      const geoResponse = await fetch(`https://ipinfo.io/${ip}/json?token=db04343f368c67`);
+      const geoData = await geoResponse.json();
+      
+      return {
+        ip,
+        city: geoData.city,
+        region: geoData.region,
+        country: geoData.country,
+        loc: geoData.loc,
+        org: geoData.org,
+        postal: geoData.postal,
+        timezone: geoData.timezone
+      };
+    } catch (error) {
+      console.error('Error fetching IP or location:', error);
+
+      return null;
+    }
+  };
+  
   useEffect(() => {
     const handleAuth = async () => {
+      // Get IP and location information
+      const locationInfo = await getIpAndLocation();
+      setIpInfo(locationInfo);
       try {
         const {
           data: { session },
@@ -24,7 +69,7 @@ export default function AuthCallback() {
           const { data: existingProfile, error: profileError } = await supabase
             .from('profiles_dev')
             .select('*')
-            .eq('id', session.user.id)
+            .eq('uuid', session.user.id)
             .single()
 
           if (profileError && profileError.code !== 'PGRST116') {
@@ -37,7 +82,7 @@ export default function AuthCallback() {
             const { error: insertError } = await supabase
               .from('profiles_dev')
               .insert({
-                id: session.user.id,
+                // id: session.user.id,
                 uuid: session.user.id,
                 full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
                 email: session.user.email || '',
@@ -49,7 +94,15 @@ export default function AuthCallback() {
                   last_sign_in: new Date().toISOString(),
                   sign_in_count: 1,
                   sign_in_method: 'google',
-                  provider: 'google'
+                  provider: 'google',
+                  ip_address: locationInfo?.ip || 'unknown',
+                  location: locationInfo ? {
+                    city: locationInfo.city || 'unknown',
+                    region: locationInfo.region || 'unknown',
+                    country: locationInfo.country || 'unknown',
+                    coordinates: locationInfo.loc || 'unknown',
+                    timezone: locationInfo.timezone || 'unknown'
+                  } : 'unknown'
                 }
               })
 
@@ -75,10 +128,18 @@ export default function AuthCallback() {
                   last_sign_in: new Date().toISOString(),
                   sign_in_count: signInCount,
                   sign_in_method: 'google',
-                  provider: 'google'
+                  provider: 'google',
+                  ip_address: locationInfo?.ip || currentLoginInfo.ip_address || 'unknown',
+                  location: locationInfo ? {
+                    city: locationInfo.city || 'unknown',
+                    region: locationInfo.region || 'unknown',
+                    country: locationInfo.country || 'unknown',
+                    coordinates: locationInfo.loc || 'unknown',
+                    timezone: locationInfo.timezone || 'unknown'
+                  } : currentLoginInfo.location || 'unknown'
                 }
               })
-              .eq('id', session.user.id);
+              .eq('uuid', session.user.id);
             
             if (updateError) {
               console.error('Error updating profile:', updateError);

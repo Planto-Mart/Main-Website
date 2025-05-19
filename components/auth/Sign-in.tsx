@@ -13,6 +13,18 @@ interface SignInProps {
   onClose: () => void;
 }
 
+// Interface for IP geolocation data
+interface GeoLocation {
+  ip: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  loc?: string;
+  org?: string;
+  postal?: string;
+  timezone?: string;
+}
+
 const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,12 +66,43 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
+  // Function to get the user's IP address and geolocation
+  const getIpAndLocation = async (): Promise<GeoLocation | null> => {
+    try {
+      // First get the IP address
+      const ipResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipResponse.json();
+      const ip = ipData.ip;
+      const IP_INFO_TOKEN = process.env.NEXT_PUBLIC_IP_INFO_TOKEN || 'db04343f368c67'; // Replace with your actual token
+      
+      // Then get geolocation data
+      const geoResponse = await fetch(`https://ipinfo.io/${ip}/json?token=${IP_INFO_TOKEN}`);
+      const geoData = await geoResponse.json();
+      
+      return {
+        ip,
+        city: geoData.city,
+        region: geoData.region,
+        country: geoData.country,
+        loc: geoData.loc,
+        org: geoData.org,
+        postal: geoData.postal,
+        timezone: geoData.timezone
+      };
+    } catch (error) {
+      console.error('Error fetching IP or location:', error);
+      
+      return null;
+    }
+  };
+
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setMessage(null);
     setAccountNotFound(false);
+    const locationInfo = await getIpAndLocation();
 
     try {
       // Attempt to sign in with email and password
@@ -77,7 +120,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
         const { data: profileData, error: profileError } = await supabase
           .from('profiles_dev')
           .select('*')
-          .eq('id', data.user.id)
+          .eq('uuid', data.user.id)
           .single();
 
         if (profileError && profileError.code !== 'PGRST116') {
@@ -90,7 +133,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
           const { error: insertError } = await supabase
             .from('profiles_dev')
             .insert({
-              id: data.user.id,
+              // id: data.user.id,
               uuid: data.user.id,
               full_name: data.user.user_metadata?.full_name || '',
               email: data.user.email || '',
@@ -118,11 +161,20 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
             .update({
               updated_at: new Date().toISOString(),
               user_login_info: {
-                ...currentLoginInfo,
-                last_sign_in: new Date().toISOString(),
-                sign_in_count: signInCount,
-                sign_in_method: 'email'
-              }
+                  ...currentLoginInfo,
+                  last_sign_in: new Date().toISOString(),
+                  sign_in_count: signInCount,
+                  sign_in_method: 'google',
+                  provider: 'google',
+                  ip_address: locationInfo?.ip || currentLoginInfo.ip_address || 'unknown',
+                  location: locationInfo ? {
+                    city: locationInfo.city || 'unknown',
+                    region: locationInfo.region || 'unknown',
+                    country: locationInfo.country || 'unknown',
+                    coordinates: locationInfo.loc || 'unknown',
+                    timezone: locationInfo.timezone || 'unknown'
+                  } : currentLoginInfo.location || 'unknown'
+                }
             })
             .eq('id', data.user.id);
 

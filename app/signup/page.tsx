@@ -95,7 +95,7 @@ return;
         const { error: profileError } = await supabase
           .from('profiles_dev')
           .insert({
-            id: data.user.id,
+            // id: data.user.id,
             uuid:data.user.id,
             full_name: fullName,
             email: email,
