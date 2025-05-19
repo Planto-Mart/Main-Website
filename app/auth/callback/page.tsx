@@ -1,6 +1,4 @@
 /* eslint-disable no-unused-vars */
- 
-// app/auth/callback/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -25,7 +23,7 @@ export default function AuthCallback() {
           // Check if user already has a profile
           const { data: existingProfile, error: profileError } = await supabase
             .from('profiles_dev')
-            .select('id')
+            .select('*')
             .eq('id', session.user.id)
             .single()
 
@@ -47,10 +45,43 @@ export default function AuthCallback() {
                 avatar_url: session.user.user_metadata?.avatar_url || '',
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
+                user_login_info: {
+                  last_sign_in: new Date().toISOString(),
+                  sign_in_count: 1,
+                  sign_in_method: 'google',
+                  provider: 'google'
+                }
               })
 
             if (insertError) {
               console.error('Error creating profile:', insertError)
+            }
+          } else {
+            // Update existing profile with login information
+            setMessage('Updating your account...')
+            const currentLoginInfo = existingProfile.user_login_info || {};
+            const signInCount = (currentLoginInfo.sign_in_count || 0) + 1;
+            
+            const { error: updateError } = await supabase
+              .from('profiles_dev')
+              .update({
+                updated_at: new Date().toISOString(),
+                // Update avatar_url if it has changed
+                avatar_url: session.user.user_metadata?.avatar_url || existingProfile.avatar_url,
+                // Update full_name if it has changed
+                full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || existingProfile.full_name,
+                user_login_info: {
+                  ...currentLoginInfo,
+                  last_sign_in: new Date().toISOString(),
+                  sign_in_count: signInCount,
+                  sign_in_method: 'google',
+                  provider: 'google'
+                }
+              })
+              .eq('id', session.user.id);
+            
+            if (updateError) {
+              console.error('Error updating profile:', updateError);
             }
           }
 
