@@ -116,11 +116,11 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
       }
 
       if (data?.user) {
-        // Check if user exists in profiles_dev table
+        // Check if user exists in profiles_dev table using uuid column
         const { data: profileData, error: profileError } = await supabase
           .from('profiles_dev')
           .select('*')
-          .eq('uuid', data.user.id)
+          .eq('uuid', data.user.id)  // Use 'uuid' column instead of 'id'
           .single();
 
         if (profileError && profileError.code !== 'PGRST116') {
@@ -133,8 +133,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
           const { error: insertError } = await supabase
             .from('profiles_dev')
             .insert({
-              // id: data.user.id,
-              uuid: data.user.id,
+              uuid: data.user.id,  // Store user ID in the uuid column
               full_name: data.user.user_metadata?.full_name || '',
               email: data.user.email || '',
               phone: data.user.user_metadata?.phone || '',
@@ -161,22 +160,21 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
             .update({
               updated_at: new Date().toISOString(),
               user_login_info: {
-                  ...currentLoginInfo,
-                  last_sign_in: new Date().toISOString(),
-                  sign_in_count: signInCount,
-                  sign_in_method: 'google',
-                  provider: 'google',
-                  ip_address: locationInfo?.ip || currentLoginInfo.ip_address || 'unknown',
-                  location: locationInfo ? {
-                    city: locationInfo.city || 'unknown',
-                    region: locationInfo.region || 'unknown',
-                    country: locationInfo.country || 'unknown',
-                    coordinates: locationInfo.loc || 'unknown',
-                    timezone: locationInfo.timezone || 'unknown'
-                  } : currentLoginInfo.location || 'unknown'
-                }
+                ...currentLoginInfo,
+                last_sign_in: new Date().toISOString(),
+                sign_in_count: signInCount,
+                sign_in_method: 'email',  // Changed from 'google' to 'email'
+                ip_address: locationInfo?.ip || currentLoginInfo.ip_address || 'unknown',
+                location: locationInfo ? {
+                  city: locationInfo.city || 'unknown',
+                  region: locationInfo.region || 'unknown',
+                  country: locationInfo.country || 'unknown',
+                  coordinates: locationInfo.loc || 'unknown',
+                  timezone: locationInfo.timezone || 'unknown'
+                } : currentLoginInfo.location || 'unknown'
+              }
             })
-            .eq('id', data.user.id);
+            .eq('uuid', data.user.id);  // Use 'uuid' column instead of 'id'
 
           if (updateError) {
             console.error('Error updating profile:', updateError);
