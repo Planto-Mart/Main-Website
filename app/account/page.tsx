@@ -40,8 +40,9 @@ export default function AccountPage() {
         setUser(session.user);
         
         // Fetch profile data
+        console.log('Fetching profile data for user:', session.user.id);
         const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
+          .from('profiles_dev')
           .select('*')
           .eq('id', session.user.id)
           .single();
@@ -84,7 +85,7 @@ export default function AccountPage() {
     
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('profiles_dev')
         .update({
           full_name: updatedProfile.full_name,
           phone: updatedProfile.phone,

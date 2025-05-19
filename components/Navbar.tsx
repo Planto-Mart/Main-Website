@@ -84,8 +84,9 @@ function Navbar() {
 
   // Fetch user profile data
   const fetchUserProfile = async (userId: string) => {
+    console.log('Fetching user profile for ID:', userId);
     const { data: profile, error } = await supabase
-      .from('profiles')
+      .from('profiles_dev')
       .select('*')
       .eq('id', userId)
       .single();
