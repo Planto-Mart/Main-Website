@@ -24,25 +24,18 @@ COPY package.json bun.lockb ./
 # Copy the rest of the application
 COPY . ./
 
-# Install dependencies using Bun
+# Install wrangler CLI globally and dependencies using Bun
 RUN export PATH=$PATH:$HOME/.bun/bin && \
-    if command -v bun &> /dev/null; then \
-      bun install; \
-    else \
-      npm install --legacy-peer-deps; \
-    fi
+    npm install -g wrangler && \
+    (command -v bun >/dev/null 2>&1 && bun install || npm install --legacy-peer-deps)
 
 # Build the application using Bun
 RUN export PATH=$PATH:$HOME/.bun/bin && \
     if command -v bun &> /dev/null; then \
       bun run build; \
     else \
-      npm run build; \
-    fi
-
-# Simulate Cloudflare Pages deployment process
-RUN echo "🚀 Starting Cloudflare Pages deployment simulation..."
-RUN echo "📦 Packaging build output..."
+RUN export PATH=$PATH:$HOME/.bun/bin && \
+    (command -v bun >/dev/null 2>&1 && bun run build || npm run build)
 RUN echo "🔍 Analyzing build output..."
 RUN echo "✅ Build validation complete"
 
