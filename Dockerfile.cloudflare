@@ -3,26 +3,28 @@ FROM node:20-alpine
 # Accept build args
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG CF_PAGES_BRANCH
+ARG CF_PAGES_COMMIT_SHA
 
 # Set as environment variables
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV CF_PAGES_BRANCH=$CF_PAGES_BRANCH
+ENV CF_PAGES_COMMIT_SHA=$CF_PAGES_COMMIT_SHA
 
 # Existing ENV config
 ENV NODE_VERSION=22.12.0
 ENV BUN_VERSION=latest
 ENV CF_PAGES=1
-ENV CF_PAGES_BRANCH=${GITHUB_REF_NAME:-dev}
-ENV CF_PAGES_COMMIT_SHA=${GITHUB_SHA:-local}
 ENV CF_PAGES_URL=http://localhost:8788
 
 WORKDIR /app
 
 # Copy package.json and bun.lockb for Bun package management
-COPY package.json bun.lockb ./
+COPY package.json bun.lockb ./ 
 
 # Copy the rest of the application
-COPY . ./
+COPY . ./ 
 
 # Install wrangler CLI globally and dependencies using Bun
 RUN export PATH=$PATH:$HOME/.bun/bin && \

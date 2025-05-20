@@ -53,7 +53,7 @@ jobs:
 
       - name: Build Next.js
         run: bun run build
-        
+
   cloudflare-simulation:
     name: Simulate Cloudflare Pages Environment
     runs-on: ubuntu-latest
