@@ -1,17 +1,28 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable tailwindcss/migration-from-tailwind-2 */
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, X } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, X, Info } from 'lucide-react';
 
 import { supabase } from '@/utils/supabase/client';
 
 interface SignInProps {
   isOpen: boolean;
   onClose: () => void;
+}
+
+// Interface for IP geolocation data
+interface GeoLocation {
+  ip: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  loc?: string;
+  org?: string;
+  postal?: string;
+  timezone?: string;
 }
 
 const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
@@ -21,7 +32,8 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  
+  const [accountNotFound, setAccountNotFound] = useState(false);
+
   const router = useRouter();
 
   // Close modal when escape key is pressed
@@ -48,32 +60,139 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen]);
 
+  // Function to get the user's IP address and geolocation
+  const getIpAndLocation = async (): Promise<GeoLocation | null> => {
+    try {
+      // First get the IP address
+      const ipResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipResponse.json();
+      const ip = ipData.ip;
+      const IP_INFO_TOKEN = process.env.NEXT_PUBLIC_IP_INFO_TOKEN || 'db04343f368c67'; // Replace with your actual token
+      
+      // Then get geolocation data
+      const geoResponse = await fetch(`https://ipinfo.io/${ip}/json?token=${IP_INFO_TOKEN}`);
+      const geoData = await geoResponse.json();
+      
+      return {
+        ip,
+        city: geoData.city,
+        region: geoData.region,
+        country: geoData.country,
+        loc: geoData.loc,
+        org: geoData.org,
+        postal: geoData.postal,
+        timezone: geoData.timezone
+      };
+    } catch (error) {
+      console.error('Error fetching IP or location:', error);
+      
+      return null;
+    }
+  };
+
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+    setMessage(null);
+    setAccountNotFound(false);
+    const locationInfo = await getIpAndLocation();
+
     try {
+      // Attempt to sign in with email and password
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
+
       if (error) {
         throw error;
       }
-      
-      // Close modal and refresh page after successful sign-in
-      onClose();
-      router.refresh();
+
+      if (data?.user) {
+        // Check if user exists in profiles_dev table using uuid column
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles_dev')
+          .select('*')
+          .eq('uuid', data.user.id)  // Use 'uuid' column instead of 'id'
+          .single();
+
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Error fetching profile:', profileError);
+        }
+
+        if (!profileData) {
+          // User exists in auth but not in profiles_dev table
+          // Create a new profile
+          const { error: insertError } = await supabase
+            .from('profiles_dev')
+            .insert({
+              uuid: data.user.id,  // Store user ID in the uuid column
+              full_name: data.user.user_metadata?.full_name || '',
+              email: data.user.email || '',
+              phone: data.user.user_metadata?.phone || '',
+              avatar_url: data.user.user_metadata?.avatar_url || '',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              user_login_info: {
+                last_sign_in: new Date().toISOString(),
+                sign_in_count: 1,
+                sign_in_method: 'email'
+              }
+            });
+
+          if (insertError) {
+            console.error('Error creating profile:', insertError);
+          }
+        } else {
+          // Update existing profile with login information
+          const currentLoginInfo = profileData.user_login_info || {};
+          const signInCount = (currentLoginInfo.sign_in_count || 0) + 1;
+
+          const { error: updateError } = await supabase
+            .from('profiles_dev')
+            .update({
+              updated_at: new Date().toISOString(),
+              user_login_info: {
+                ...currentLoginInfo,
+                last_sign_in: new Date().toISOString(),
+                sign_in_count: signInCount,
+                sign_in_method: 'email',  // Changed from 'google' to 'email'
+                ip_address: locationInfo?.ip || currentLoginInfo.ip_address || 'unknown',
+                location: locationInfo ? {
+                  city: locationInfo.city || 'unknown',
+                  region: locationInfo.region || 'unknown',
+                  country: locationInfo.country || 'unknown',
+                  coordinates: locationInfo.loc || 'unknown',
+                  timezone: locationInfo.timezone || 'unknown'
+                } : currentLoginInfo.location || 'unknown'
+              }
+            })
+            .eq('uuid', data.user.id);  // Use 'uuid' column instead of 'id'
+
+          if (updateError) {
+            console.error('Error updating profile:', updateError);
+          }
+        }
+
+        // Close modal and refresh page after successful sign-in
+        onClose();
+        router.refresh();
+      }
     } catch (error: any) {
-      setError(error.message || 'Failed to sign in');
+      if (error.message.includes('Invalid login credentials')) {
+        // Set account not found message
+        setAccountNotFound(true);
+        setError('Account not found. Please create an account to continue.');
+      } else {
+        setError(error.message || 'Failed to sign in');
+      }
     } finally {
       setLoading(false);
     }
@@ -82,18 +201,28 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
-    
+    setMessage(null);
+
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      // Initiate Google OAuth sign-in
+      // Profile creation/update will be handled in the auth/callback page
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            // Pass additional data to be used in the callback
+            prompt: 'select_account', // Force account selection even if already logged in
+            access_type: 'offline' // Get refresh token for server-side use
+          }
         },
       });
-      
+
       if (error) {
         throw error;
       }
+
+      // The auth callback page will handle profile creation/update
     } catch (error: any) {
       setError(error.message || 'Failed to sign in with Google');
       setLoading(false);
@@ -106,19 +235,19 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
 
       return;
     }
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      
+
       if (error) {
         throw error;
       }
-      
+
       setMessage('Password reset link sent to your email');
     } catch (error: any) {
       setError(error.message || 'Failed to send reset password email');
@@ -132,7 +261,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
   return (
     <>
       {/* Modal Overlay */}
-      <div 
+      <div
         className="fixed inset-0 z-50 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}
       ></div>
@@ -140,7 +269,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
       <div className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-full max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl bg-white p-6 shadow-2xl">
         <div className="relative">
           {/* Close Button */}
-          <button 
+          <button
             onClick={onClose}
             className="absolute right-0 top-0 rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
             aria-label="Close"
@@ -150,8 +279,8 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
           <div className="text-center">
             <div className="flex justify-center">
               <div className="relative size-16">
-                <Image 
-                  src="/assets/logo_Without_Text.png" 
+                <Image
+                  src="/assets/logo_Without_Text.png"
                   alt="Plantomart Logo"
                   fill
                   className="object-contain"
@@ -173,6 +302,16 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
                 <AlertCircle className="mr-2 size-5 text-red-500" />
                 <p className="text-sm text-red-700">{error}</p>
               </div>
+              {accountNotFound && (
+                <div className="mt-2 flex items-center">
+                  <Info className="mr-2 size-4 text-blue-500" />
+                  <p className="text-xs text-blue-700">
+                    <Link href="/signup" className="font-medium underline">
+                      Sign up now
+                    </Link> to create a new account.
+                  </p>
+                </div>
+              )}
             </div>
           )}
           {message && (

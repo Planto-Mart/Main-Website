@@ -1,16 +1,16 @@
-/* eslint-disable no-unused-vars */
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, User, Check, X } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, User, Check, X, Phone } from 'lucide-react';
 
-import { supabase } from '../../utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 
 export default function SignUp() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +49,12 @@ return;
 return;
     }
     
+    if (!phoneNumber.trim()) {
+      setError('Please enter your phone number');
+      
+return;
+    }
+    
     if (!password) {
       setError('Please enter a password');
       
@@ -77,6 +83,7 @@ return;
         options: {
           data: {
             full_name: fullName,
+            phone: phoneNumber,
           },
         },
       });
@@ -84,13 +91,15 @@ return;
       if (signUpError) throw signUpError;
       
       if (data?.user) {
-        // Create profile in profiles table
+        // Create profile in profiles_dev table
         const { error: profileError } = await supabase
-          .from('profiles')
+          .from('profiles_dev')
           .insert({
-            id: data.user.id,
+            // id: data.user.id,
+            uuid:data.user.id,
             full_name: fullName,
             email: email,
+            phone: phoneNumber,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });
@@ -119,7 +128,9 @@ return;
     setError(null);
     
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      // Initiate Google OAuth sign-in
+      // Profile creation will be handled in the auth/callback page
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
@@ -129,6 +140,8 @@ return;
       if (error) {
         throw error;
       }
+      
+      // No need to handle profile creation here as it's done in the callback page
     } catch (error: any) {
       setError(error.message || 'Failed to sign up with Google');
       setLoading(false);
@@ -215,6 +228,26 @@ return;
                       onChange={(e) => setEmail(e.target.value)}
                       className="block w-full rounded-md border border-gray-300 py-3 pl-10 pr-3 text-black placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
                       placeholder="you@example.com"
+                    />
+                  </div>
+                </div>
+                {/* Phone Number */}
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                    Phone Number
+                  </label>
+                  <div className="relative mt-1">
+                    <Phone className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      autoComplete="tel"
+                      required
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="block w-full rounded-md border border-gray-300 py-3 pl-10 pr-3 text-black placeholder:text-gray-400 focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
+                      placeholder="+91 1234567890"
                     />
                   </div>
                 </div>

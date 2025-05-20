@@ -6,10 +6,27 @@ import Link from 'next/link';
 import { 
   User, Package, Heart, CreditCard, LogOut, Settings, Edit, Camera, 
   Truck, Clock, CheckCircle, AlertCircle, ChevronRight, ShoppingBag, 
-  MapPin, Phone, Shield, Bell, HelpCircle, Loader2
+  MapPin, Phone, Shield, Bell, HelpCircle, Loader2, Store, Activity,
+  Globe, Calendar, MapPinned, Info, Lock
 } from 'lucide-react';
 
 import { supabase } from '../../utils/supabase/client';
+
+// Interface for user login info
+interface UserLoginInfo {
+  last_sign_in?: string;
+  sign_in_count?: number;
+  sign_in_method?: string;
+  provider?: string;
+  ip_address?: string;
+  location?: {
+    city?: string;
+    region?: string;
+    country?: string;
+    coordinates?: string;
+    timezone?: string;
+  } | string;
+}
 
 export default function AccountPage() {
   const [user, setUser] = useState<any>(null);
@@ -23,6 +40,9 @@ export default function AccountPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isVendor, setIsVendor] = useState(false);
+  const [vendorRegistering, setVendorRegistering] = useState(false);
+  const [loginInfo, setLoginInfo] = useState<UserLoginInfo | null>(null);
   
   const router = useRouter();
 
@@ -40,10 +60,11 @@ export default function AccountPage() {
         setUser(session.user);
         
         // Fetch profile data
+        console.log('Fetching profile data for user:', session.user.id);
         const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
+          .from('profiles_dev')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('uuid', session.user.id)
           .single();
         
         if (profileError) {
@@ -51,6 +72,12 @@ export default function AccountPage() {
         } else {
           setProfile(profileData);
           setUpdatedProfile(profileData);
+          setIsVendor(profileData?.is_vendor || false);
+          
+          // Extract login info from profile data
+          if (profileData?.user_login_info) {
+            setLoginInfo(profileData.user_login_info);
+          }
         }
         
         // Fetch mock orders (replace with real data when available)
@@ -84,13 +111,13 @@ export default function AccountPage() {
     
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('profiles_dev')
         .update({
           full_name: updatedProfile.full_name,
           phone: updatedProfile.phone,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', user.id);
+        .eq('uuid', user.id);
       
       if (error) {
         throw error;
@@ -109,6 +136,39 @@ export default function AccountPage() {
       setError(error.message || 'Failed to update profile');
     } finally {
       setSaving(false);
+    }
+  };
+  
+  const handleVendorRegistration = async () => {
+    setVendorRegistering(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      const { error } = await supabase
+        .from('profiles_dev')
+        .update({
+          is_vendor: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('uuid', user.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setProfile({
+        ...profile,
+        is_vendor: true,
+        updated_at: new Date().toISOString(),
+      });
+      
+      setIsVendor(true);
+      setSuccess('Congratulations! You are now registered as a vendor.');
+    } catch (error: any) {
+      setError(error.message || 'Failed to register as vendor');
+    } finally {
+      setVendorRegistering(false);
     }
   };
 
@@ -350,6 +410,17 @@ return null;
                 <CreditCard className="mr-2 size-4" />
                 Payment Methods
               </button>
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium ${
+                  activeTab === 'activity'
+                    ? 'border-b-2 border-green-600 text-green-600'
+                    : 'text-gray-500 hover:border-b-2 hover:border-gray-300 hover:text-gray-700'
+                }`}
+              >
+                <Activity className="mr-2 size-4" />
+                Login Activity
+              </button>
             </div>
           </div>
           {/* Content Area */}
@@ -526,6 +597,202 @@ return null;
                       </div>
                     </div>
                   </div>
+                </div>
+                {/* Vendor Registration Section */}
+                <div className="mt-8">
+                  <h2 className="text-xl font-semibold text-gray-900">Vendor Information</h2>
+                  <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6">
+                    {isVendor ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex size-12 items-center justify-center rounded-full bg-green-100">
+                            <Store className="size-6 text-green-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-900">Registered Vendor</h3>
+                            <p className="text-sm text-gray-500">You are registered as a vendor on PlantoMart</p>
+                          </div>
+                        </div>
+                        <Link 
+                          href="/vendor/dashboard" 
+                          className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                        >
+                          Vendor Dashboard
+                        </Link>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="flex items-center space-x-3">
+                          <div className="flex size-12 items-center justify-center rounded-full bg-amber-100">
+                            <Store className="size-6 text-amber-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-medium text-gray-900">Become a Vendor</h3>
+                            <p className="text-sm text-gray-500">Start selling your plants and gardening products on PlantoMart</p>
+                          </div>
+                        </div>
+                        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                          <h4 className="font-medium text-amber-800">Benefits of becoming a vendor:</h4>
+                          <ul className="mt-2 space-y-2 text-sm text-amber-700">
+                            <li className="flex items-start">
+                              <CheckCircle className="mr-2 mt-0.5 size-4 shrink-0" />
+                              <span>Access to thousands of plant enthusiasts across the country</span>
+                            </li>
+                            <li className="flex items-start">
+                              <CheckCircle className="mr-2 mt-0.5 size-4 shrink-0" />
+                              <span>Easy-to-use dashboard to manage your products and orders</span>
+                            </li>
+                            <li className="flex items-start">
+                              <CheckCircle className="mr-2 mt-0.5 size-4 shrink-0" />
+                              <span>Secure and timely payments directly to your bank account</span>
+                            </li>
+                            <li className="flex items-start">
+                              <CheckCircle className="mr-2 mt-0.5 size-4 shrink-0" />
+                              <span>Dedicated support team to help you grow your business</span>
+                            </li>
+                          </ul>
+                        </div>
+                        <div className="mt-6 flex justify-center">
+                          <button
+                            onClick={handleVendorRegistration}
+                            disabled={vendorRegistering}
+                            className="flex items-center rounded-md bg-green-600 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-70"
+                          >
+                            {vendorRegistering ? (
+                              <>
+                                <Loader2 className="mr-2 size-5 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Store className="mr-2 size-5" />
+                                Register as Vendor
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Login Activity Tab */}
+            {activeTab === 'activity' && (
+              <div>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-gray-900">Login Activity</h2>
+                </div>
+                <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6">
+                  <div className="mb-6 flex items-center space-x-3">
+                    <div className="flex size-12 items-center justify-center rounded-full bg-blue-100">
+                      <Activity className="size-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">Recent Login Information</h3>
+                      <p className="text-sm text-gray-500">
+                        Last login: {loginInfo?.last_sign_in ? new Date(loginInfo.last_sign_in).toLocaleString() : 'Unknown'}
+                      </p>
+                    </div>
+                  </div>
+                  {loginInfo ? (
+                    <div className="space-y-6">
+                      <div className="rounded-lg border border-gray-200 p-4">
+                        <h4 className="mb-3 font-medium text-gray-700">Login Statistics</h4>
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <div className="rounded-md bg-gray-50 p-3">
+                            <div className="flex items-center space-x-2">
+                              <Calendar className="size-5 text-gray-500" />
+                              <span className="text-sm font-medium text-gray-500">Last Sign-in</span>
+                            </div>
+                            <p className="mt-1 text-sm text-gray-900">
+                              {loginInfo.last_sign_in ? new Date(loginInfo.last_sign_in).toLocaleString() : 'Unknown'}
+                            </p>
+                          </div>
+                          <div className="rounded-md bg-gray-50 p-3">
+                            <div className="flex items-center space-x-2">
+                              <Activity className="size-5 text-gray-500" />
+                              <span className="text-sm font-medium text-gray-500">Sign-in Count</span>
+                            </div>
+                            <p className="mt-1 text-sm text-gray-900">{loginInfo.sign_in_count || 0}</p>
+                          </div>
+                          <div className="rounded-md bg-gray-50 p-3">
+                            <div className="flex items-center space-x-2">
+                              <Lock className="size-5 text-gray-500" />
+                              <span className="text-sm font-medium text-gray-500">Sign-in Method</span>
+                            </div>
+                            <p className="mt-1 text-sm text-gray-900">
+                              {loginInfo.sign_in_method ? loginInfo.sign_in_method.charAt(0).toUpperCase() + loginInfo.sign_in_method.slice(1) : 'Unknown'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-gray-200 p-4">
+                        <h4 className="mb-3 font-medium text-gray-700">Location Information</h4>
+                        {typeof loginInfo.location === 'object' && loginInfo.location ? (
+                          <div className="space-y-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex size-10 items-center justify-center rounded-full bg-blue-100">
+                                <MapPinned className="size-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h5 className="font-medium text-gray-900">
+                                  {loginInfo.location.city}, {loginInfo.location.region}, {loginInfo.location.country}
+                                </h5>
+                                <p className="text-sm text-gray-500">
+                                  Coordinates: {loginInfo.location.coordinates}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2">
+                              <div className="rounded-md bg-gray-50 p-3">
+                                <div className="flex items-center space-x-2">
+                                  <Globe className="size-5 text-gray-500" />
+                                  <span className="text-sm font-medium text-gray-500">IP Address</span>
+                                </div>
+                                <p className="mt-1 text-sm text-gray-900">{loginInfo.ip_address || 'Unknown'}</p>
+                              </div>
+                              <div className="rounded-md bg-gray-50 p-3">
+                                <div className="flex items-center space-x-2">
+                                  <Clock className="size-5 text-gray-500" />
+                                  <span className="text-sm font-medium text-gray-500">Timezone</span>
+                                </div>
+                                <p className="mt-1 text-sm text-gray-900">{loginInfo.location.timezone || 'Unknown'}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="rounded-md bg-gray-50 p-4 text-center">
+                            <Info className="mx-auto size-8 text-gray-400" />
+                            <p className="mt-2 text-sm text-gray-500">No detailed location information available</p>
+                          </div>
+                        )}
+                      </div>
+                      <div className="rounded-md bg-blue-50 p-4">
+                        <div className="flex">
+                          <div className="shrink-0">
+                            <Info className="size-5 text-blue-400" />
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="text-sm font-medium text-blue-800">Security Tip</h3>
+                            <div className="mt-2 text-sm text-blue-700">
+                              <p>
+                                If you don't recognize this location or device, please change your password immediately and contact support.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="rounded-md bg-gray-50 p-8 text-center">
+                      <Info className="mx-auto size-12 text-gray-400" />
+                      <h3 className="mt-2 text-lg font-medium text-gray-900">No login data available</h3>
+                      <p className="mt-1 text-sm text-gray-500">
+                        We haven't collected any login activity information yet. This will be updated on your next login.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
