@@ -16,24 +16,23 @@ ENV CF_PAGES_BRANCH=${GITHUB_REF_NAME:-dev}
 ENV CF_PAGES_COMMIT_SHA=${GITHUB_SHA:-local}
 ENV CF_PAGES_URL=http://localhost:8788
 
-
 WORKDIR /app
 
-# Copy package.json
-COPY package.json ./
+# Copy package.json and bun.lockb for Bun package management
+COPY package.json bun.lockb ./
 
 # Copy the rest of the application
 COPY . ./
 
-# Install dependencies using either bun or npm
+# Install dependencies using Bun
 RUN export PATH=$PATH:$HOME/.bun/bin && \
     if command -v bun &> /dev/null; then \
       bun install; \
     else \
-      npm install; \
+      npm install --legacy-peer-deps; \
     fi
 
-# Build the application
+# Build the application using Bun
 RUN export PATH=$PATH:$HOME/.bun/bin && \
     if command -v bun &> /dev/null; then \
       bun run build; \
