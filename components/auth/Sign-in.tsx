@@ -11,6 +11,7 @@ import { supabase } from '@/utils/supabase/client';
 interface SignInProps {
   isOpen: boolean;
   onClose: () => void;
+  redirectUrl?: string; // Add redirectUrl parameter
 }
 
 // Interface for IP geolocation data
@@ -25,7 +26,7 @@ interface GeoLocation {
   timezone?: string;
 }
 
-const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
+const SignIn: React.FC<SignInProps> = ({ isOpen, onClose, redirectUrl }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -163,7 +164,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
                 ...currentLoginInfo,
                 last_sign_in: new Date().toISOString(),
                 sign_in_count: signInCount,
-                sign_in_method: 'email',  // Changed from 'google' to 'email'
+                sign_in_method: 'email',
                 ip_address: locationInfo?.ip || currentLoginInfo.ip_address || 'unknown',
                 location: locationInfo ? {
                   city: locationInfo.city || 'unknown',
@@ -181,9 +182,15 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
           }
         }
 
-        // Close modal and refresh page after successful sign-in
+        // Close modal and redirect after successful sign-in
         onClose();
-        router.refresh();
+        
+        // Redirect to the original URL if provided, otherwise refresh the current page
+        if (redirectUrl) {
+          router.push(redirectUrl);
+        } else {
+          router.refresh();
+        }
       }
     } catch (error: any) {
       if (error.message.includes('Invalid login credentials')) {
@@ -204,14 +211,20 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
     setMessage(null);
 
     try {
+      // Store the redirect URL in localStorage before redirecting to Google OAuth
+      if (redirectUrl) {
+        localStorage.setItem('authRedirectUrl', redirectUrl);
+      } else {
+        // If no redirectUrl is provided, store the current path
+        localStorage.setItem('authRedirectUrl', window.location.pathname);
+      }
+
       // Initiate Google OAuth sign-in
-      // Profile creation/update will be handled in the auth/callback page
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
-            // Pass additional data to be used in the callback
             prompt: 'select_account', // Force account selection even if already logged in
             access_type: 'offline' // Get refresh token for server-side use
           }
@@ -222,7 +235,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose }) => {
         throw error;
       }
 
-      // The auth callback page will handle profile creation/update
+      // The auth callback page will handle profile creation/update and redirection
     } catch (error: any) {
       setError(error.message || 'Failed to sign in with Google');
       setLoading(false);

@@ -58,6 +58,7 @@ export default function AuthCallback() {
       // Get IP and location information
       const locationInfo = await getIpAndLocation();
       setIpInfo(locationInfo);
+      
       try {
         const {
           data: { session },
@@ -82,7 +83,6 @@ export default function AuthCallback() {
             const { error: insertError } = await supabase
               .from('profiles_dev')
               .insert({
-                // id: session.user.id,
                 uuid: session.user.id,
                 full_name: session.user.user_metadata?.full_name || session.user.user_metadata?.name || '',
                 email: session.user.email || '',
@@ -146,7 +146,21 @@ export default function AuthCallback() {
             }
           }
 
-          router.push('/')
+          // Check if there's a stored redirect URL
+          let redirectTo = '/';
+          
+          // Only run this in the browser environment
+          if (typeof window !== 'undefined') {
+            const storedRedirectUrl = localStorage.getItem('authRedirectUrl');
+            if (storedRedirectUrl) {
+              redirectTo = storedRedirectUrl;
+              // Clear the stored URL after using it
+              localStorage.removeItem('authRedirectUrl');
+            }
+          }
+          
+          setMessage(`Redirecting to ${redirectTo}...`);
+          router.push(redirectTo);
         } else {
           console.error('Authentication error:', error?.message)
           router.push('/login')
