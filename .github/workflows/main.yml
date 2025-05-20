@@ -68,13 +68,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
       - name: Build Docker image for Cloudflare simulation
         run: |
-          docker build -t cloudflare-pages-sim -f ./Dockerfile.cloudflare .
+          docker build -t cloudflare-pages-sim -f ./Dockerfile.cloudflare \
+            --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
+            --build-arg NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
+            --build-arg CF_PAGES_BRANCH=${{ github.ref_name }} \
+            --build-arg CF_PAGES_COMMIT_SHA=${{ github.sha }}
 
       - name: Run deployment simulation in Docker
         run: |
