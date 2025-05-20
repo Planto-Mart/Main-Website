@@ -21,14 +21,14 @@ ENV CF_PAGES_URL=http://localhost:8788
 WORKDIR /app
 
 # Copy package.json and bun.lockb for Bun package management
-COPY package.json bun.lockb ./ 
+COPY package.json bun.lockb* ./ 
 
 # Copy the rest of the application
 COPY . ./ 
 
-# Install wrangler CLI globally and dependencies using Bun
+# Install wrangler as a dev dependency instead of globally
 RUN export PATH=$PATH:$HOME/.bun/bin && \
-    npm install -g wrangler && \
+    (command -v bun >/dev/null 2>&1 && bun add -d wrangler || npm install --save-dev wrangler) && \
     (command -v bun >/dev/null 2>&1 && bun install || npm install --legacy-peer-deps)
 
 # Build the application using Bun or npm
