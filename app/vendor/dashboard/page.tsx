@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable import/no-unresolved */
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -11,11 +10,7 @@ import {
   Package, 
   Star, 
   Settings, 
-  Users, 
-  TrendingUp, 
-  ArrowUpRight, 
-  Clock, 
-  AlertCircle, 
+  Users,  
   Plus, 
   Search, 
   Filter, 
@@ -31,6 +26,7 @@ import {
 
 import { supabase } from '@/utils/supabase/client';
 import SignIn from '@/components/auth/Sign-in';
+import OverviewTab from '@/components/vendor/Dashboard/OverviewTab';
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,7 +45,7 @@ export default function VendorDashboard() {
     pendingOrders: 0,
     lowStockProducts: 0
   });
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  // const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
@@ -160,15 +156,6 @@ return;
       pendingOrders: 12,
       lowStockProducts: 5
     });
-    
-    // Mock recent orders
-    setRecentOrders([
-      { id: 'ORD-7829', customer: 'Rahul Sharma', date: '2023-06-15', total: 1250, status: 'delivered', items: 3 },
-      { id: 'ORD-7830', customer: 'Priya Patel', date: '2023-06-14', total: 850, status: 'processing', items: 2 },
-      { id: 'ORD-7831', customer: 'Amit Kumar', date: '2023-06-14', total: 3200, status: 'shipped', items: 5 },
-      { id: 'ORD-7832', customer: 'Neha Singh', date: '2023-06-13', total: 1600, status: 'delivered', items: 4 },
-      { id: 'ORD-7833', customer: 'Vikram Reddy', date: '2023-06-12', total: 950, status: 'processing', items: 2 }
-    ]);
     
     // Mock products
     setProducts([
@@ -530,169 +517,11 @@ return;
         <main className="flex-1">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
-            <div className="p-4 md:p-6">
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-                <p className="text-gray-600">Welcome back, {user?.email}</p>
-              </div>
-              {/* Stats Grid */}
-              <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Total Sales */}
-                <div className="overflow-hidden rounded-lg bg-white p-4 shadow-sm">
-                  <div className="flex items-center">
-                    <div className="mr-4 flex size-12 items-center justify-center rounded-full bg-green-100">
-                      <TrendingUp className="size-6 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Total Sales</p>
-                      <p className="text-2xl font-bold text-gray-900">₹{stats.totalSales.toLocaleString()}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-center text-xs font-medium text-green-600">
-                    <ArrowUpRight className="mr-1 size-3" />
-                    <span>12% from last month</span>
-                  </div>
-                </div>
-                {/* Total Orders */}
-                <div className="overflow-hidden rounded-lg bg-white p-4 shadow-sm">
-                  <div className="flex items-center">
-                    <div className="mr-4 flex size-12 items-center justify-center rounded-full bg-purple-100">
-                      <ShoppingBag className="size-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Total Orders</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.totalOrders}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-center text-xs font-medium text-purple-600">
-                    <ArrowUpRight className="mr-1 size-3" />
-                    <span>8% from last month</span>
-                  </div>
-                </div>
-                {/* Total Products */}
-                <div className="overflow-hidden rounded-lg bg-white p-4 shadow-sm">
-                  <div className="flex items-center">
-                    <div className="mr-4 flex size-12 items-center justify-center rounded-full bg-blue-100">
-                      <Package className="size-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Total Products</p>
-                      <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-center text-xs font-medium text-blue-600">
-                    <Plus className="mr-1 size-3" />
-                    <span>5 new this month</span>
-                  </div>
-                </div>
-              </div>
-              {/* Alerts Section */}
-              <div className="mb-6">
-                <h2 className="mb-4 text-lg font-medium text-gray-900">Alerts & Notifications</h2>
-                <div className="space-y-3">
-                  {/* Pending Orders Alert */}
-                  {stats.pendingOrders > 0 && (
-                    <div className="flex items-start rounded-lg border border-amber-200 bg-amber-50 p-3">
-                      <div className="mr-3 mt-0.5">
-                        <Clock className="size-5 text-amber-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium text-amber-800">Pending Orders</h3>
-                        <p className="text-sm text-amber-700">
-                          You have {stats.pendingOrders} orders awaiting processing.
-                        </p>
-                        <button 
-                                                  onClick={() => setActiveTab('orders')}
-                          className="mt-1 text-xs font-medium text-amber-800 hover:text-amber-900"
-                        >
-                          View Orders →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  {/* Low Stock Alert */}
-                  {stats.lowStockProducts > 0 && (
-                    <div className="flex items-start rounded-lg border border-red-200 bg-red-50 p-3">
-                      <div className="mr-3 mt-0.5">
-                        <AlertCircle className="size-5 text-red-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium text-red-800">Low Stock Alert</h3>
-                        <p className="text-sm text-red-700">
-                          {stats.lowStockProducts} products are running low on inventory.
-                        </p>
-                        <button 
-                          onClick={() => setActiveTab('products')}
-                          className="mt-1 text-xs font-medium text-red-800 hover:text-red-900"
-                        >
-                          View Products →
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* Recent Orders */}
-              <div className="mb-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-medium text-gray-900">Recent Orders</h2>
-                  <button 
-                    onClick={() => setActiveTab('orders')}
-                    className="text-sm font-medium text-green-600 hover:text-green-700"
-                  >
-                    View All
-                  </button>
-                </div>
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                            Order ID
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                            Customer
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                            Date
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                            Total
-                          </th>
-                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
-                        {recentOrders.map((order) => (
-                          <tr key={order.id} className="hover:bg-gray-50">
-                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900">{order.id}</div>
-                            </td>
-                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className="text-sm text-gray-900">{order.customer}</div>
-                            </td>
-                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className="text-sm text-gray-500">{order.date}</div>
-                            </td>
-                            <td className="whitespace-nowrap px-6 py-4">
-                              <div className="text-sm font-medium text-gray-900">₹{order.total}</div>
-                            </td>
-                            <td className="whitespace-nowrap px-6 py-4">
-                              <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusColor(order.status)}`}>
-                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <OverviewTab email={user?.email} 
+            totalSales={`${stats.totalSales.toLocaleString()}`}
+            totalOrders={`${stats.totalOrders}`}
+            totalProducts={`${stats.totalProducts}`}
+            onViewAllClick={() => setActiveTab('orders')}/>
           )}
           {/* Products Tab */}
           {activeTab === 'products' && (
