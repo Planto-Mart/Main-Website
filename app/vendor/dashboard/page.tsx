@@ -4,23 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  BarChart3, 
-  ShoppingBag, 
-  Package, 
-  Star, 
-  Settings, 
-  Users,  
-  Loader2,
-  LogOut,
-  Store
-} from 'lucide-react';
+import { Loader2, Store } from 'lucide-react';
 
 import { supabase } from '@/utils/supabase/client';
 import SignIn from '@/components/auth/Sign-in';
+import Sidebar from '@/components/vendor/Dashboard/Sidebar';
 import OverviewTab from '@/components/vendor/Dashboard/OverviewTab';
 import ProductsTab from '@/components/vendor/Dashboard/ProductsTab';
 import OrdersTab from '@/components/vendor/Dashboard/OrdersTab';
+import ReviewsTab from '@/components/vendor/Dashboard/ReviewsTab';
+import CustomersTab from '@/components/vendor/Dashboard/CustomersTab';
+import SettingsTab from '@/components/vendor/Dashboard/SettingsTab';
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -39,12 +33,10 @@ export default function VendorDashboard() {
     pendingOrders: 0,
     lowStockProducts: 0
   });
-  // const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [customers, setCustomers] = useState<any[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const router = useRouter();
@@ -60,8 +52,8 @@ export default function VendorDashboard() {
           setIsAuthenticated(false);
           setShowSignIn(true);
           setAuthChecking(false);
-          
-return;
+
+          return;
         }
         
         setUser(session.user);
@@ -186,6 +178,16 @@ return;
       { id: 'REV-005', product: 'Pothos', customer: 'Vikram Reddy', date: '2023-06-06', rating: 5, comment: 'Perfect hanging plant! Growing so fast and looks beautiful.', status: 'published' },
       { id: 'REV-006', product: 'Rubber Plant', customer: 'Ananya Desai', date: '2023-06-05', rating: 4, comment: 'Healthy plant with glossy leaves. Very satisfied with my purchase.', status: 'published' }
     ]);
+    
+    // Mock customers
+    setCustomers([
+      { id: 'CUST-001', name: 'Rahul Sharma', email: 'rahul.sharma@example.com', orders: 5, totalSpent: 4500, lastOrder: '2023-06-15' },
+      { id: 'CUST-002', name: 'Priya Patel', email: 'priya.patel@example.com', orders: 3, totalSpent: 2800, lastOrder: '2023-06-14' },
+      { id: 'CUST-003', name: 'Amit Kumar', email: 'amit.kumar@example.com', orders: 7, totalSpent: 8500, lastOrder: '2023-06-14' },
+      { id: 'CUST-004', name: 'Neha Singh', email: 'neha.singh@example.com', orders: 4, totalSpent: 3600, lastOrder: '2023-06-13' },
+      { id: 'CUST-005', name: 'Vikram Reddy', email: 'vikram.reddy@example.com', orders: 2, totalSpent: 1900, lastOrder: '2023-06-12' },
+      { id: 'CUST-006', name: 'Ananya Desai', email: 'ananya.desai@example.com', orders: 6, totalSpent: 5200, lastOrder: '2023-06-11' }
+    ]);
   };
 
   // Handle sign out
@@ -199,35 +201,6 @@ return;
       setShowSignIn(true);
     } catch (error) {
       console.error('Error signing out:', error);
-    }
-  };
-
-  // Filter orders based on search term and status
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         order.customer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || order.status === filterStatus;
-    
-    return matchesSearch && matchesFilter;
-  });
-
-  // Get status color class
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'shipped':
-        return 'bg-purple-100 text-purple-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      case 'low-stock':
-        return 'bg-amber-100 text-amber-800';
-      case 'active':
-        return 'bg-emerald-100 text-emerald-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -339,9 +312,9 @@ return;
 
   // Main dashboard UI for authenticated vendors
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile Header */}
-      <div className="sticky top-0 z-30 border-b border-gray-200 bg-white px-4 py-3 md:hidden">
+    <div className="flex h-screen bg-gray-50">
+      {/* Mobile Header - Only visible on mobile */}
+      <div className="fixed top-0 z-30 w-full border-b border-gray-200 bg-white px-4 py-3 md:hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div className="relative mr-2 size-8">
@@ -370,337 +343,43 @@ return;
           </button>
         </div>
       </div>
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className={`${isMenuOpen ? 'block' : 'hidden'} fixed inset-0 z-20 h-full w-64 bg-white shadow-lg transition-transform md:relative md:block md:translate-x-0`}>
-          <div className="flex h-full flex-col">
-            {/* Sidebar Header */}
-            <div className="border-b border-gray-200 p-4">
-              <div className="flex items-center">
-                <div className="relative mr-2 size-8">
-                  <Image 
-                    src="/assets/logo_Without_Text.png" 
-                    alt="Plantomart Logo"
-                    fill
-                    className="object-contain"
-                  />
-                </div>
-                <h2 className="text-lg font-bold text-gray-800">PlantoMart</h2>
-              </div>
-              <div className="mt-4">
-                <div className="rounded-md bg-green-50 p-3">
-                  <div className="flex items-center">
-                    <div className="mr-3 flex size-10 shrink-0 items-center justify-center rounded-full bg-green-100">
-                      <ShoppingBag className="size-5 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-green-800">Vendor Store</p>
-                      <p className="text-sm font-semibold text-gray-800">
-                        {vendorData?.vendor_details?.store_name || 'Your Store'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Sidebar Navigation */}
-            <nav className="flex-1 overflow-y-auto p-4">
-              <ul className="space-y-1">
-                <li>
-                  <button
-                    onClick={() => setActiveTab('overview')}
-                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium ${
-                      activeTab === 'overview' 
-                        ? 'bg-green-50 text-green-700' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <BarChart3 className="mr-3 size-5" />
-                    Overview
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('products')}
-                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium ${
-                      activeTab === 'products' 
-                        ? 'bg-green-50 text-green-700' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Package className="mr-3 size-5" />
-                    Products
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('orders')}
-                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium ${
-                      activeTab === 'orders' 
-                        ? 'bg-green-50 text-green-700' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <ShoppingBag className="mr-3 size-5" />
-                    Orders
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('reviews')}
-                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium ${
-                      activeTab === 'reviews' 
-                        ? 'bg-green-50 text-green-700' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Star className="mr-3 size-5" />
-                    Reviews
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('customers')}
-                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium ${
-                      activeTab === 'customers' 
-                        ? 'bg-green-50 text-green-700' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Users className="mr-3 size-5" />
-                    Customers
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => setActiveTab('settings')}
-                    className={`flex w-full items-center rounded-md px-3 py-2 text-sm font-medium ${
-                      activeTab === 'settings' 
-                        ? 'bg-green-50 text-green-700' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Settings className="mr-3 size-5" />
-                    Settings
-                  </button>
-                </li>
-              </ul>
-            </nav>
-            {/* Sidebar Footer */}
-            <div className="border-t border-gray-200 p-4">
-              <button
-                onClick={handleSignOut}
-                className="flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-              >
-                <LogOut className="mr-3 size-5" />
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </aside>
-        {/* Main Content */}
-        <main className="flex-1">
-          {/* Overview Tab */}
-          {activeTab === 'overview' && (
-            <OverviewTab email={user?.email} 
+      {/* Sidebar - Using the Sidebar component */}
+      <div className={`${isMenuOpen ? 'block' : 'hidden'} fixed inset-0 z-20 md:relative md:block`}>
+        <Sidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          vendorData={vendorData} 
+          isMenuOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+        />
+      </div>
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto pt-16 md:pt-0">
+        {/* Render the appropriate tab component based on activeTab */}
+        {activeTab === 'overview' && (
+          <OverviewTab 
+            email={user?.email} 
             totalSales={`${stats.totalSales.toLocaleString()}`}
             totalOrders={`${stats.totalOrders}`}
             totalProducts={`${stats.totalProducts}`}
-            onViewAllClick={() => setActiveTab('orders')}/>
-          )}
-          {/* Products Tab */}
-          {activeTab === 'products' && (
-            <ProductsTab
-              products={products}
-            />
-          )}
-          {/* Orders Tab */}
-          {activeTab === 'orders' && (
-            <OrdersTab
-              orders={orders}
-            />
-          )}
-          {/* Reviews Tab */}
-          {activeTab === 'reviews' && (
-            <div className="p-4 md:p-6">
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Reviews</h1>
-                <p className="text-gray-600">Manage customer reviews for your products</p>
-              </div>
-              {/* Reviews List */}
-              <div className="space-y-4">
-                {reviews.map((review) => (
-                  <div key={review.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                    <div className="mb-2 flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="mr-4 flex size-10 items-center justify-center rounded-full bg-gray-100 text-gray-700">
-                          {review.customer.charAt(0)}
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-900">{review.customer}</h3>
-                          <p className="text-xs text-gray-500">{review.date}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="mr-2 flex">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`size-4 ${
-                                i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm font-medium text-gray-700">{review.rating}/5</span>
-                      </div>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="mb-1 text-sm font-medium text-gray-900">
-                        Product: {review.product}
-                      </h4>
-                      <p className="text-sm text-gray-700">{review.comment}</p>
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                      <button className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
-                        Reply
-                      </button>
-                      {review.status !== 'published' && (
-                        <button className="rounded-md border border-green-600 bg-white px-3 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50">
-                          Publish
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          {/* Customers Tab */}
-          {activeTab === 'customers' && (
-            <div className="p-4 md:p-6">
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
-                <p className="text-gray-600">View and manage your customer information</p>
-              </div>
-              <div className="rounded-lg border border-gray-200 bg-white p-6 text-center shadow-sm">
-                <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-gray-100">
-                  <Users className="size-8 text-gray-500" />
-                </div>
-                <h2 className="mb-2 text-lg font-medium text-gray-900">Customer Management</h2>
-                <p className="mb-4 text-gray-600">
-                  This feature is coming soon. You'll be able to view customer details, purchase history, and more.
-                </p>
-              </div>
-            </div>
-          )}
-          {/* Settings Tab */}
-          {activeTab === 'settings' && (
-            <div className="p-4 md:p-6">
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Store Settings</h1>
-                <p className="text-gray-600">Manage your store preferences and account settings</p>
-              </div>
-              <div className="space-y-6">
-                {/* Store Information */}
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                  <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
-                    <h2 className="text-base font-medium text-gray-900">Store Information</h2>
-                  </div>
-                  <div className="p-4">
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="store-name" className="block text-sm font-medium text-gray-700">
-                          Store Name
-                        </label>
-                        <input
-                          type="text"
-                          id="store-name"
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
-                          defaultValue={vendorData?.vendor_details?.store_name || ''}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="store-description" className="block text-sm font-medium text-gray-700">
-                          Store Description
-                        </label>
-                        <textarea
-                          id="store-description"
-                          rows={3}
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
-                          defaultValue={vendorData?.vendor_details?.description || ''}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="store-email" className="block text-sm font-medium text-gray-700">
-                          Contact Email
-                        </label>
-                        <input
-                          type="email"
-                          id="store-email"
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
-                          defaultValue={vendorData?.email || user?.email || ''}
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="store-phone" className="block text-sm font-medium text-gray-700">
-                          Contact Phone
-                        </label>
-                        <input
-                          type="tel"
-                          id="store-phone"
-                          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
-                          defaultValue={vendorData?.vendor_details?.phone || ''}
-                        />
-                      </div>
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                      <button
-                        type="button"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                      >
-                        Save Changes
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                {/* Account Settings */}
-                <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-                  <div className="border-b border-gray-200 bg-gray-50 px-4 py-3">
-                    <h2 className="text-base font-medium text-gray-900">Account Settings</h2>
-                  </div>
-                  <div className="p-4">
-                    <div className="space-y-4">
-                      <div>
-                        <label htmlFor="account-email" className="block text-sm font-medium text-gray-700">
-                          Email Address
-                        </label>
-                        <input
-                          type="email"
-                          id="account-email"
-                          className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm"
-                          value={user?.email || ''}
-                          disabled
-                        />
-                        <p className="mt-1 text-xs text-gray-500">
-                          To change your email, please contact support.
-                        </p>
-                      </div>
-                      <div>
-                        <button
-                          type="button"
-                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                        >
-                          Change Password
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </main>
+            onViewAllClick={() => setActiveTab('orders')}
+          />
+        )}
+        {activeTab === 'products' && (
+          <ProductsTab products={products} />
+        )}
+        {activeTab === 'orders' && (
+          <OrdersTab orders={orders} />
+        )}
+        {activeTab === 'reviews' && (
+          <ReviewsTab reviews={reviews} />
+        )}
+        {activeTab === 'customers' && (
+          <CustomersTab customers={customers} />
+        )}
+        {activeTab === 'settings' && (
+          <SettingsTab vendorData={vendorData} />
+        )}
       </div>
     </div>
   );
