@@ -5,7 +5,7 @@ export default interface VendorDataType{
     description: string;
     bannerImage: string;
     logo: string;
-    rating: Float16Array;
+    rating: Float64Array;
     AboutUs: string;
     categories: string[];
     products: string[]; // Array of product IDs
