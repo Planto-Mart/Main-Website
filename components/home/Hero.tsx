@@ -57,10 +57,10 @@ function Hero() {
       subtitle: "Up to 55% off",
       image: "/assets/products/monstra.png",
       items: [
-        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
-        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
-        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
-        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/product/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/product/self-watering' },
+        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/product/snake-plant' },
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/product/organic-plant' }
       ]
     },
     {
@@ -69,10 +69,10 @@ function Hero() {
       subtitle: "with nature inspired decor",
       image: "/assets/products/self-watering.png",
       items: [
-        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
-        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/product/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/product/self-watering' },
         { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
-        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/product/organic-plant' }
       ]
     },
     {
@@ -81,10 +81,10 @@ function Hero() {
       subtitle: "PlantoMart Brands & more",
       image: "/assets/products/snake-plant.png",
       items: [
-        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
-        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
-        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
-        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/product/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/product/self-watering' },
+        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/product/snake-plant' },
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/product/organic-plant' }
       ]
     },
     {
@@ -93,10 +93,10 @@ function Hero() {
       subtitle: "plants",
       image: "/assets/products/organic-plant-food.png",
       items: [
-        { name: "Monstra", image: "/assets/products/monstra.png",link:'/monstra' },
-        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/self-watering' },
-        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/snake-plant' },
-        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/organic-plant' }
+        { name: "Monstra", image: "/assets/products/monstra.png",link:'/product/monstra' },
+        { name: "Self-Watering Plants", image: "/assets/products/self-watering.png",link:'/product/self-watering' },
+        { name: "Snake plant", image: "/assets/products/snake-plant.png",link:'/product/snake-plant' },
+        { name: "Organic plant food", image: "/assets/products/organic-plant-food.png",link:'/product/organic-plant' }
       ]
     }
   ];
