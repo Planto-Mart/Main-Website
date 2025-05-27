@@ -32,7 +32,12 @@ The platform is built with scalability, security, and ease of use in mind, enabl
       <img alt="TailwindCSS" src="https://img.shields.io/badge/-Tailwind CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" />
       <img alt="Cloudflare" src="https://img.shields.io/badge/Cloudflare-F38020?style=flat&logo=Cloudflare&logoColor=white" />
       <img alt="git" src="https://img.shields.io/badge/-Git-F05032?style=flat-square&logo=git&logoColor=white" />
+      <img alt="Supabase" src="https://img.shields.io/badge/Supabase-3FCF8E?style=flat-square&logo=supabase&logoColor=white" />
+      <img alt="Razorpay" src="https://img.shields.io/badge/Razorpay-02042B?style=flat-square&logo=razorpay&logoColor=white" />
+      <img alt="Google OAuth" src="https://img.shields.io/badge/Google%20OAuth-via%20GCP-4285F4?style=flat-square&logo=google&logoColor=white" />
+      <img alt="Supabase Auth" src="https://img.shields.io/badge/Supabase-Auth-3FCF8E?style=flat-square&logo=supabase&logoColor=white" />
     </p>
+
   </div>
 </div>
 
