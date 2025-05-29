@@ -1,7 +1,7 @@
 name = "plantomart-main-website"
-compatibility_date = "2025-05-05"
-compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".vercel/output/static"
+main = "./.open-next/server/worker.mjs"
+compatibility_date = "2025-05-29"
+compatibility_flags = [ "nodejs_compat" ]
 
 [vars]
 NODE_VERSION = "22.12.0"
