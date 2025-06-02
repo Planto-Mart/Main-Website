@@ -1,20 +1,22 @@
 export default interface ProductDataType{
-    id: string;
+    product_id: string; //
     slug: string;
     title: string;
     description: string;
     category: string;
     aboutInBullets: string[];
-    image: string[];
+    image_gallery: string[];
     price: number;
+    brand: string;
     vendorID: string;
     raiting:number;
     reviewNumbers: number;
     reviews?: string[];
-    stock: number;
-    status: string;
+    quantity: number;
     discountPercent?: number;
     discountPrice?: number;
     variants? : string[]; // Array of variant product IDs
     variantState: boolean;
 }
+
+// /products/{vendor-slug}/{product-slug}

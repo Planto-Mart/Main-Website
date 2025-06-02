@@ -1,5 +1,5 @@
 export default interface VendorDataType{
-    id: string;
+    vendor_id: string;
     slug: string;
     name: string;
     description: string;
