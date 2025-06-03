@@ -17,6 +17,9 @@ export default interface ProductDataType{
     discountPrice?: number;
     variants? : string[]; // Array of variant product IDs
     variantState: boolean;
+    featured: boolean; // whether the product is featured or not
+    createdAt: string; // ISO date string
+    updatedAt: string; // ISO date string
 }
 
 // /products/{vendor-slug}/{product-slug}
