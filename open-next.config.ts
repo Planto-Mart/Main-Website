@@ -1,2 +1,3 @@
-/* eslint-disable import/no-anonymous-default-export */
-export default {};
+import { defineCloudflareConfig } from "@opennextjs/cloudflare";
+
+export default defineCloudflareConfig();
