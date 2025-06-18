@@ -1,4 +1,2 @@
 /* eslint-disable import/no-anonymous-default-export */
-export default {
-  default: {},
-};
+export default {};
