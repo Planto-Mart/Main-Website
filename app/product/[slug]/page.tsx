@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import CompletePage from "@/components/productsPage/CompletePage";
 
-export const runtime = process.env.HOSTPLATFORM === 'pages' ? 'edge' : undefined;
+export const runtime = 'nodejs';
 
 export default async function Page({
   params,
