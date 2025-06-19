@@ -1,19 +1,12 @@
 name = "plantomart-main-website"
-main = ".opennext/server/worker.mjs"
+compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-05-29"
-compatibility_flags = [ "nodejs_compat" ]
+
+[build]
+command = "pnpm opennext:build"
 
 [vars]
 NODE_VERSION = "22.12.0"
 
-[assets]
-directory = ".open-next/assets"
-binding = "ASSETS"
-
-[build]
-command = "npx opennext build"
-
-# wrangler.toml (wrangler v3.88.0^)
-[observability.logs]
-enabled = true
-
+[site]
+bucket = ".open-next/static"  # This must be 'static', not 'assets'
