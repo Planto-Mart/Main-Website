@@ -9,3 +9,6 @@ NODE_VERSION = "22.12.0"
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
+
+[build]
+command = "npx opennext build"
