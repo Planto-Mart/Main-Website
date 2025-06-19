@@ -1,5 +1,5 @@
 name = "plantomart-main-website"
-main = "./.opennext/server/worker.mjs"
+main = ".opennext/server/worker.mjs"
 compatibility_date = "2025-05-29"
 compatibility_flags = [ "nodejs_compat" ]
 
