@@ -12,3 +12,8 @@ binding = "ASSETS"
 
 [build]
 command = "npx opennext build"
+
+# wrangler.toml (wrangler v3.88.0^)
+[observability.logs]
+enabled = true
+
