@@ -6,7 +6,7 @@
     "lint": "next lint",
     "dev": "next dev",
     "build": "next build",
-    "opennext:build": "pnpm exec opennext-cloudflare build",
+    "opennext:build": "pnpm exec opennextjs-cloudflare",
     "deploy": "pnpm run opennext:build && wrangler deploy .open-next"
 },
   "dependencies": {

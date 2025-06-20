@@ -1,6 +1,7 @@
 name = "plantomart-main-website"
 compatibility_date = "2025-05-29"
 compatibility_flags = ["nodejs_compat"]
+main = "workers-site/index.js"
 
 [build]
 command = "pnpm run opennext:build"
