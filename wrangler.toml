@@ -7,6 +7,3 @@ command = "pnpm opennext:build"
 
 [vars]
 NODE_VERSION = "22.12.0"
-
-[site]
-bucket = ".open-next/static"  # This must be 'static', not 'assets'
