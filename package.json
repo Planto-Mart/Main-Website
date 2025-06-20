@@ -6,8 +6,8 @@
     "lint": "next lint",
     "dev": "next dev",
     "build": "next build",
-    "opennext:build": "npx open-next@cloudflare build",
-    "deploy": "pnpm opennext:build && wrangler deploy .open-next"
+    "opennext:build": "pnpm exec opennext-cloudflare build",
+    "deploy": "pnpm run opennext:build && wrangler deploy .open-next"
 },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
