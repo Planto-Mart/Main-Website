@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@cloudflare/next-on-pages':
-        specifier: ^1.13.5
-        version: 1.13.12(vercel@43.3.0)(wrangler@4.20.5)
       '@supabase/supabase-js':
         specifier: ^2.49.4
         version: 2.50.0
@@ -63,6 +60,9 @@ importers:
         specifier: ^2.0.6
         version: 2.0.6(react@18.3.1)
     devDependencies:
+      '@cloudflare/next-on-pages':
+        specifier: ^1.13.5
+        version: 1.13.12(vercel@43.3.0)(wrangler@4.20.5)
       '@eslint/eslintrc':
         specifier: ^3
         version: 3.3.1

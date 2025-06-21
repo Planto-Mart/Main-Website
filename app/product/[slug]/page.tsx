@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import CompletePage from "@/components/productsPage/CompletePage";
 
 export const runtime = 'edge';
