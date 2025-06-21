@@ -2,8 +2,5 @@ name = "plantomart-main-website"
 compatibility_flags = ["nodejs_compat"]
 compatibility_date = "2025-05-29"
 
-[build]
-command = "pnpm opennext:build"
-
 [vars]
 NODE_VERSION = "22.12.0"
