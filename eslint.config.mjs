@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 
