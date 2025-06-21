@@ -4,7 +4,7 @@ compatibility_flags = ["nodejs_compat"]
 main = "workers-site/index.js"
 
 [build]
-command = "pnpm run opennext:build"
+command = "pnpm build"
 
 [site]
 bucket = ".open-next/assets"

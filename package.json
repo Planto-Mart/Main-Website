@@ -5,8 +5,8 @@
   "scripts": {
     "lint": "next lint",
     "dev": "next dev",
-    "build": "next build && pnpm exec opennextjs-cloudflare",
-    "deploy": "pnpm run opennext:build && wrangler deploy .open-next"
+    "build": "pnpm exec opennextjs-cloudflare build",
+    "deploy": "pnpm build && wrangler deploy .open-next"
 },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
