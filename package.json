@@ -8,7 +8,7 @@
     "pages:build": "pnpx @cloudflare/next-on-pages",
     "preview": "pnpm run pages:build && wrangler pages dev",
     "deploy": "pnpm run pages:build && wrangler pages deploy",
-    "vercel-build":"next-build"
+    "vercel-build":"next build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
