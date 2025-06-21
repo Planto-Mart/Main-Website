@@ -8,7 +8,7 @@ const products_sample: ProductDataType[] = [
     "description": "100% pure and natural aloe vera gel for soothing skin care and healing properties.",
     "category": "Skin Care",
     "aboutInBullets": ["Soothes sunburns and irritation", "Deep moisturizes dry skin", "Reduces acne scars", "Anti-inflammatory properties"],
-    "image_gallery": ["https://example.com/images/aloe-vera-main.jpg", "https://example.com/images/aloe-vera-use.jpg"],
+    "image_gallery": ["/assets/green_essentials_oil.png", "https://example.com/images/aloe-vera-use.jpg"],
     "price": 299,
     "brand": "GreenLeaf",
     "vendorID": "VND-13WA",
