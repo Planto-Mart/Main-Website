@@ -6,6 +6,7 @@
     "lint": "biome lint .",
 		"format": "biome format . --write",
     "dev": "next dev",
+    "build": "next build",
     "pages:build": "pnpx @cloudflare/next-on-pages",
     "preview": "pnpm run pages:build && wrangler pages dev",
     "deploy": "pnpm run pages:build && wrangler pages deploy",
