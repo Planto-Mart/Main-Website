@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/a11y/noLabelWithoutControl: will look in future */
-/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: <explanation> */
+/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: will see while refactoring */
 /** biome-ignore-all lint/correctness/noUnusedImports: will look in future */
 import { useState, useRef } from 'react';
 
@@ -26,23 +26,23 @@ import Image from 'next/image';
 
 // Mock Supabase client - Replace with your actual Supabase client
 const supabase = {
-  from: (table) => ({
-    insert: async (data) => {
+  from: (_table) => ({
+    insert: async (_data) => {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Inserting data:', data);
+      console.log('Inserting data:', _data);
       
       // Simulate random success/error for demo
       if (Math.random() > 0.1) {
-        return { data: { ...data, product_id: Math.random().toString(36).substr(2, 9) }, error: null };
+        return { data: { ..._data, product_id: Math.random().toString(36).substr(2, 9) }, error: null };
       } else {
         return { data: null, error: { message: 'Failed to insert product' } };
       }
     }
   }),
   storage: {
-    from: (bucket) => ({
-      upload: async (path, file) => {
+    from: (_bucket) => ({
+      upload: async (path:any, file:any) => {
         // Simulate file upload
         await new Promise(resolve => setTimeout(resolve, 1000));
         return { 
@@ -226,7 +226,7 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }:any) => {
       };
       
       // Insert into Supabase
-      // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+      // biome-ignore lint/correctness/noUnusedVariables: will see while refactoring
                   const { data, error } = await supabase
         .from('products_dev')
         .insert([productData]);
