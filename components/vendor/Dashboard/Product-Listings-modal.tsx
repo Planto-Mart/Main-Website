@@ -26,8 +26,8 @@ import Image from 'next/image';
 
 // Mock Supabase client - Replace with your actual Supabase client
 const supabase = {
-  from: (_table) => ({
-    insert: async (_data) => {
+  from: (_table:any) => ({
+    insert: async (_data:any) => {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       console.log('Inserting data:', _data);
@@ -41,7 +41,7 @@ const supabase = {
     }
   }),
   storage: {
-    from: (_bucket) => ({
+    from: (_bucket:any) => ({
       upload: async (path:any, file:any) => {
         // Simulate file upload
         await new Promise(resolve => setTimeout(resolve, 1000));
