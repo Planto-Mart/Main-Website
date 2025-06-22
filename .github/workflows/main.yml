@@ -27,8 +27,12 @@ jobs:
         uses: biomejs/setup-biome@v2
         with:
           version: latest
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - name: Run Biome
-        run: biome ci .
+        run: pnpm run lint
 
   build:
     name: Build Next.js Application
