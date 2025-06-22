@@ -640,11 +640,11 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }:any) => {
                       <>
                         <div className="flex justify-between text-red-600">
                           <span>Discount ({formData.discountPercent}%):</span>
-                          <span>-${(parseFloat(formData.price || 0) * parseFloat(formData.discountPercent || 0) / 100).toFixed(2)}</span>
+                          <span>-${(parseFloat(formData.price || "0") * parseFloat(formData.discountPercent || "0") / 100).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-medium text-green-600 pt-1 border-t border-green-200">
                           <span>Final Price:</span>
-                          <span>${(parseFloat(formData.price || 0) - (parseFloat(formData.price || 0) * parseFloat(formData.discountPercent || 0) / 100)).toFixed(2)}</span>
+                          <span>${(parseFloat(formData.price || "0") - (parseFloat(formData.price || "0") * parseFloat(formData.discountPercent || "0") / 100)).toFixed(2)}</span>
                         </div>
                       </>
                     )}
