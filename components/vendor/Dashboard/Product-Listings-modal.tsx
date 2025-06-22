@@ -1,5 +1,8 @@
-/** biome-ignore-all lint/a11y/noLabelWithoutControl: <explanation> */
-import React, { useState, useRef } from 'react';
+/** biome-ignore-all lint/a11y/noLabelWithoutControl: will look in future */
+/** biome-ignore-all lint/correctness/noUnusedFunctionParameters: <explanation> */
+/** biome-ignore-all lint/correctness/noUnusedImports: will look in future */
+import { useState, useRef } from 'react';
+
 import { 
   X, 
   Upload, 
@@ -51,11 +54,11 @@ const supabase = {
   }
 };
 
-const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
+const ProductListingModal = ({ isOpen, onClose, vendorID }:any) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null);
-  const fileInputRef = useRef(null);
+  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -72,8 +75,8 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
     featured: false
   });
 
-  const [imageFiles, setImageFiles] = useState([]);
-  const [errors, setErrors] = useState({});
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const categories = [
     'Indoor Plants',
@@ -90,7 +93,7 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
     'Soil & Compost'
   ];
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e:any) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -103,29 +106,36 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
     }
   };
 
-  const handleArrayInputChange = (index, value, arrayName) => {
+  const handleArrayInputChange = (
+    index: number,
+    value: string,
+    arrayName: 'aboutInBullets' | 'variants'
+  ) => {
     setFormData(prev => ({
       ...prev,
       [arrayName]: prev[arrayName].map((item, i) => i === index ? value : item)
     }));
   };
 
-  const addArrayItem = (arrayName) => {
+  const addArrayItem = (arrayName: 'aboutInBullets' | 'variants') => {
     setFormData(prev => ({
       ...prev,
       [arrayName]: [...prev[arrayName], '']
     }));
   };
 
-  const removeArrayItem = (index, arrayName) => {
+  const removeArrayItem = (
+    index: number,
+    arrayName: 'aboutInBullets' | 'variants'
+  ) => {
     setFormData(prev => ({
       ...prev,
       [arrayName]: prev[arrayName].filter((_, i) => i !== index)
     }));
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
+  const handleImageUpload = (e:any) => {
+    const files: File[] = Array.from(e.target.files);
     if (files.length + imageFiles.length > 5) {
       alert('Maximum 5 images allowed');
       return;
@@ -139,7 +149,7 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: { [key: string]: string } = {};
     
     if (!formData.title.trim()) newErrors.title = 'Product title is required';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
@@ -216,7 +226,8 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
       };
       
       // Insert into Supabase
-      const { data, error } = await supabase
+      // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+                  const { data, error } = await supabase
         .from('products_dev')
         .insert([productData]);
       
@@ -260,7 +271,7 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
   const nextStep = () => {
     if (currentStep === 1) {
       // Validate basic info before proceeding
-      const basicErrors = {};
+      const basicErrors: { [key: string]: string } = {};
       if (!formData.title.trim()) basicErrors.title = 'Product title is required';
       if (!formData.description.trim()) basicErrors.description = 'Description is required';
       if (!formData.category) basicErrors.category = 'Category is required';
@@ -623,7 +634,7 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }) => {
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span>Original Price:</span>
-                      <span>${parseFloat(formData.price || 0).toFixed(2)}</span>
+                      <span>${parseFloat(formData.price || "0").toFixed(2)}</span>
                     </div>
                     {formData.discountPercent && (
                       <>
