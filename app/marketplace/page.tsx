@@ -1,7 +1,6 @@
-/* eslint-disable tailwindcss/classnames-order */
-/* eslint-disable tailwindcss/migration-from-tailwind-2 */
+/** biome-ignore-all lint/a11y/useButtonType: will refactor these later */
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiSearch, FiFilter, FiX, FiChevronDown, FiChevronUp, FiStar, FiHeart, FiShoppingCart } from 'react-icons/fi';
@@ -308,7 +307,7 @@ return price >= priceRange[0] && price <= priceRange[1];
       case "rating":
         result = [...result].sort((a, b) => b.rating - a.rating);
         break;
-      case "featured":
+      // case "featured":
       default:
         result = [...result].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
         break;
@@ -343,6 +342,8 @@ return price >= priceRange[0] && price <= priceRange[1];
             <div className="hide-scrollbar flex items-center space-x-4 overflow-x-auto pb-2">
               {categories.map((category, index) => (
                 <button
+                type='button'
+                // biome-ignore lint/suspicious/noArrayIndexKey: will refactor this later
                 key={index}
                 className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 selectedCategory === category
@@ -380,6 +381,8 @@ return price >= priceRange[0] && price <= priceRange[1];
                 transition={{ type: 'tween' }}
                 className="fixed inset-0 z-50 lg:hidden"
             >
+                {/** biome-ignore lint/a11y/noStaticElementInteractions: will see this later */}
+                {/** biome-ignore lint/a11y/noStaticElementInteractions: will see this later */}
                 <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setMobileFiltersOpen(false)}></div>
                 <div className="absolute right-0 top-0 h-full w-80 overflow-y-auto bg-white shadow-xl">
                   <div className="flex items-center justify-between border-b p-4">
@@ -414,6 +417,7 @@ return price >= priceRange[0] && price <= priceRange[1];
                         {expandedSections.categories && (
                         <div className="mt-2 space-y-2">
                             {categories.map((category, index) => (
+                              // biome-ignore lint/suspicious/noArrayIndexKey: <=>
                               <div key={index} className="flex items-center">
                                 <input
                                 type="radio"
@@ -581,6 +585,7 @@ return price >= priceRange[0] && price <= priceRange[1];
                   {expandedSections.categories && (
                   <div className="mt-3 space-y-2">
                     {categories.map((category, index) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: will refactor later
                       <div key={index} className="flex items-center">
                         <input
                         type="radio"

@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import type React from 'react';
+import { useState, useEffect, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -43,6 +44,8 @@ export default function AccountPage() {
   const [isVendor, setIsVendor] = useState(false);
   const [vendorRegistering, setVendorRegistering] = useState(false);
   const [loginInfo, setLoginInfo] = useState<UserLoginInfo | null>(null);
+
+  const element_unique_id = useId();
   
   const router = useRouter();
 
@@ -324,7 +327,7 @@ return null;
                   </div>
                 )}
               </div>
-              <button className="absolute bottom-0 right-0 rounded-full bg-green-600 p-1.5 text-white shadow-md hover:bg-green-700">
+              <button type='button' className="absolute bottom-0 right-0 rounded-full bg-green-600 p-1.5 text-white shadow-md hover:bg-green-700">
                 <Camera className="size-4" />
               </button>
             </div>
@@ -336,6 +339,7 @@ return null;
               </p>
               <div className="mt-4 flex flex-wrap justify-center gap-2 md:justify-start">
                 <button 
+                  type='button'
                   onClick={handleSignOut}
                   className="flex items-center rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                 >
@@ -356,6 +360,7 @@ return null;
           <div className="mb-6 overflow-x-auto">
             <div className="flex min-w-max space-x-1 border-b border-gray-200">
               <button
+                type='button'
                 onClick={() => setActiveTab('profile')}
                 className={`flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   activeTab === 'profile'
@@ -367,6 +372,7 @@ return null;
                 Profile
               </button>
               <button
+                type='button'
                 onClick={() => setActiveTab('orders')}
                 className={`flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   activeTab === 'orders'
@@ -378,6 +384,7 @@ return null;
                 Orders
               </button>
               <button
+               type='button'
                 onClick={() => setActiveTab('addresses')}
                 className={`flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   activeTab === 'addresses'
@@ -389,6 +396,7 @@ return null;
                 Addresses
               </button>
               <button
+               type='button'
                 onClick={() => setActiveTab('wishlist')}
                 className={`flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   activeTab === 'wishlist'
@@ -400,6 +408,7 @@ return null;
                 Wishlist
               </button>
               <button
+               type='button'
                 onClick={() => setActiveTab('payments')}
                 className={`flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   activeTab === 'payments'
@@ -411,6 +420,7 @@ return null;
                 Payment Methods
               </button>
               <button
+               type='button'
                 onClick={() => setActiveTab('activity')}
                 className={`flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium ${
                   activeTab === 'activity'
@@ -455,6 +465,7 @@ return null;
                 <div className="flex justify-between">
                   <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
                   <button
+                    type='button'
                     onClick={() => setEditMode(!editMode)}
                     className="flex items-center text-sm font-medium text-green-600 hover:text-green-700"
                   >
@@ -475,7 +486,7 @@ return null;
                         </label>
                         <input
                           type="text"
-                          id="full_name"
+                          id={element_unique_id}
                           name="full_name"
                           value={updatedProfile.full_name || ''}
                           onChange={handleInputChange}
@@ -488,7 +499,7 @@ return null;
                         </label>
                         <input
                           type="email"
-                          id="email"
+                          id={element_unique_id}
                           value={user.email}
                           disabled
                           className="mt-1 block w-full cursor-not-allowed rounded-md border border-gray-300 bg-gray-100 px-3 py-2 shadow-sm sm:text-sm"
@@ -503,7 +514,7 @@ return null;
                         </label>
                         <input
                           type="tel"
-                          id="phone"
+                          id={element_unique_id}
                           name="phone"
                           value={updatedProfile.phone || ''}
                           onChange={handleInputChange}
@@ -512,6 +523,7 @@ return null;
                         />
                       </div>
                       <div className="flex justify-end pt-4">
+                        {/* biome-ignore lint/a11y/useButtonType: not needed here */}
                         <button
                           onClick={handleProfileUpdate}
                           disabled={saving}
@@ -653,6 +665,7 @@ return null;
                           </ul>
                         </div>
                         <div className="mt-6 flex justify-center">
+                        {/* biome-ignore lint/a11y/useButtonType: not needed here */}
                           <button
                             onClick={handleVendorRegistration}
                             disabled={vendorRegistering}
@@ -900,7 +913,7 @@ return null;
               <div>
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-gray-900">Your Addresses</h2>
-                  <button className="flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                  <button type='button' className="flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                     Add New Address
                   </button>
                 </div>
@@ -933,13 +946,13 @@ return null;
                         </p>
                       </div>
                       <div className="mt-4 flex space-x-3">
-                        <button className="text-xs font-medium text-green-600 hover:text-green-700">
+                        <button type='button' className="text-xs font-medium text-green-600 hover:text-green-700">
                           Edit
                         </button>
-                        <button className="text-xs font-medium text-gray-600 hover:text-gray-700">
+                        <button type='button' className="text-xs font-medium text-gray-600 hover:text-gray-700">
                           {address.default ? 'Remove Default' : 'Set as Default'}
                         </button>
-                        <button className="text-xs font-medium text-red-600 hover:text-red-700">
+                        <button type='button' className="text-xs font-medium text-red-600 hover:text-red-700">
                           Delete
                         </button>
                       </div>
@@ -994,7 +1007,7 @@ return null;
               <div>
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold text-gray-900">Payment Methods</h2>
-                  <button className="flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                  <button type='button' className="flex items-center rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                     Add Payment Method
                   </button>
                 </div>
@@ -1007,7 +1020,7 @@ return null;
                     Add a payment method for faster checkout.
                   </p>
                   <div className="mt-6">
-                    <button className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    <button type='button' className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                       Add Payment Method
                     </button>
                   </div>

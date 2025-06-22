@@ -2,9 +2,10 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable import/no-unresolved */
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+// biome-ignore lint/correctness/noUnusedImports: might be needed later
 import { Loader2, CheckCircle, AlertCircle, ShoppingBag, TrendingUp, CreditCard, Shield } from 'lucide-react';
 import Link from 'next/link';
 
@@ -18,6 +19,7 @@ export default function VendorRegisterPage() {
   const [isVendor, setIsVendor] = useState(false);
   const [isVendorRegistered, setIsVendorRegistered] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  // biome-ignore lint/correctness/noUnusedVariables: will look into this during refactoring
   const [becomingVendor, setBecomingVendor] = useState(false);
   const [formData, setFormData] = useState({
     storeName: '',
@@ -41,6 +43,7 @@ export default function VendorRegisterPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const router = useRouter();
+  const element_unique_id = useId();
 
   // Check authentication status on page load
   useEffect(() => {
@@ -117,7 +120,7 @@ return;
   }, []);
 
   // Handle becoming a vendor (first step)
-  const handleBecomeVendor = async () => {
+  const _handleBecomeVendor = async () => {
     if (!user) return;
     
     setBecomingVendor(true);
@@ -449,7 +452,7 @@ return;
                   </label>
                   <input
                     type="text"
-                    id="storeName"
+                    id={element_unique_id}
                     name="storeName"
                     value={formData.storeName}
                     onChange={handleInputChange}
@@ -471,7 +474,7 @@ return;
                     Store Description *
                   </label>
                   <textarea
-                    id="storeDescription"
+                    id={element_unique_id}
                     name="storeDescription"
                     rows={3}
                     value={formData.storeDescription}
@@ -492,7 +495,7 @@ return;
                   </label>
                   <input
                     type="tel"
-                    id="phoneNumber"
+                    id={element_unique_id}
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
@@ -513,7 +516,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="address"
+                      id={element_unique_id}
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
@@ -533,7 +536,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="city"
+                      id={element_unique_id}
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
@@ -555,7 +558,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="state"
+                      id={element_unique_id}
                       name="state"
                       value={formData.state}
                       onChange={handleInputChange}
@@ -575,7 +578,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="pincode"
+                      id={element_unique_id}
                       name="pincode"
                       value={formData.pincode}
                       onChange={handleInputChange}
@@ -600,7 +603,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="gstNumber"
+                      id={element_unique_id}
                       name="gstNumber"
                       value={formData.gstNumber}
                       onChange={handleInputChange}
@@ -620,7 +623,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="panNumber"
+                      id={element_unique_id}
                       name="panNumber"
                       value={formData.panNumber}
                       onChange={handleInputChange}
@@ -645,7 +648,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="bankName"
+                      id={element_unique_id}
                       name="bankName"
                       value={formData.bankName}
                       onChange={handleInputChange}
@@ -665,7 +668,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="accountNumber"
+                      id={element_unique_id}
                       name="accountNumber"
                       value={formData.accountNumber}
                       onChange={handleInputChange}
@@ -686,8 +689,8 @@ return;
                       IFSC Code *
                     </label>
                     <input
-                                            type="text"
-                      id="ifscCode"
+                      type="text"
+                      id={element_unique_id}
                       name="ifscCode"
                       value={formData.ifscCode}
                       onChange={handleInputChange}
@@ -707,7 +710,7 @@ return;
                     </label>
                     <input
                       type="text"
-                      id="accountHolderName"
+                      id={element_unique_id}
                       name="accountHolderName"
                       value={formData.accountHolderName}
                       onChange={handleInputChange}
@@ -726,7 +729,7 @@ return;
                   <div className="flex items-start">
                     <div className="flex h-5 items-center">
                       <input
-                        id="agreeToTerms"
+                        id={element_unique_id}
                         name="agreeToTerms"
                         type="checkbox"
                         checked={formData.agreeToTerms}

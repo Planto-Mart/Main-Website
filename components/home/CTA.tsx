@@ -1,4 +1,3 @@
-import React from 'react'
 
 function CTA() {
   return (
@@ -16,7 +15,7 @@ function CTA() {
                 placeholder="Enter your email" 
                 className="grow rounded-full px-6 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-400"
               />
-              <button className="whitespace-nowrap rounded-full bg-green-600 px-8 py-3 font-medium text-white transition-colors hover:bg-green-500">
+              <button type='button' className="whitespace-nowrap rounded-full bg-green-600 px-8 py-3 font-medium text-white transition-colors hover:bg-green-500">
                 Subscribe
               </button>
             </div>

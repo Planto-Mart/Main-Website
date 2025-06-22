@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 "use client";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronDown, Edit, Eye, Filter, Plus, Search, Trash2 } from 'lucide-react';
 
@@ -20,6 +20,7 @@ interface ProductsTabProps {
 
 function ProductsTab({ products }: ProductsTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  // biome-ignore lint/correctness/noUnusedVariables: might be future use
   const [filterStatus, setFilterStatus] = useState('all');
 
   // Filter products based on search term and status
@@ -52,7 +53,7 @@ function ProductsTab({ products }: ProductsTabProps) {
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
           <p className="text-gray-600">Manage your product inventory</p>
         </div>
-        <button className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+        <button type='button' className="inline-flex items-center justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
           <Plus className="mr-2 size-4" />
           Add Product
         </button>
@@ -147,13 +148,13 @@ function ProductsTab({ products }: ProductsTabProps) {
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
-                      <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                      <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                         <Eye className="size-4" />
                       </button>
-                      <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                      <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                         <Edit className="size-4" />
                       </button>
-                      <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-red-700">
+                      <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-red-700">
                         <Trash2 className="size-4" />
                       </button>
                     </div>

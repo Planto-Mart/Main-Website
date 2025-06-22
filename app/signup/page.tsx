@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import { useState, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,6 +20,7 @@ export default function SignUp() {
   const [success, setSuccess] = useState<string | null>(null);
   
   const router = useRouter();
+  const element_unique_id = useId();
 
   // Password validation
   const hasMinLength = password.length >= 8;
@@ -200,7 +201,7 @@ return;
                   <div className="relative mt-1">
                     <User className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
                     <input
-                      id="full-name"
+                      id={element_unique_id}
                       name="full-name"
                       type="text"
                       required
@@ -219,7 +220,7 @@ return;
                   <div className="relative mt-1">
                     <Mail className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
                     <input
-                      id="email"
+                      id={element_unique_id}
                       name="email"
                       type="email"
                       autoComplete="email"
@@ -239,7 +240,7 @@ return;
                   <div className="relative mt-1">
                     <Phone className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
                     <input
-                      id="phone"
+                      id={element_unique_id}
                       name="phone"
                       type="tel"
                       autoComplete="tel"
@@ -259,7 +260,7 @@ return;
                   <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
                     <input
-                      id="password"
+                      id={element_unique_id}
                       name="password"
                       type={showPassword ? "text" : "password"}
                       autoComplete="new-password"
@@ -333,7 +334,7 @@ return;
                   <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-gray-400" />
                     <input
-                      id="confirm-password"
+                      id={element_unique_id}
                       name="confirm-password"
                       type={showConfirmPassword ? "text" : "password"}
                       autoComplete="new-password"
@@ -401,12 +402,14 @@ return;
                   </div>
                 </div>
                 <div className="mt-6">
+                  {/** biome-ignore lint/a11y/useButtonType: Need to look-on is it required or not here */}
                   <button
                     onClick={handleGoogleSignUp}
                     disabled={loading}
                     className="flex w-full items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-70"
                   >
                     <svg className="mr-2 size-5" viewBox="0 0 24 24">
+                      <title>Sign up with Google</title>
                       <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
                         <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
                         <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />

@@ -45,6 +45,7 @@ export default function PrivacyPolicy() {
           {/* Introduction Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("introduction")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -78,6 +79,7 @@ export default function PrivacyPolicy() {
           {/* Data Collection Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("dataCollection")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -141,6 +143,7 @@ export default function PrivacyPolicy() {
           {/* Purpose of Data Collection Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("dataPurpose")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -207,6 +210,7 @@ export default function PrivacyPolicy() {
           {/* User Consent & Opt-Out Options Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("consent")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -258,6 +262,7 @@ export default function PrivacyPolicy() {
           {/* Data Retention & Security Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("dataRetention")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -322,6 +327,7 @@ export default function PrivacyPolicy() {
           {/* Third-Party Sharing & Data Usage Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("thirdParty")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -399,6 +405,7 @@ export default function PrivacyPolicy() {
           {/* User Rights Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("userRights")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -475,6 +482,7 @@ export default function PrivacyPolicy() {
           {/* Changes to Privacy Policy Section */}
           <section className="border-b border-gray-200">
             <button
+              type="button"
               onClick={() => toggleSection("changes")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >
@@ -515,6 +523,7 @@ export default function PrivacyPolicy() {
           {/* Contact Information Section */}
           <section>
             <button
+              type="button"
               onClick={() => toggleSection("contact")}
               className="flex w-full items-center justify-between px-6 py-4 transition-colors hover:bg-gray-50"
             >

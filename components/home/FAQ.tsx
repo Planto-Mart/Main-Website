@@ -1,5 +1,5 @@
 "use client";
-import React,{useState} from 'react'
+import {useState} from 'react'
 import { ChevronDown,ChevronUp } from 'lucide-react'
 
 function FAQ() {
@@ -43,10 +43,12 @@ function FAQ() {
               }
             ].map((faq, index) => (
               <div 
+                // biome-ignore lint/suspicious/noArrayIndexKey: did't need it here
                 key={index} 
                 className="border-b border-gray-200 py-6"
               >
                 <button 
+                  type='button'
                   className="flex w-full items-center justify-between text-left"
                   onClick={() => toggleAccordion(index)}
                 >

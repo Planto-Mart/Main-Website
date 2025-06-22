@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 "use client";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Filter, ChevronDown, Users, Mail, Phone, ShoppingBag } from 'lucide-react';
 
 interface Customer {
@@ -18,6 +18,7 @@ interface CustomersTabProps {
 
 function CustomersTab({ customers }: CustomersTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  // biome-ignore lint/correctness/noUnusedVariables: will see if needed in future
   const [filterType, setFilterType] = useState('all');
 
   // Filter customers based on search term
@@ -119,13 +120,13 @@ function CustomersTab({ customers }: CustomersTabProps) {
                     </td>
                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
-                        <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700" title="View Orders">
+                        <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700" title="View Orders">
                           <ShoppingBag className="size-4" />
                         </button>
-                        <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700" title="Email Customer">
+                        <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700" title="Email Customer">
                           <Mail className="size-4" />
                         </button>
-                        <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700" title="Call Customer">
+                        <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700" title="Call Customer">
                           <Phone className="size-4" />
                         </button>
                       </div>

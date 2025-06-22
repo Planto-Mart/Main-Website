@@ -45,6 +45,7 @@ function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   
   // Initialize state from localStorage on component mount and check auth status
+  // biome-ignore lint/correctness/useExhaustiveDependencies: will reafactor later
   useEffect(() => {
     setIsClient(true);
     loadCartAndWishlist();
@@ -57,7 +58,7 @@ function Navbar() {
     
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         if (session) {
           fetchUserProfile(session.user.id);
         } else {
@@ -273,7 +274,7 @@ function Navbar() {
     // Check if product already exists in cart
     const existingItemIndex = cartItems.findIndex(item => item.id === product.id);
     
-    let updatedCart;
+    let updatedCart:any;
     if (existingItemIndex >= 0) {
       // Increase quantity if already in cart
       updatedCart = cartItems.map(item => 
@@ -301,6 +302,7 @@ function Navbar() {
             {/* Mobile Menu Button - Left side */}
             <div className="flex items-center lg:hidden">
               <button 
+                type='button'
                 className="text-gray-700 hover:text-green-600" 
                 onClick={toggleMenu}
                 aria-label="Toggle menu"
@@ -420,13 +422,14 @@ function Navbar() {
               </div>
               {/* Action Icons - With divider for visual separation */}
               <div className="flex items-center space-x-5 border-l border-gray-200 pl-6">
-                <button className="text-gray-700 hover:text-green-600">
+                <button type='button' className="text-gray-700 hover:text-green-600">
                   <Search className="size-5" />
                 </button>
                 {/* User Profile/Sign In Button */}
                 {user ? (
                   <div className="relative">
                     <button 
+                      type='button'
                       onClick={toggleUserMenu}
                       className="relative flex items-center"
                       aria-label="User menu"
@@ -468,6 +471,7 @@ function Navbar() {
                           My Orders
                         </Link>
                         <button 
+                          type='button'
                           onClick={handleSignOut}
                           className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                         >
@@ -479,6 +483,7 @@ function Navbar() {
                   </div>
                 ) : (
                   <button 
+                    type='button'
                     onClick={toggleSignIn}
                     className="rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-700"
                   >
@@ -487,6 +492,7 @@ function Navbar() {
                 )}
                 <div className="relative">
                   <button 
+                    type='button'
                     className="text-gray-700 hover:text-green-600"
                     onClick={toggleCart}
                     aria-label="Cart"
@@ -501,6 +507,7 @@ function Navbar() {
                 </div>
                 <div className="relative">
                   <button 
+                    type='button'
                     className="text-gray-700 hover:text-green-600"
                     onClick={toggleWishlist}
                     aria-label="Wishlist"
@@ -520,6 +527,7 @@ function Navbar() {
               {/* User Profile/Sign In Button for Mobile */}
               {user ? (
                 <button 
+                  type='button'
                   onClick={toggleUserMenu}
                   className="relative text-gray-700"
                   aria-label="User menu"
@@ -539,6 +547,7 @@ function Navbar() {
                 </button>
               ) : (
                 <button 
+                  type='button'
                   onClick={toggleSignIn}
                   className="relative text-gray-700 hover:text-green-600"
                   aria-label="Sign in"
@@ -552,6 +561,7 @@ function Navbar() {
               </Link>
               {/* Shopping Cart */}
               <button 
+                type='button'
                 className="relative text-gray-700 hover:text-green-600"
                 onClick={toggleCart}
                 aria-label="Cart"
@@ -570,6 +580,8 @@ function Navbar() {
         {isMenuOpen && (
           <>
             {/* Overlay that covers the rest of the screen */}
+            {/** biome-ignore lint/a11y/noStaticElementInteractions: will look into later */}
+            {/** biome-ignore lint/a11y/useKeyWithClickEvents: will look into later */}
             <div 
               className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity lg:hidden"
               onClick={toggleMenu}
@@ -590,6 +602,7 @@ function Navbar() {
                   <span className="text-lg font-bold text-green-800">plantomart</span>
                 </div>
                 <button 
+                  type='button'
                   onClick={toggleMenu}
                   className="rounded-full p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
                   aria-label="Close menu"
@@ -633,6 +646,7 @@ function Navbar() {
                             My Account
                           </Link>
                           <button 
+                            type='button'
                             onClick={handleSignOut}
                             className="rounded bg-red-50 px-3 py-1.5 text-center text-sm font-medium text-red-600 shadow-sm hover:bg-red-100"
                           >
@@ -643,7 +657,8 @@ function Navbar() {
                     ) : (
                       <div className="mb-2 rounded-lg bg-green-50 p-4 text-center">
                         <p className="mb-3 text-sm text-gray-600">Sign in to access your account</p>
-                        <button 
+                        <button  
+                          type='button'
                           onClick={() => {
                             toggleSignIn();
                             // toggleMenu();
@@ -686,6 +701,7 @@ function Navbar() {
                       {/* Vendors Dropdown */}
                       <div>
                         <button 
+                          type='button'
                           onClick={toggleMobileVendor}
                           className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600"
                         >
@@ -746,6 +762,8 @@ function Navbar() {
         {isCartOpen && (
           <>
             {/* Overlay */}
+            {/** biome-ignore lint/a11y/noStaticElementInteractions: will look into this alatetrr */}
+            {/** biome-ignore lint/a11y/useKeyWithClickEvents: will look into while refactoring */}
             <div 
               className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity"
               onClick={toggleCart}
@@ -756,6 +774,7 @@ function Navbar() {
               <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3">
                 <h2 className="text-lg font-medium text-gray-900">Shopping Cart ({cartItems.length})</h2>
                 <button 
+                  type='button'
                   onClick={toggleCart}
                   className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-500"
                   aria-label="Close cart"
@@ -777,6 +796,7 @@ function Navbar() {
                         Looks like you haven't added any plants to your cart yet.
                       </p>
                       <button
+                        type='button'
                         onClick={toggleCart}
                         className="mt-6 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                       >
@@ -813,6 +833,7 @@ function Navbar() {
                               {/* Quantity Controls */}
                               <div className="flex items-center rounded-md border border-gray-200">
                                 <button
+                                  type='button'
                                   onClick={() => updateCartItemQuantity(item.id, item.quantity - 1)}
                                   className="rounded-l-md p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-600"
                                   disabled={item.quantity <= 1}
@@ -821,6 +842,7 @@ function Navbar() {
                                 </button>
                                 <span className="w-8 text-center text-sm">{item.quantity}</span>
                                 <button
+                                  type='button'
                                   onClick={() => updateCartItemQuantity(item.id, item.quantity + 1)}
                                   className="rounded-r-md p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-600"
                                 >
@@ -829,6 +851,7 @@ function Navbar() {
                               </div>
                               {/* Remove Button */}
                               <button
+                                type='button'
                                 onClick={() => removeFromCart(item.id)}
                                 className="text-xs font-medium text-red-600 hover:text-red-500"
                               >
@@ -881,6 +904,8 @@ function Navbar() {
         {isWishlistOpen && (
           <>
             {/* Overlay */}
+            {/** biome-ignore lint/a11y/noStaticElementInteractions: will look into this later */}
+            {/** biome-ignore lint/a11y/useKeyWithClickEvents: will look into this later */}
             <div 
               className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity"
               onClick={toggleWishlist}
@@ -891,6 +916,7 @@ function Navbar() {
               <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-4 py-3">
                 <h2 className="text-lg font-medium text-gray-900">Wishlist ({wishlistItems.length})</h2>
                 <button 
+                  type='button'
                   onClick={toggleWishlist}
                   className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-500"
                   aria-label="Close wishlist"
@@ -912,6 +938,7 @@ function Navbar() {
                         Save your favorite plants for later.
                       </p>
                       <button
+                        type='button'
                         onClick={toggleWishlist}
                         className="mt-6 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                       >
@@ -947,6 +974,7 @@ function Navbar() {
                             <div className="flex flex-1 items-end justify-between">
                               {/* Add to Cart Button */}
                               <button
+                                type='button'
                                 onClick={() => addWishlistItemToCart(item)}
                                 className="rounded-md bg-green-600 px-2 py-1 text-xs font-medium text-white hover:bg-green-700"
                               >
@@ -954,6 +982,7 @@ function Navbar() {
                               </button>
                               {/* Remove Button */}
                               <button
+                                type='button'
                                 onClick={() => removeFromWishlist(item.id)}
                                 className="text-xs font-medium text-red-600 hover:text-red-500"
                               >

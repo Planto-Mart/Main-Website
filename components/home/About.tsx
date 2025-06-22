@@ -1,6 +1,5 @@
-import React from 'react'
+import Image from 'next/image';
 import { Truck, Leaf, UserPlus } from 'lucide-react'
-import Image from 'next/image'
 
 function About() {
   return (

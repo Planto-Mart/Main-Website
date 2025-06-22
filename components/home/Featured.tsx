@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, ShoppingCart, Check, Loader2, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -232,6 +232,7 @@ function Featured() {
                     {product.tag}
                   </span>
                   <button 
+                    type='button'
                     className={`absolute right-4 top-4 rounded-full p-2 shadow-md transition-all duration-200 ${
                       isInWishlist(product.id) 
                         ? 'bg-red-50 hover:bg-red-100' 
@@ -267,6 +268,7 @@ function Featured() {
                   </Link>
                   {/* Add to Cart Button */}
                   <button 
+                    type='button'
                     className={`flex w-full items-center justify-center rounded-lg px-4 py-2.5 font-medium transition-all duration-200 ${
                       isInCart(product.id)
                         ? 'bg-green-600 text-white hover:bg-green-700'
@@ -294,7 +296,7 @@ function Featured() {
             ))}
           </div>
           <div className="mt-10 text-center md:mt-12">
-            <button className="rounded-full border-2 border-green-600 px-6 py-2.5 font-medium text-green-600 transition-colors hover:bg-green-50 md:px-8 md:py-3">
+            <button type='button' className="rounded-full border-2 border-green-600 px-6 py-2.5 font-medium text-green-600 transition-colors hover:bg-green-50 md:px-8 md:py-3">
               View All Products
             </button>
           </div>

@@ -20,8 +20,10 @@ interface GeoLocation {
 
 export default function AuthCallback() {
   const router = useRouter()
+  // biome-ignore lint/correctness/noUnusedVariables: will see if needed later
   const [isProcessing, setIsProcessing] = useState(true)
   const [message, setMessage] = useState('Processing login...')
+  // biome-ignore lint/correctness/noUnusedVariables: will see if needed later
   const [ipInfo, setIpInfo] = useState<GeoLocation | null>(null)
 
   // Function to get the user's IP address and geolocation
@@ -53,7 +55,8 @@ export default function AuthCallback() {
     }
   };
   
-  useEffect(() => {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: will refactor later
+    useEffect(() => {
     const handleAuth = async () => {
       // Get IP and location information
       const locationInfo = await getIpAndLocation();

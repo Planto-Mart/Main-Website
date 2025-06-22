@@ -1,7 +1,8 @@
 /* eslint-disable import/no-unresolved */
+/** biome-ignore-all lint/a11y/noSvgWithoutTitle: thinking of removing this globally */
 /* eslint-disable no-unused-vars */
 "use client";
-import React, { useState } from 'react';
+import { useState, useId } from 'react';
 import Image from 'next/image';
 import { Camera, Save, Store, User, Mail, Phone, MapPin, CreditCard, Shield, Bell, Upload } from 'lucide-react';
 
@@ -38,6 +39,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
   });
   const [isUploading, setIsUploading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const element_unique_id = useId();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -103,6 +105,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Update profile in Supabase (simplified for demo)
+      // biome-ignore lint/correctness/noUnusedVariables: might be used in future
       const updateData = section === 'profile' 
         ? { 
             full_name: formData.fullName,
@@ -171,6 +174,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
           <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
             <nav className="flex flex-col divide-y divide-gray-200">
               <button
+                type='button'
                 onClick={() => setActiveSection('profile')}
                 className={`flex items-center px-4 py-3 text-sm font-medium ${
                   activeSection === 'profile'
@@ -182,6 +186,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                 Profile & Store
               </button>
               <button
+                type='button'
                 onClick={() => setActiveSection('payment')}
                 className={`flex items-center px-4 py-3 text-sm font-medium ${
                   activeSection === 'payment'
@@ -193,6 +198,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                 Payment Information
               </button>
               <button
+                type='button'
                 onClick={() => setActiveSection('legal')}
                 className={`flex items-center px-4 py-3 text-sm font-medium ${
                   activeSection === 'legal'
@@ -204,6 +210,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                 Legal & Tax
               </button>
               <button
+                type='button'
                 onClick={() => setActiveSection('notifications')}
                 className={`flex items-center px-4 py-3 text-sm font-medium ${
                   activeSection === 'notifications'
@@ -226,7 +233,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                 <h2 className="mb-4 text-lg font-medium text-gray-900">Profile & Store Information</h2>
                 {/* Profile Image */}
                 <div className="mb-6">
-                  <label className="mb-2 block text-sm font-medium text-gray-700">Profile Image</label>
+                  <label htmlFor="profile-upload" className="mb-2 block text-sm font-medium text-gray-700">Profile Image</label>
                   <div className="flex items-center">
                     <div className="relative mr-4 size-20 overflow-hidden rounded-full border-2 border-gray-200">
                       {vendorData?.avatar_url ? (
@@ -248,7 +255,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         {isUploading ? 'Uploading...' : 'Change Image'}
                       </label>
                       <input 
-                        id="profile-upload" 
+                        id={element_unique_id} 
                         type="file" 
                         accept="image/*" 
                         className="hidden" 
@@ -273,7 +280,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         </div>
                         <input
                           type="text"
-                          id="storeName"
+                          id={element_unique_id}
                           name="storeName"
                           value={formData.storeName}
                           onChange={handleInputChange}
@@ -287,7 +294,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         Store Description
                       </label>
                       <textarea
-                        id="storeDescription"
+                        id={element_unique_id}
                         name="storeDescription"
                         value={formData.storeDescription}
                         onChange={handleInputChange}
@@ -312,7 +319,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         </div>
                         <input
                           type="text"
-                          id="fullName"
+                          id={element_unique_id}
                           name="fullName"
                           value={formData.fullName}
                           onChange={handleInputChange}
@@ -331,7 +338,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         </div>
                         <input
                           type="email"
-                          id="email"
+                          id={element_unique_id}
                           name="email"
                           value={formData.email}
                           disabled
@@ -351,7 +358,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         </div>
                         <input
                           type="tel"
-                          id="phone"
+                          id={element_unique_id}
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
@@ -376,7 +383,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         </div>
                         <input
                           type="text"
-                          id="address"
+                          id={element_unique_id}
                           name="address"
                           value={formData.address}
                           onChange={handleInputChange}
@@ -391,7 +398,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                       </label>
                       <input
                         type="text"
-                        id="city"
+                        id={element_unique_id}
                         name="city"
                         value={formData.city}
                         onChange={handleInputChange}
@@ -405,7 +412,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                       </label>
                       <input
                         type="text"
-                        id="state"
+                        id={element_unique_id}
                         name="state"
                         value={formData.state}
                         onChange={handleInputChange}
@@ -419,7 +426,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                       </label>
                       <input
                         type="text"
-                        id="pincode"
+                        id={element_unique_id}
                         name="pincode"
                         value={formData.pincode}
                         onChange={handleInputChange}
@@ -480,7 +487,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                     </label>
                     <input
                       type="text"
-                      id="bankName"
+                      id={element_unique_id}
                       name="bankName"
                       value={formData.bankName}
                       onChange={handleInputChange}
@@ -494,7 +501,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                     </label>
                     <input
                       type="text"
-                      id="accountNumber"
+                      id={element_unique_id}
                       name="accountNumber"
                       value={formData.accountNumber}
                       onChange={handleInputChange}
@@ -508,7 +515,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                     </label>
                     <input
                       type="text"
-                      id="ifscCode"
+                      id={element_unique_id}
                       name="ifscCode"
                       value={formData.ifscCode}
                       onChange={handleInputChange}
@@ -568,7 +575,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                     </label>
                     <input
                       type="text"
-                      id="gstNumber"
+                      id={element_unique_id}
                       name="gstNumber"
                       value={formData.gstNumber}
                       onChange={handleInputChange}
@@ -582,7 +589,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                     </label>
                     <input
                       type="text"
-                      id="panNumber"
+                      id={element_unique_id}
                       name="panNumber"
                       value={formData.panNumber}
                       onChange={handleInputChange}
@@ -603,7 +610,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                         Choose Files
                       </label>
                       <input 
-                        id="document-upload" 
+                        id={element_unique_id}
                         type="file" 
                         multiple 
                         className="hidden" 
@@ -659,7 +666,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                   <div className="flex items-start">
                     <div className="flex h-5 items-center">
                       <input
-                        id="orderUpdates"
+                        id={element_unique_id}
                         name="orderUpdates"
                         type="checkbox"
                         checked={notifications.orderUpdates}
@@ -675,7 +682,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                   <div className="flex items-start">
                     <div className="flex h-5 items-center">
                       <input
-                        id="productReviews"
+                        id={element_unique_id}
                         name="productReviews"
                         type="checkbox"
                         checked={notifications.productReviews}
@@ -691,7 +698,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                   <div className="flex items-start">
                     <div className="flex h-5 items-center">
                       <input
-                        id="lowStockAlerts"
+                        id={element_unique_id}
                         name="lowStockAlerts"
                         type="checkbox"
                         checked={notifications.lowStockAlerts}
@@ -707,7 +714,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                   <div className="flex items-start">
                     <div className="flex h-5 items-center">
                       <input
-                        id="marketingEmails"
+                        id={element_unique_id}
                         name="marketingEmails"
                         type="checkbox"
                         checked={notifications.marketingEmails}
@@ -723,7 +730,7 @@ function SettingsTab({ vendorData }: SettingsTabProps) {
                   <div className="flex items-start">
                     <div className="flex h-5 items-center">
                       <input
-                        id="securityAlerts"
+                        id={element_unique_id}
                         name="securityAlerts"
                         type="checkbox"
                         checked={notifications.securityAlerts}

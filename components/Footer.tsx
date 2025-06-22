@@ -1,4 +1,3 @@
-import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Leaf, Facebook, Instagram, Twitter, MapPin, Phone, Mail, Clock, HeartHandshake } from 'lucide-react'
@@ -41,7 +40,7 @@ function Footer() {
                   placeholder="Your email address" 
                   className="grow rounded-l-md border-y border-l border-green-600 bg-green-950/80 px-3 py-2 text-xs placeholder:text-green-500 focus:outline-none focus:ring-1 focus:ring-green-400"
                 />
-                <button className="rounded-r-md bg-gradient-to-r from-green-500 to-green-400 px-3 py-2 text-xs font-medium text-green-950 transition-all hover:from-green-400 hover:to-green-300">
+                <button type='button' className="rounded-r-md bg-gradient-to-r from-green-500 to-green-400 px-3 py-2 text-xs font-medium text-green-950 transition-all hover:from-green-400 hover:to-green-300">
                   Subscribe
                 </button>
               </div>

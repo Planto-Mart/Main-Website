@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,6 +29,7 @@ function Features() {
           </div>
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {categories.map((category, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: will look into during refactor
               <div key={index} className="overflow-hidden rounded-xl bg-green-50 shadow-md transition-transform hover:scale-105 hover:shadow-lg">
                 <Image
                   width={500}

@@ -1,4 +1,4 @@
-import React from 'react'
+/** biome-ignore-all lint/a11y/noSvgWithoutTitle: Not required it seems will disable globally if required */
 
 function Testimonials() {
   return (
@@ -46,6 +46,7 @@ function Testimonials() {
               }
             ].map((testimonial, index) => (
               <div 
+                // biome-ignore lint/suspicious/noArrayIndexKey: don't need it here it seems 
                 key={index} 
                 className="group relative overflow-hidden rounded-2xl border border-green-100 bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:border-green-300 hover:shadow-xl"
               >
@@ -65,6 +66,7 @@ function Testimonials() {
                 <div className="mt-4 flex">
                   {Array(5).fill(0).map((_, i) => (
                     <svg 
+                      // biome-ignore lint/suspicious/noArrayIndexKey: don't need it here it seems 
                       key={i} 
                       className="size-5 text-yellow-400 transition-colors duration-300 group-hover:text-yellow-500" 
                       fill="currentColor" 

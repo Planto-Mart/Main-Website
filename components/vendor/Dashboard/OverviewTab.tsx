@@ -105,6 +105,7 @@ return (
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-medium text-gray-900">Recent Orders</h2>
         <button 
+            type='button'
             onClick={onViewAllClick} // call the function from parameter 
             className="text-sm font-medium text-green-600 hover:text-green-700"
         >

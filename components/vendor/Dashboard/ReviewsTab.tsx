@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 "use client";
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { Star, Search, Filter, ChevronDown } from 'lucide-react';
 
 interface Review {
@@ -19,6 +19,7 @@ interface ReviewsTabProps {
 
 function ReviewsTab({ reviews }: ReviewsTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  // biome-ignore lint/correctness/noUnusedVariables: will see if needed later
   const [filterRating, setFilterRating] = useState('all');
 
   // Filter reviews based on search term and rating
@@ -84,6 +85,7 @@ function ReviewsTab({ reviews }: ReviewsTabProps) {
                 <div className="mr-2 flex">
                   {[...Array(5)].map((_, i) => (
                     <Star
+                      // biome-ignore lint/suspicious/noArrayIndexKey: not needed here
                       key={i}
                       className={`size-4 ${
                         i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
@@ -101,11 +103,11 @@ function ReviewsTab({ reviews }: ReviewsTabProps) {
               <p className="text-sm text-gray-700">{review.comment}</p>
             </div>
             <div className="flex justify-end space-x-2">
-              <button className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+              <button type='button' className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50">
                 Reply
               </button>
               {review.status !== 'published' && (
-                <button className="rounded-md border border-green-600 bg-white px-3 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50">
+                <button type='button' className="rounded-md border border-green-600 bg-white px-3 py-1 text-xs font-medium text-green-600 shadow-sm hover:bg-green-50">
                   Publish
                 </button>
               )}

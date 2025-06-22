@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useId } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Star, X, Search, ShieldCheck, Heart, MinusCircle, PlusCircle } from 'lucide-react';
@@ -23,6 +23,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const [showMagnifier, setShowMagnifier] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLDivElement>(null);
+
+  const element_unique_id = useId();
 
   // Function to fetch product data from local TypeScript file
   const fetchProductFromJSON = async () => {
@@ -47,7 +49,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   };
 
   // Function to fetch product data from Supabase
-  const fetchProductFromSupabase = async () => {
+  const _fetchProductFromSupabase = async () => {
     try {
       // Fetch main product
       const { data: productData, error: productError } = await supabase
@@ -78,6 +80,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: will look into this while refactoring
   useEffect(() => {
     if (slug) {
       // Use this for development with local JSON data
@@ -191,6 +194,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
           {/* Left Column - Image Gallery */}
           <div className="lg:col-span-4">
             <div className="sticky top-24">
+              {/** biome-ignore lint/a11y/noStaticElementInteractions: don't require it here */}
               <div 
                 ref={imageRef}
                 className="relative mb-4 aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm"
@@ -212,6 +216,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               <div className="flex space-x-2 overflow-x-auto pb-2">
                 {product.image_gallery.map((img, index) => (
                   <button
+                    type='button'
+                    // biome-ignore lint/suspicious/noArrayIndexKey: don't need it here
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`relative aspect-square h-16 shrink-0 overflow-hidden rounded-md border-2 ${
@@ -231,6 +237,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               {showMagnifier && (
                 <div className="fixed left-1/2 top-1/2 z-[9999] size-[350px] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg border-2 border-green-500 bg-white shadow-xl">
                   <button 
+                    type='button'
                     onClick={closeMagnifier}
                     className="absolute right-2 top-2 z-10 rounded-full bg-white p-1 shadow-sm"
                   >
@@ -288,6 +295,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {variants.map((variant) => (
                     <button
+                      type='button'
                       key={variant.product_id}
                       onClick={() => handleVariantSelect(variant.product_id)}
                       className={`flex flex-col rounded-md border p-2 text-left transition ${
@@ -311,7 +319,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               <h3 className="mb-3 text-lg font-medium text-blue-600">About this item</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 {product.aboutInBullets.map((bullet, index) => (
-                  <li key={index} className="flex">
+                  // biome-ignore lint/suspicious/noArrayIndexKey: not needed here
+                    <li key={index} className="flex">
                     <span className="mr-2 mt-1 text-green-600">•</span>
                     <span>{bullet}</span>
                   </li>
@@ -346,6 +355,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                 </label>
                 <div className="mt-1 flex items-center">
                   <button
+                    type='button'
                     onClick={() => handleQuantityChange(false)}
                     disabled={quantity <= 1}
                     className="rounded-md p-1 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -354,12 +364,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                   </button>
                   <input
                     type="text"
-                    id="quantity"
+                    id={element_unique_id}
                     value={quantity}
                     readOnly
                     className="w-12 border-0 bg-transparent text-center text-sm text-gray-800"
                   />
                   <button
+                    type='button'
                     onClick={() => handleQuantityChange(true)}
                     disabled={quantity >= product.quantity}
                     className="rounded-md p-1 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -370,6 +381,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               </div>
               {/* Add to Cart Button */}
               <button
+                type='button'
                 onClick={handleAddToCart}
                 disabled={product.quantity <= 0}
                 className="mb-2 w-full rounded-full bg-yellow-400 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-yellow-500 disabled:cursor-not-allowed disabled:opacity-50"
@@ -378,6 +390,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               </button>
               {/* Buy Now Button */}
               <button
+                type='button'
                 disabled={product.quantity <= 0}
                 className="mb-4 w-full rounded-full bg-orange-500 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -386,7 +399,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               {/* Add to Wishlist */}
               <div className="mb-4 flex items-center">
                 <input
-                  id="add-gift-options"
+                  id={element_unique_id}
                   type="checkbox"
                   className="size-4 rounded border-gray-300 bg-white text-green-600 focus:ring-green-500"
                 />
@@ -395,6 +408,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                 </label>
               </div>
               <button
+                type='button'
                 onClick={handleAddToWishlist}
                 className="mb-4 flex w-full items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100"
               >

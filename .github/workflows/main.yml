@@ -18,27 +18,17 @@ env:
 
 jobs:
   lint:
-    name: ES-Lint Check
+    name: BiomeJS Code Scan
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
         with:
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run ES-Lint
-        run: pnpm lint
+          version: latest
+      - name: Run Biome
+        run: biome ci .
 
   build:
     name: Build Next.js Application

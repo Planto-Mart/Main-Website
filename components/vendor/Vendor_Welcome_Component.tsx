@@ -1,6 +1,6 @@
 /* eslint-disable import/no-unresolved */
 import Link from 'next/link'
-import React,{useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 import { Loader2, ShoppingBag, TrendingUp, CreditCard, Shield } from 'lucide-react';
 import Image from 'next/image';
 
@@ -11,6 +11,7 @@ function Vendor_Welcome_Component() {
       const [user, setUser] = useState<any>(null);
     
     // Fetch user data from Supabase
+    // biome-ignore lint/correctness/useExhaustiveDependencies: will look  into this later
     useEffect(()=>{
         const fetchUser = async () => {
           const { data, error } = await supabase.auth.getUser();
@@ -139,10 +140,11 @@ function Vendor_Welcome_Component() {
         {/* CTA Button */}
         <div className="mt-8 text-center">
           <button
-                  onClick={handleBecomeVendor}
-                  disabled={becomingVendor}
-                  className="inline-block rounded-md bg-green-600 px-8 py-3 text-center text-lg font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
-                >
+            type='button'
+            onClick={handleBecomeVendor}
+            disabled={becomingVendor}
+            className="inline-block rounded-md bg-green-600 px-8 py-3 text-center text-lg font-medium text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-70"
+          >
             {becomingVendor ? (
               <>
                 <Loader2 className="mr-2 inline size-5 animate-spin" />

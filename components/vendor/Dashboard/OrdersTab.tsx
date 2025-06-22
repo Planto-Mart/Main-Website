@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 "use client";
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, Edit, Eye, Filter, MoreHorizontal, Search } from 'lucide-react';
 
 interface Order {
@@ -19,6 +19,7 @@ interface OrdersTabProps {
 
 function OrdersTab({ orders }: OrdersTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  // biome-ignore lint/correctness/noUnusedVariables: will see if needed in future
   const [filterStatus, setFilterStatus] = useState('all');
 
   // Filter orders based on search term and status
@@ -129,13 +130,13 @@ function OrdersTab({ orders }: OrdersTabProps) {
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
-                      <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                      <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                         <Eye className="size-4" />
                       </button>
-                      <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
+                      <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                         <Edit className="size-4" />
                       </button>
-                      <button className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-red-700">
+                      <button type='button' className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-red-700">
                         <MoreHorizontal className="size-4" />
                       </button>
                     </div>
