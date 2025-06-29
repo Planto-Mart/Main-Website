@@ -186,7 +186,7 @@ const products_sample: ProductDataType[] = [
     "description": "Pure organic neem oil for natural pest control and skin care.",
     "category": "Garden Care",
     "aboutInBullets": ["100% organic neem oil", "Natural pesticide", "Antifungal properties", "Safe for plants and pets"],
-    "image_gallery": ["https://example.com/images/neem-oil-main.jpg", "https://example.com/images/neem-oil-garden.jpg"],
+    "image_gallery": ["https://images.unsplash.com/photo-1712913991539-3cd2e277ebf0?q=80&w=1150&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", "https://example.com/images/neem-oil-garden.jpg"],
     "price": 249,
     "brand": "NaturalGard",
     "vendorID": "VND-35HY",
