@@ -8,4 +8,16 @@ export const API_ENDPOINTS = {
     getProfileByUUID: (uuid: string) => `${API_BASE_URL}/user-profile/get/${uuid}`, // Fetching a specific userProfile by uuid
     updateProfileByUUID: (uuid: string) => `${API_BASE_URL}/user-profile/update/${uuid}`, // Updating a specific userProfile by uuid
 
-}
+    // vendor Endpoints
+    vendorRegister: `${API_BASE_URL}/vendor/register`,
+    updateVendorById: (vendor_id: string) => `${API_BASE_URL}/vendor/update/${vendor_id}`,
+    deleteVendorById: (vendor_id: string) => `${API_BASE_URL}/vendor/delete/${vendor_id}`,
+
+    getAllVendorsPublic: `${API_BASE_URL}/vendor/get-all-vendors`,
+    getVendorByUserUUID: (user_uuid: string) => `${API_BASE_URL}/vendor/get/${user_uuid}`,
+
+    // Admin-only vendor endpoints
+    getAllVendorsAdmin: `${API_BASE_URL}/vendor/get-all-vendors-admin`,
+    getVendorByUserUUIDAdmin: (user_uuid: string) => `${API_BASE_URL}/vendor/get-admin/${user_uuid}`,
+
+}   
