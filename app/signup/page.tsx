@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, User, Check, X, Phone } from 'lucide-react';
 
 import { supabase } from '@/utils/supabase/client';
+import { API_ENDPOINTS } from '@/config/api';
 
 export default function SignUp() {
   const [fullName, setFullName] = useState('');
@@ -92,24 +93,24 @@ return;
       if (signUpError) throw signUpError;
       
       if (data?.user) {
-        // Create profile in profiles_dev table
-        const { error: profileError } = await supabase
-          .from('profiles_dev')
-          .insert({
-            // id: data.user.id,
-            uuid:data.user.id,
+        // Create profile in backend via API
+        const res = await fetch(API_ENDPOINTS.createProfile, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uuid: data.user.id,
             full_name: fullName,
             email: email,
             phone: phoneNumber,
+            avatar_url: data.user.user_metadata?.avatar_url || '',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          });
-        
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Continue anyway as the auth user was created
+          }),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.message || 'Failed to create user profile');
         }
-        
         setSuccess('Account created successfully! Please check your email to confirm your account.');
         
         // Redirect after a delay

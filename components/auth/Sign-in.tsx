@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, X, Info } from 'lucide-react';
 
 import { supabase } from '@/utils/supabase/client';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface SignInProps {
   isOpen: boolean;
@@ -121,75 +122,82 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose, redirectUrl }) => {
       }
 
       if (data?.user) {
-        // Check if user exists in profiles_dev table using uuid column
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles_dev')
-          .select('*')
-          .eq('uuid', data.user.id)  // Use 'uuid' column instead of 'id'
-          .single();
-
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error('Error fetching profile:', profileError);
+        // Check if user profile exists in backend
+        const profileRes = await fetch(API_ENDPOINTS.getProfileByUUID(data.user.id), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        let profileData = null;
+        if (profileRes.ok) {
+          const profileJson = await profileRes.json();
+          if (profileJson.success && profileJson.data) {
+            profileData = profileJson.data;
+            // Parse user_login_info if present and is a string
+            if (profileData.user_login_info && typeof profileData.user_login_info === 'string') {
+              try {
+                profileData.user_login_info = JSON.parse(profileData.user_login_info);
+              } catch {}
+            }
+          }
         }
 
         if (!profileData) {
-          // User exists in auth but not in profiles_dev table
-          // Create a new profile
-          const { error: insertError } = await supabase
-            .from('profiles_dev')
-            .insert({
-              uuid: data.user.id,  // Store user ID in the uuid column
+          // Profile does not exist, create it
+          const createRes = await fetch(API_ENDPOINTS.createProfile, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              uuid: data.user.id,
               full_name: data.user.user_metadata?.full_name || '',
               email: data.user.email || '',
               phone: data.user.user_metadata?.phone || '',
               avatar_url: data.user.user_metadata?.avatar_url || '',
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
-              user_login_info: {
-                last_sign_in: new Date().toISOString(),
-                sign_in_count: 1,
-                sign_in_method: 'email'
-              }
-            });
-
-          if (insertError) {
-            console.error('Error creating profile:', insertError);
+            }),
+          });
+          if (!createRes.ok) {
+            const err = await createRes.json();
+            throw new Error(err.message || 'Failed to create user profile');
           }
         } else {
-          // Update existing profile with login information
-          const currentLoginInfo = profileData.user_login_info || {};
-          const signInCount = (currentLoginInfo.sign_in_count || 0) + 1;
-
-          const { error: updateError } = await supabase
-            .from('profiles_dev')
-            .update({
-              updated_at: new Date().toISOString(),
-              user_login_info: {
-                ...currentLoginInfo,
-                last_sign_in: new Date().toISOString(),
-                sign_in_count: signInCount,
-                sign_in_method: 'email',
-                ip_address: locationInfo?.ip || currentLoginInfo.ip_address || 'unknown',
-                location: locationInfo ? {
-                  city: locationInfo.city || 'unknown',
-                  region: locationInfo.region || 'unknown',
-                  country: locationInfo.country || 'unknown',
-                  coordinates: locationInfo.loc || 'unknown',
-                  timezone: locationInfo.timezone || 'unknown'
-                } : currentLoginInfo.location || 'unknown'
-              }
-            })
-            .eq('uuid', data.user.id);  // Use 'uuid' column instead of 'id'
-
-          if (updateError) {
-            console.error('Error updating profile:', updateError);
+          // Profile exists, update login info
+          const userLoginInfo = {
+            last_sign_in: new Date().toISOString(),
+            sign_in_method: 'email',
+            ip_address: locationInfo?.ip || profileData.user_login_info?.ip_address || 'unknown',
+            location: locationInfo ? {
+              city: locationInfo.city || 'unknown',
+              region: locationInfo.region || 'unknown',
+              country: locationInfo.country || 'unknown',
+              coordinates: locationInfo.loc || 'unknown',
+              timezone: locationInfo.timezone || 'unknown',
+            } : profileData.user_login_info?.location || 'unknown',
+            sign_in_count: (profileData.user_login_info?.sign_in_count || 0) + 1,
+          };
+          const updatePayload: any = {
+            user_login_info: userLoginInfo,
+            updated_at: new Date().toISOString(),
+          };
+          const updateRes = await fetch(API_ENDPOINTS.updateProfileByUUID(data.user.id), {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatePayload),
+          });
+          if (!updateRes.ok) {
+            const err = await updateRes.json();
+            throw new Error(err.message || 'Failed to update user profile');
           }
         }
 
         // Close modal and redirect after successful sign-in
         onClose();
-        
-        // Redirect to the original URL if provided, otherwise refresh the current page
         if (redirectUrl) {
           router.push(redirectUrl);
         } else {
@@ -197,8 +205,7 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose, redirectUrl }) => {
         }
       }
     } catch (error: any) {
-      if (error.message.includes('Invalid login credentials')) {
-        // Set account not found message
+      if (error.message && error.message.includes('Invalid login credentials')) {
         setAccountNotFound(true);
         setError('Account not found. Please create an account to continue.');
       } else {

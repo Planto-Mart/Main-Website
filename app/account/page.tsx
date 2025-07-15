@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 
 import { supabase } from '../../utils/supabase/client';
+import { API_ENDPOINTS } from '@/config/api';
 
 // Interface for user login info
 interface UserLoginInfo {
@@ -53,40 +54,37 @@ export default function AccountPage() {
     const fetchUserData = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
         if (!session) {
           router.push('/');
-          
-            return;
+          return;
         }
-        
         setUser(session.user);
-        
-        // Fetch profile data
-        console.log('Fetching profile data for user:', session.user.id);
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles_dev')
-          .select('*')
-          .eq('uuid', session.user.id)
-          .single();
-        
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-        } else {
-          setProfile(profileData);
-          setUpdatedProfile(profileData);
-          setIsVendor(profileData?.is_vendor || false);
-          
-          // Extract login info from profile data
-          if (profileData?.user_login_info) {
-            setLoginInfo(profileData.user_login_info);
-          }
+        // Fetch profile data from backend API
+        const res = await fetch(API_ENDPOINTS.getProfileByUUID(session.user.id), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) {
+          throw new Error('Failed to fetch profile');
         }
-        
-        // Fetch mock orders (replace with real data when available)
+        const profileJson = await res.json();
+        if (!profileJson.success || !profileJson.data) {
+          throw new Error(profileJson.message || 'Profile not found');
+        }
+        let profileData = profileJson.data;
+        // Parse user_login_info if present and is a string
+        if (profileData.user_login_info && typeof profileData.user_login_info === 'string') {
+          try {
+            profileData.user_login_info = JSON.parse(profileData.user_login_info);
+          } catch {}
+        }
+        setProfile(profileData);
+        setUpdatedProfile(profileData);
+        setIsVendor(profileData?.is_vendor || false);
+        if (profileData?.user_login_info) {
+          setLoginInfo(profileData.user_login_info);
+        }
         setOrders(getMockOrders());
-        
-        // Fetch mock addresses (replace with real data when available)
         setAddresses(getMockAddresses());
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -94,7 +92,6 @@ export default function AccountPage() {
         setLoading(false);
       }
     };
-    
     fetchUserData();
   }, [router]);
 
@@ -111,28 +108,36 @@ export default function AccountPage() {
     setSaving(true);
     setError(null);
     setSuccess(null);
-    
     try {
-      const { error } = await supabase
-        .from('profiles_dev')
-        .update({
-          full_name: updatedProfile.full_name,
-          phone: updatedProfile.phone,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('uuid', user.id);
-      
-      if (error) {
-        throw error;
+      // Prepare update payload
+      const payload: any = {
+        full_name: updatedProfile.full_name,
+        phone: updatedProfile.phone,
+        updated_at: new Date().toISOString(),
+      };
+      // Always update user_login_info (login stats)
+      let newLoginInfo = loginInfo || {};
+      newLoginInfo.last_sign_in = new Date().toISOString();
+      newLoginInfo.sign_in_count = (loginInfo?.sign_in_count || 0) + 1;
+      newLoginInfo.sign_in_method = loginInfo?.sign_in_method || 'email';
+      payload.user_login_info = newLoginInfo;
+      const res = await fetch(API_ENDPOINTS.updateProfileByUUID(user.id), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || 'Failed to update profile');
       }
-      
       setProfile({
         ...profile,
         full_name: updatedProfile.full_name,
         phone: updatedProfile.phone,
-        updated_at: new Date().toISOString(),
+        updated_at: payload.updated_at,
+        user_login_info: newLoginInfo,
       });
-      
+      setLoginInfo(newLoginInfo);
       setSuccess('Profile updated successfully!');
       setEditMode(false);
     } catch (error: any) {
