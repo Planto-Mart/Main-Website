@@ -13,6 +13,7 @@ import {
 
 import { supabase } from '../../utils/supabase/client';
 import { API_ENDPOINTS } from '@/config/api';
+import VendorRegister from '@/components/vendor/VendorRegister';
 
 // Interface for user login info
 interface UserLoginInfo {
@@ -251,47 +252,75 @@ export default function AccountPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loginInfo, setLoginInfo] = useState<UserLoginInfo | null>(null);
+  const [vendorStatus, setVendorStatus] = useState<'loading' | 'not_vendor' | 'is_vendor' | 'registering' | 'error'>(
+    'loading'
+  );
+  const [vendorError, setVendorError] = useState<string | null>(null);
   const element_unique_id = useId();
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
+  const fetchUserData = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/');
+        return;
+      }
+      setUser(session.user);
+      // Fetch profile data from backend API
+      const res = await fetch(API_ENDPOINTS.getProfileByUUID(session.user.id), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      const profileJson = await res.json();
+      if (!profileJson.success || !profileJson.data) {
+        throw new Error(profileJson.message || 'Profile not found');
+      }
+      let profileData = profileJson.data;
+      if (profileData.user_login_info && typeof profileData.user_login_info === 'string') {
+        try {
+          profileData.user_login_info = JSON.parse(profileData.user_login_info);
+        } catch {}
+      }
+      setProfile(profileData);
+      setUpdatedProfile(profileData);
+      if (profileData?.user_login_info) {
+        setLoginInfo(profileData.user_login_info);
+      }
+      // --- Vendor check logic ---
+      setVendorStatus('loading');
+      setVendorError(null);
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          router.push('/');
-          return;
-        }
-        setUser(session.user);
-        // Fetch profile data from backend API
-        const res = await fetch(API_ENDPOINTS.getProfileByUUID(session.user.id), {
+        const vendorRes = await fetch(API_ENDPOINTS.getAllVendorsAdmin, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
         });
-        if (!res.ok) {
-          throw new Error('Failed to fetch profile');
-        }
-        const profileJson = await res.json();
-        if (!profileJson.success || !profileJson.data) {
-          throw new Error(profileJson.message || 'Profile not found');
-        }
-        let profileData = profileJson.data;
-        if (profileData.user_login_info && typeof profileData.user_login_info === 'string') {
-          try {
-            profileData.user_login_info = JSON.parse(profileData.user_login_info);
-          } catch {}
-        }
-        setProfile(profileData);
-        setUpdatedProfile(profileData);
-        if (profileData?.user_login_info) {
-          setLoginInfo(profileData.user_login_info);
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
+        if (!vendorRes.ok) throw new Error('Failed to fetch vendor profiles');
+        const vendorJson = await vendorRes.json();
+        if (!vendorJson.success || !Array.isArray(vendorJson.data)) throw new Error(vendorJson.message || 'Vendor data error');
+        // Try to match by user_uuid, user_id, or vendor_id
+        const found = vendorJson.data.find((v: any) =>
+          v.user_uuid === session.user.id ||
+          v.user_id === session.user.id ||
+          v.vendor_id === session.user.id
+        );
+        setVendorStatus(found ? 'is_vendor' : 'not_vendor');
+      } catch (err: any) {
+        setVendorStatus('error');
+        setVendorError(err.message || 'Could not check vendor status');
       }
-    };
+      // --- End vendor check logic ---
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchUserData();
   }, [router]);
 
@@ -440,10 +469,70 @@ export default function AccountPage() {
             success={success}
             element_unique_id={element_unique_id}
           />
-          {/* Vendor Registration Placeholder */}
-          <div className="mt-8 rounded-lg border border-gray-200 bg-white p-6 text-center">
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Vendor Registration</h2>
-            <p className="text-gray-500">Vendor registration coming soon. Stay tuned!</p>
+          {/* Vendor Registration Section */}
+          <div className="mt-10">
+            {vendorStatus === 'loading' && (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="mb-2 size-8 animate-spin text-green-600" />
+                <span className="text-gray-600 font-medium">Checking vendor status...</span>
+              </div>
+            )}
+            {vendorStatus === 'error' && (
+              <div className="rounded-lg bg-red-50 border border-red-200 p-6 text-center">
+                <AlertCircle className="mx-auto mb-2 size-6 text-red-500" />
+                <div className="text-red-700 font-semibold">{vendorError}</div>
+                <button
+                  className="mt-4 rounded bg-green-600 px-4 py-2 text-white font-medium hover:bg-green-700"
+                  onClick={() => setVendorStatus('loading')}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+            {vendorStatus === 'is_vendor' && (
+              <div className="rounded-lg bg-green-50 border border-green-200 p-6 flex flex-col items-center text-center">
+                <Store className="mb-2 size-10 text-green-600" />
+                <h3 className="text-xl font-bold text-green-800 mb-2">You are a registered vendor!</h3>
+                <p className="text-gray-700 mb-4">Manage your products, orders, and more in your vendor dashboard.</p>
+                <Link
+                  href="/vendor/dashboard"
+                  className="rounded bg-green-600 px-6 py-2 text-white font-semibold hover:bg-green-700 transition"
+                >
+                  Go to Vendor Dashboard
+                </Link>
+              </div>
+            )}
+            {vendorStatus === 'not_vendor' && (
+              <div className="rounded-lg bg-gradient-to-br from-green-100 via-white to-green-50 border border-green-200 p-6 flex flex-col items-center text-center">
+                <ShoppingBag className="mb-2 size-10 text-green-500" />
+                <h3 className="text-xl font-bold text-green-800 mb-2">Become a Vendor on PlantoMart!</h3>
+                <p className="text-gray-700 mb-4 max-w-xl">Unlock your own storefront, reach thousands of plant lovers, and grow your business with us. Click below to start your vendor journey.</p>
+                <button
+                  className="rounded bg-green-600 px-6 py-2 text-white font-semibold hover:bg-green-700 transition mb-2"
+                  onClick={() => setVendorStatus('registering')}
+                >
+                  Register as Vendor
+                </button>
+              </div>
+            )}
+            {vendorStatus === 'registering' && (
+              <div className="w-full flex flex-col items-center">
+                <VendorRegister 
+                  userUUID={user?.id}
+                  userEmail={user?.email}
+                  userName={profile?.full_name}
+                  onRegistrationSuccess={() => {
+                    setVendorStatus('is_vendor');
+                    // Refresh vendor status after successful registration
+                    setTimeout(() => {
+                      setVendorStatus('loading');
+                      // Re-check vendor status
+                      fetchUserData();
+                    }, 2000);
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
