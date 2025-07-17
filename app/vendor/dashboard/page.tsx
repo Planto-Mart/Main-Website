@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Loader2, Store } from 'lucide-react';
 
 import { supabase } from '@/utils/supabase/client';
+import { API_ENDPOINTS } from '@/config/api';
 import SignIn from '@/components/auth/Sign-in';
 import Sidebar from '@/components/vendor/Dashboard/Sidebar';
 import OverviewTab from '@/components/vendor/Dashboard/OverviewTab';
@@ -42,65 +43,100 @@ export default function VendorDashboard() {
   
   const router = useRouter();
 
-  // Check authentication and fetch vendor data
-  // biome-ignore lint/correctness/useExhaustiveDependencies: will look upon during refactor
-    useEffect(() => {
-    const checkAuth = async () => {
+  const fetchUserData = async () => {
+    try {
+      setAuthChecking(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        setIsAuthenticated(false);
+        setShowSignIn(true);
+        setAuthChecking(false);
+        return;
+      }
+      
+      setUser(session.user);
+      setIsAuthenticated(true);
+      
+      // Fetch profile data from backend API
+      const res = await fetch(API_ENDPOINTS.getProfileByUUID(session.user.id), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (!res.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      
+      const profileJson = await res.json();
+      if (!profileJson.success || !profileJson.data) {
+        throw new Error(profileJson.message || 'Profile not found');
+      }
+      
+      let profileData = profileJson.data;
+      if (profileData.user_login_info && typeof profileData.user_login_info === 'string') {
+        try {
+          profileData.user_login_info = JSON.parse(profileData.user_login_info);
+        } catch (e) {
+          // Handle parsing error silently
+        }
+      }
+      
+      setVendorData(profileData);
+      
+      // Check if user is a vendor by fetching all vendor profiles
       try {
-        setAuthChecking(true);
-        const { data: { session } } = await supabase.auth.getSession();
+        const vendorRes = await fetch(API_ENDPOINTS.getAllVendorsAdmin, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
         
-        if (!session) {
-          setIsAuthenticated(false);
-          setShowSignIn(true);
-          setAuthChecking(false);
-
-          return;
+        if (!vendorRes.ok) {
+          throw new Error('Failed to fetch vendor profiles');
         }
         
-        setUser(session.user);
-        setIsAuthenticated(true);
-        
-        // Fetch vendor profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles_dev')
-          .select('*')
-          .eq('uuid', session.user.id)
-          .single();
-        
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          setAuthChecking(false);
-          setLoading(false);
-          
-return;
+        const vendorJson = await vendorRes.json();
+        if (!vendorJson.success || !Array.isArray(vendorJson.data)) {
+          throw new Error(vendorJson.message || 'Vendor data error');
         }
         
-        // Check if user is a vendor
-        if (!profileData.is_vendor) {
+        // Try to match by user_uuid, user_id, or vendor_id
+        const found = vendorJson.data.find((v: any) =>
+          v.user_uuid === session.user.id ||
+          v.user_id === session.user.id ||
+          v.vendor_id === session.user.id
+        );
+        
+        if (!found) {
           setIsVendor(false);
           setAuthChecking(false);
           setLoading(false);
-          
-return;
+          return;
         }
         
         setIsVendor(true);
-        setVendorData(profileData);
         
         // Fetch mock data for demonstration
         fetchMockData();
         
-        setAuthChecking(false);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error checking authentication:', error);
-        setAuthChecking(false);
-        setLoading(false);
+      } catch (vendorError) {
+        console.error('Error checking vendor status:', vendorError);
+        setIsVendor(false);
       }
-    };
-    
-    checkAuth();
+      
+      setAuthChecking(false);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setAuthChecking(false);
+      setLoading(false);
+    }
+  };
+
+  // Check authentication and fetch vendor data
+  // biome-ignore lint/correctness/useExhaustiveDependencies: will look upon during refactor
+  useEffect(() => {
+    fetchUserData();
   }, [router]);
 
   // Handle successful authentication (gotta look for this usage why not used during refactor)
@@ -113,18 +149,63 @@ return;
       setIsAuthenticated(true);
       setShowSignIn(false);
       
-      // Fetch vendor profile
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles_dev')
-        .select('*')
-        .eq('uuid', session.user.id)
-        .single();
-      
-      if (!profileError && profileData.is_vendor) {
-        setIsVendor(true);
+      // Fetch profile data from API
+      try {
+        const res = await fetch(API_ENDPOINTS.getProfileByUUID(session.user.id), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!res.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+        
+        const profileJson = await res.json();
+        if (!profileJson.success || !profileJson.data) {
+          throw new Error(profileJson.message || 'Profile not found');
+        }
+        
+        let profileData = profileJson.data;
+        if (profileData.user_login_info && typeof profileData.user_login_info === 'string') {
+          try {
+            profileData.user_login_info = JSON.parse(profileData.user_login_info);
+          } catch (e) {
+            // Handle parsing error silently
+          }
+        }
+        
         setVendorData(profileData);
-        fetchMockData();
-      } else {
+        
+        // Check if user is a vendor by fetching all vendor profiles
+        const vendorRes = await fetch(API_ENDPOINTS.getAllVendorsAdmin, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        
+        if (!vendorRes.ok) {
+          throw new Error('Failed to fetch vendor profiles');
+        }
+        
+        const vendorJson = await vendorRes.json();
+        if (!vendorJson.success || !Array.isArray(vendorJson.data)) {
+          throw new Error(vendorJson.message || 'Vendor data error');
+        }
+        
+        // Try to match by user_uuid, user_id, or vendor_id
+        const found = vendorJson.data.find((v: any) =>
+          v.user_uuid === session.user.id ||
+          v.user_id === session.user.id ||
+          v.vendor_id === session.user.id
+        );
+        
+        if (found) {
+          setIsVendor(true);
+          fetchMockData();
+        } else {
+          setIsVendor(false);
+        }
+      } catch (error) {
+        console.error('Error fetching profile or checking vendor status:', error);
         setIsVendor(false);
       }
     }
