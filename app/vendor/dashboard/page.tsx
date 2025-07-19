@@ -42,6 +42,7 @@ export default function VendorDashboard() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [vendorId, setVendorId] = useState<string | null>(null);
   
   const router = useRouter();
 
@@ -112,12 +113,16 @@ export default function VendorDashboard() {
           setIsVendor(false);
           setAuthChecking(false);
           setLoading(false);
+          setVendorId(null);
           return;
         }
         
         setIsVendor(true);
+        setVendorId(found.vendor_id || found.user_uuid || found.user_id);
         // Fetch real products for this vendor
-        fetchProducts(found.vendor_id || found.user_uuid || found.user_id);
+        if (found.vendor_id || found.user_uuid || found.user_id) {
+          fetchProducts(found.vendor_id || found.user_uuid || found.user_id);
+        }
         
       } catch (vendorError) {
         console.error('Error checking vendor status:', vendorError);
@@ -200,9 +205,13 @@ export default function VendorDashboard() {
         
         if (found) {
           setIsVendor(true);
-          fetchProducts(found.vendor_id || found.user_uuid || found.user_id);
+          setVendorId(found.vendor_id || found.user_uuid || found.user_id);
+          if (found.vendor_id || found.user_uuid || found.user_id) {
+            fetchProducts(found.vendor_id || found.user_uuid || found.user_id);
+          }
         } else {
           setIsVendor(false);
+          setVendorId(null);
         }
       } catch (error) {
         console.error('Error fetching profile or checking vendor status:', error);
@@ -215,7 +224,7 @@ export default function VendorDashboard() {
   };
 
   // Fetch products from API
-  const fetchProducts = async (vendorId: string) => {
+  const fetchProducts = async (vendorId: string | null | undefined) => {
     if (!vendorId) {
       setProductsError('Vendor ID is missing');
       setProducts([]);
@@ -417,7 +426,14 @@ export default function VendorDashboard() {
           />
         )}
         {activeTab === 'products' && (
-          <ProductsTab products={products} loading={productsLoading} error={productsError} onRefresh={() => fetchProducts(vendorData?.vendor_id || vendorData?.user_uuid || vendorData?.user_id)} user={user} />
+          <ProductsTab
+            products={products}
+            loading={productsLoading}
+            error={productsError}
+            onRefresh={() => vendorId && fetchProducts(vendorId)}
+            user={user}
+            vendorId={vendorId}
+          />
         )}
         {activeTab === 'orders' && (
           <OrdersTab orders={orders} />
