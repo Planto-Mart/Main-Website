@@ -8,7 +8,7 @@ import { Star, X, Search, ShieldCheck, Heart, MinusCircle, PlusCircle } from 'lu
 
 import { supabase } from '@/utils/supabase/client';
 import type ProductDataType from '@/types/ProductData';
-import  products_sample  from '@/data/sampleProducts';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface HeroSectionProps {
   slug: string; // Changed from productId to slug since we'll use slug for routing
@@ -22,73 +22,40 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [showMagnifier, setShowMagnifier] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const imageRef = useRef<HTMLDivElement>(null);
-
   const element_unique_id = useId();
 
-  // Function to fetch product data from local TypeScript file
-  const fetchProductFromJSON = async () => {
+  // Fetch all products and find the one with the matching slug
+  const fetchProductFromAllAPI = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      // Import the products directly from the TypeScript file
-      const data = products_sample;
-      const foundProduct = data.find((p: ProductDataType) => p.slug === slug);
-      
-      if (foundProduct) {
-        setProduct(foundProduct);
-        // If product has variants, fetch them
-        if (foundProduct.variants && foundProduct.variants.length > 0) {
-          const variantProducts = data.filter((p: ProductDataType) => 
-            foundProduct.variants?.includes(p.product_id)
-          );
-          setVariants(variantProducts);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching product:', error);
+      const res = await fetch(API_ENDPOINTS.getAllProducts, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const json = await res.json();
+      if (!json.success || !Array.isArray(json.data)) throw new Error(json.message || 'Products not found');
+      const foundProduct = json.data.find((p: ProductDataType) => p.slug === slug);
+      if (!foundProduct) throw new Error('Product not found');
+      setProduct(foundProduct);
+      // Optionally, set variants here if needed
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch product');
+      setProduct(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Function to fetch product data from Supabase
-  const _fetchProductFromSupabase = async () => {
-    try {
-      // Fetch main product
-      const { data: productData, error: productError } = await supabase
-        .from('products_dev')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-      if (productError) throw productError;
-      if (productData) {
-        setProduct(productData);
-        
-        // If product has variants, fetch them
-        if (productData.variants && productData.variants.length > 0) {
-          const { data: variantData, error: variantError } = await supabase
-            .from('products_dev')
-            .select('*')
-            .in('product_id', productData.variants);
-
-          if (variantError) throw variantError;
-          if (variantData) {
-            setVariants(variantData);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching product from Supabase:', error);
-    }
-  };
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: will look into this while refactoring
   useEffect(() => {
     if (slug) {
-      // Use this for development with local JSON data
-      fetchProductFromJSON();
-      
-      // Comment out the above line and uncomment below line when ready to use Supabase
-      // fetchProductFromSupabase();
+      fetchProductFromAllAPI();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
 
   const handleQuantityChange = (increment: boolean) => {
@@ -182,6 +149,38 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const formatIndianPrice = (price: number) => {
     return price.toLocaleString('en-IN');
   };
+
+  if (loading) {
+    return (
+      <section className="flex min-h-[60vh] items-center justify-center bg-gradient-to-br from-green-100 to-emerald-100">
+        <div className="flex flex-col items-center justify-center gap-4 p-8">
+          <span className="inline-block animate-spin rounded-full bg-green-200 p-4 shadow-lg">
+            <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v4m0 8v4m8-8h-4M4 12H8" />
+            </svg>
+          </span>
+          <h2 className="text-2xl font-bold text-green-700">Loading product details...</h2>
+          <p className="text-green-600">Please wait while we grow your plant's details 🌱</p>
+        </div>
+      </section>
+    );
+  }
+  if (error) {
+    return (
+      <section className="flex min-h-[60vh] items-center justify-center bg-gradient-to-br from-red-50 to-green-50">
+        <div className="flex flex-col items-center justify-center gap-4 p-8">
+          <span className="inline-block rounded-full bg-red-200 p-4 shadow-lg">
+            <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01" />
+            </svg>
+          </span>
+          <h2 className="text-2xl font-bold text-red-700">Oops! Product not found</h2>
+          <p className="text-red-600">{error}</p>
+          <button type="button" onClick={fetchProductFromAllAPI} className="mt-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">Retry</button>
+        </div>
+      </section>
+    );
+  }
 
   if (!product) {
     return <div>Loading...</div>;

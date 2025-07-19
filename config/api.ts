@@ -24,7 +24,7 @@ export const API_ENDPOINTS = {
     createProduct: `${API_BASE_URL}/product/create-new`,
     getAllProducts: `${API_BASE_URL}/product/get-all`,
     getProductsByVendor: (vendorID: string) => `${API_BASE_URL}/product/get-products-of/${vendorID}`,
-    getProductById: (user_uuid: string) => `${API_BASE_URL}/product/get/${user_uuid}`,
+    getProductById: (slug: string) => `${API_BASE_URL}/product/get/${slug}`,
     deleteProduct: (product_id: string) => `${API_BASE_URL}/product/delete/${product_id}`,
     updateProduct: (user_uuid: string) => `${API_BASE_URL}/product/update/${user_uuid}`,
 
