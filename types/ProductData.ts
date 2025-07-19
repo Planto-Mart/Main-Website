@@ -9,7 +9,7 @@ export default interface ProductDataType {
   image_gallery: string[];    // JSON
   price: number;
   brand: string;
-  vendor_id: string;
+  vendorID: string;
   raiting: number;
   reviewNumbers: number;
   reviews?: string[];         // JSON
