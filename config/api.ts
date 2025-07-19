@@ -15,9 +15,18 @@ export const API_ENDPOINTS = {
 
     getAllVendorsPublic: `${API_BASE_URL}/vendor/get-all-vendors`,
     getVendorByUserUUID: (user_uuid: string) => `${API_BASE_URL}/vendor/get/${user_uuid}`,
-
+    
     // Admin-only vendor endpoints
     getAllVendorsAdmin: `${API_BASE_URL}/vendor/get-all-vendors-admin`,
     getVendorByUserUUIDAdmin: (user_uuid: string) => `${API_BASE_URL}/vendor/get-admin/${user_uuid}`,
+    
+    // product Endpoints
+    createProduct: `${API_BASE_URL}/product/create-new`,
+    getAllProducts: `${API_BASE_URL}/product/get-all`,
+    getProductsByVendor: (vendorID: string) => `${API_BASE_URL}/product/get-products-of/${vendorID}`,
+    getProductById: (user_uuid: string) => `${API_BASE_URL}/product/get/${user_uuid}`,
+    deleteProduct: (user_uuid: string) => `${API_BASE_URL}/product/delete/${user_uuid}`,
+    updateProduct: (user_uuid: string) => `${API_BASE_URL}/product/update/${user_uuid}`,
+
 
 }   

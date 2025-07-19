@@ -4,50 +4,54 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronDown, Edit, Eye, Filter, Plus, Search, Trash2 } from 'lucide-react';
 import ProductListingModal from './Product-Listings-modal';
-
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  price: number;
-  stock: number;
-  status: string;
-  image: string;
-}
+import ProductDataType from '@/types/ProductData';
 
 interface ProductsTabProps {
-  products: Product[];
+  products: ProductDataType[];
+  loading: boolean;
+  error: string | null;
+  onRefresh: () => void;
+  user: any;
 }
 
-function ProductsTab({ products }: ProductsTabProps) {
+function ProductsTab({ products, loading, error, onRefresh, user }: ProductsTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isProductListingModalOpen, setIsProductListingModalOpen] = useState(false);
-  const vendorID = "vendor-123"; // This would come from your auth context
-  // biome-ignore lint/correctness/noUnusedVariables: might be future use
+  const vendorID = user?.id || user?.user_id || user?.uuid || '';
   const [filterStatus, setFilterStatus] = useState('all');
 
   // Filter products based on search term and status
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         product.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || product.status === filterStatus;
-    
+    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         product.product_id?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Status logic can be improved if backend provides it
+    const matchesFilter = filterStatus === 'all' || product.quantity === 0 || (filterStatus === 'active' && product.quantity > 0);
     return matchesSearch && matchesFilter;
   });
 
   // Helper function to get status color
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'low-stock':
-        return 'bg-amber-100 text-amber-800';
-      case 'out-of-stock':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+  const getStatusColor = (product: ProductDataType) => {
+    if (product.quantity === 0) return 'bg-red-100 text-red-800';
+    if (product.quantity < 5) return 'bg-amber-100 text-amber-800';
+    return 'bg-green-100 text-green-800';
   };
+
+  // Loading and error UI
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px]">
+        <span className="text-gray-500">Loading products...</span>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-red-600">
+        <span>{error}</span>
+        <button className="mt-2 px-4 py-2 bg-green-600 text-white rounded" onClick={onRefresh}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6">
@@ -118,20 +122,20 @@ function ProductsTab({ products }: ProductsTabProps) {
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
               {filteredProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
+                <tr key={product.product_id} className="hover:bg-gray-50">
                   <td className="whitespace-nowrap px-6 py-4">
                     <div className="flex items-center">
                       <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-gray-100">
                         <Image
-                          src={product.image || '/assets/placeholder.jpg'}
-                          alt={product.name}
+                          src={product.image_gallery && product.image_gallery.length > 0 ? product.image_gallery[0] : '/assets/placeholder.jpg'}
+                          alt={product.title}
                           fill
                           className="object-cover"
                         />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{product.id}</div>
+                        <div className="text-sm font-medium text-gray-900">{product.title}</div>
+                        <div className="text-sm text-gray-500">{product.product_id}</div>
                       </div>
                     </div>
                   </td>
@@ -142,11 +146,11 @@ function ProductsTab({ products }: ProductsTabProps) {
                     <div className="text-sm font-medium text-gray-900">₹{product.price}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm text-gray-900">{product.stock}</div>
+                    <div className="text-sm text-gray-900">{product.quantity}</div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusColor(product.status)}`}>
-                      {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                    <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusColor(product)}`}>
+                      {product.quantity === 0 ? 'Out of Stock' : product.quantity < 5 ? 'Low Stock' : 'In Stock'}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
@@ -172,6 +176,7 @@ function ProductsTab({ products }: ProductsTabProps) {
         isOpen={isProductListingModalOpen}
         onClose={() => setIsProductListingModalOpen(false)}
         vendorID={vendorID}
+        onProductCreated={onRefresh}
       />
     </div>
   );

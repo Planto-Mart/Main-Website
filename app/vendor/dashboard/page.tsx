@@ -36,6 +36,8 @@ export default function VendorDashboard() {
     lowStockProducts: 0
   });
   const [products, setProducts] = useState<any[]>([]);
+  const [productsLoading, setProductsLoading] = useState(false);
+  const [productsError, setProductsError] = useState<string | null>(null);
   const [orders, setOrders] = useState<any[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
@@ -81,7 +83,6 @@ export default function VendorDashboard() {
           // Handle parsing error silently
         }
       }
-      
       setVendorData(profileData);
       
       // Check if user is a vendor by fetching all vendor profiles
@@ -115,9 +116,8 @@ export default function VendorDashboard() {
         }
         
         setIsVendor(true);
-        
-        // Fetch mock data for demonstration
-        fetchMockData();
+        // Fetch real products for this vendor
+        fetchProducts(found.vendor_id || found.user_uuid || found.user_id);
         
       } catch (vendorError) {
         console.error('Error checking vendor status:', vendorError);
@@ -200,7 +200,7 @@ export default function VendorDashboard() {
         
         if (found) {
           setIsVendor(true);
-          fetchMockData();
+          fetchProducts(found.vendor_id || found.user_uuid || found.user_id);
         } else {
           setIsVendor(false);
         }
@@ -214,63 +214,29 @@ export default function VendorDashboard() {
     setLoading(false);
   };
 
-  // Fetch mock data for demonstration purposes
-  const fetchMockData = () => {
-    // Mock statistics
-    setStats({
-      totalSales: 24580,
-      totalOrders: 156,
-      totalProducts: 48,
-      totalCustomers: 89,
-      pendingOrders: 12,
-      lowStockProducts: 5
-    });
-    
-    // Mock products
-    setProducts([
-      { id: 'PRD-001', name: 'Monstera Deliciosa', category: 'Indoor Plants', price: 1200, stock: 15, status: 'active', image: '/assets/products/monstera.jpg' },
-      { id: 'PRD-002', name: 'Snake Plant', category: 'Indoor Plants', price: 850, stock: 23, status: 'active', image: '/assets/products/snake-plant.jpg' },
-      { id: 'PRD-003', name: 'Fiddle Leaf Fig', category: 'Indoor Plants', price: 1800, stock: 8, status: 'active', image: '/assets/products/fiddle-leaf.jpg' },
-      { id: 'PRD-004', name: 'Peace Lily', category: 'Indoor Plants', price: 950, stock: 3, status: 'low-stock', image: '/assets/products/peace-lily.jpg' },
-      { id: 'PRD-005', name: 'Pothos', category: 'Hanging Plants', price: 650, stock: 19, status: 'active', image: '/assets/products/pothos.jpg' },
-      { id: 'PRD-006', name: 'Rubber Plant', category: 'Indoor Plants', price: 1100, stock: 12, status: 'active', image: '/assets/products/rubber-plant.jpg' },
-      { id: 'PRD-007', name: 'ZZ Plant', category: 'Indoor Plants', price: 950, stock: 2, status: 'low-stock', image: '/assets/products/zz-plant.jpg' },
-      { id: 'PRD-008', name: 'Aloe Vera', category: 'Succulents', price: 550, stock: 25, status: 'active', image: '/assets/products/aloe-vera.jpg' }
-    ]);
-    
-    // Mock orders
-    setOrders([
-      { id: 'ORD-7829', customer: 'Rahul Sharma', date: '2023-06-15', total: 1250, status: 'delivered', items: 3, payment: 'completed' },
-      { id: 'ORD-7830', customer: 'Priya Patel', date: '2023-06-14', total: 850, status: 'processing', items: 2, payment: 'completed' },
-      { id: 'ORD-7831', customer: 'Amit Kumar', date: '2023-06-14', total: 3200, status: 'shipped', items: 5, payment: 'completed' },
-      { id: 'ORD-7832', customer: 'Neha Singh', date: '2023-06-13', total: 1600, status: 'delivered', items: 4, payment: 'completed' },
-      { id: 'ORD-7833', customer: 'Vikram Reddy', date: '2023-06-12', total: 950, status: 'processing', items: 2, payment: 'completed' },
-      { id: 'ORD-7834', customer: 'Ananya Desai', date: '2023-06-11', total: 2100, status: 'delivered', items: 3, payment: 'completed' },
-      { id: 'ORD-7835', customer: 'Rajesh Khanna', date: '2023-06-10', total: 750, status: 'cancelled', items: 1, payment: 'refunded' },
-      { id: 'ORD-7836', customer: 'Meera Iyer', date: '2023-06-09', total: 1850, status: 'delivered', items: 4, payment: 'completed' },
-      { id: 'ORD-7837', customer: 'Karthik Nair', date: '2023-06-08', total: 1200, status: 'delivered', items: 2, payment: 'completed' },
-      { id: 'ORD-7838', customer: 'Divya Sharma', date: '2023-06-07', total: 3500, status: 'delivered', items: 6, payment: 'completed' }
-    ]);
-    
-    // Mock reviews
-    setReviews([
-      { id: 'REV-001', product: 'Monstera Deliciosa', customer: 'Rahul Sharma', date: '2023-06-10', rating: 5, comment: 'Beautiful plant, arrived in perfect condition. Very happy with my purchase!', status: 'published' },
-      { id: 'REV-002', product: 'Snake Plant', customer: 'Priya Patel', date: '2023-06-09', rating: 4, comment: 'Healthy plant, slightly smaller than expected but growing well.', status: 'published' },
-      { id: 'REV-003', product: 'Fiddle Leaf Fig', customer: 'Amit Kumar', date: '2023-06-08', rating: 5, comment: 'Excellent quality and packaging. The plant is thriving in my living room.', status: 'published' },
-      { id: 'REV-004', product: 'Peace Lily', customer: 'Neha Singh', date: '2023-06-07', rating: 3, comment: 'Plant arrived with some damaged leaves, but customer service was helpful.', status: 'published' },
-      { id: 'REV-005', product: 'Pothos', customer: 'Vikram Reddy', date: '2023-06-06', rating: 5, comment: 'Perfect hanging plant! Growing so fast and looks beautiful.', status: 'published' },
-      { id: 'REV-006', product: 'Rubber Plant', customer: 'Ananya Desai', date: '2023-06-05', rating: 4, comment: 'Healthy plant with glossy leaves. Very satisfied with my purchase.', status: 'published' }
-    ]);
-    
-    // Mock customers
-    setCustomers([
-      { id: 'CUST-001', name: 'Rahul Sharma', email: 'rahul.sharma@example.com', orders: 5, totalSpent: 4500, lastOrder: '2023-06-15' },
-      { id: 'CUST-002', name: 'Priya Patel', email: 'priya.patel@example.com', orders: 3, totalSpent: 2800, lastOrder: '2023-06-14' },
-      { id: 'CUST-003', name: 'Amit Kumar', email: 'amit.kumar@example.com', orders: 7, totalSpent: 8500, lastOrder: '2023-06-14' },
-      { id: 'CUST-004', name: 'Neha Singh', email: 'neha.singh@example.com', orders: 4, totalSpent: 3600, lastOrder: '2023-06-13' },
-      { id: 'CUST-005', name: 'Vikram Reddy', email: 'vikram.reddy@example.com', orders: 2, totalSpent: 1900, lastOrder: '2023-06-12' },
-      { id: 'CUST-006', name: 'Ananya Desai', email: 'ananya.desai@example.com', orders: 6, totalSpent: 5200, lastOrder: '2023-06-11' }
-    ]);
+  // Fetch products from API
+  const fetchProducts = async (vendorId: string) => {
+    if (!vendorId) {
+      setProductsError('Vendor ID is missing');
+      setProducts([]);
+      return;
+    }
+    setProductsLoading(true);
+    setProductsError(null);
+    try {
+      const res = await fetch(API_ENDPOINTS.getProductsByVendor(vendorId), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error('Failed to fetch products');
+      const json = await res.json();
+      if (!json.success || !Array.isArray(json.data)) throw new Error(json.message || 'Product data error');
+      setProducts(json.data);
+    } catch (err: any) {
+      setProductsError(err.message || 'Failed to fetch products');
+    } finally {
+      setProductsLoading(false);
+    }
   };
 
   // Handle sign out
@@ -451,7 +417,7 @@ export default function VendorDashboard() {
           />
         )}
         {activeTab === 'products' && (
-          <ProductsTab products={products} />
+          <ProductsTab products={products} loading={productsLoading} error={productsError} onRefresh={() => fetchProducts(vendorData?.vendor_id || vendorData?.user_uuid || vendorData?.user_id)} user={user} />
         )}
         {activeTab === 'orders' && (
           <OrdersTab orders={orders} />
