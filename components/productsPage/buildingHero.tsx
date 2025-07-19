@@ -318,7 +318,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
             <div className="mb-6">
               <h3 className="mb-3 text-lg font-medium text-blue-600">About this item</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                {product.aboutInBullets.map((bullet, index) => (
+                {product.about_in_bullets.map((bullet, index) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: not needed here
                     <li key={index} className="flex">
                     <span className="mr-2 mt-1 text-green-600">•</span>
