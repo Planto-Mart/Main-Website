@@ -275,7 +275,7 @@ function ProductsTab({ products, loading, error, onRefresh, user, vendorId }: Pr
       <ProductListingModal
         isOpen={isProductListingModalOpen}
         onClose={() => setIsProductListingModalOpen(false)}
-        vendorID={vendorID}
+        // vendorID={vendorID}
         onProductCreated={onRefresh}
       />
     </div>

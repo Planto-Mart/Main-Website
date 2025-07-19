@@ -1,651 +1,443 @@
 /** biome-ignore-all lint/a11y/noLabelWithoutControl: will look in future */
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: will see while refactoring */
 /** biome-ignore-all lint/correctness/noUnusedImports: will look in future */
-import { useState, useRef } from 'react';
-
-import { 
-  X, 
-  Upload, 
-  Plus, 
-  Minus, 
-  ImageIcon, 
-  Package, 
-  Tag, 
-  DollarSign, 
-  FileText,
-  Star,
-  Trash2,
-  Save,
-  Loader2,
-  AlertCircle,
-  CheckCircle,
-  Camera,
-  Info
-} from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { X, Plus, Trash2, Loader2, CheckCircle, AlertCircle, Camera, Info } from 'lucide-react';
 import Image from 'next/image';
+import { API_ENDPOINTS } from '@/config/api';
+import { supabase } from '@/utils/supabase/client';
 
-// Mock Supabase client - Replace with your actual Supabase client
-const supabase = {
-  from: (_table:any) => ({
-    insert: async (_data:any) => {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Inserting data:', _data);
-      
-      // Simulate random success/error for demo
-      if (Math.random() > 0.1) {
-        return { data: { ..._data, product_id: Math.random().toString(36).substr(2, 9) }, error: null };
-      } else {
-        return { data: null, error: { message: 'Failed to insert product' } };
-      }
-    }
-  }),
-  storage: {
-    from: (_bucket:any) => ({
-      upload: async (path:any, file:any) => {
-        // Simulate file upload
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return { 
-          data: { path: `https://example.com/storage/${path}` }, 
-          error: null 
-        };
-      }
-    })
-  }
-};
+function slugify(str: string) {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
+}
 
-const ProductListingModal = ({ isOpen, onClose, vendorID }:any) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const categories = [
+  'Indoor Plants',
+  'Outdoor Plants',
+  'Succulents',
+  'Flowering Plants',
+  'Herbs',
+  'Trees',
+  'Seeds',
+  'Plant Care',
+  'Pots & Planters',
+  'Garden Tools',
+  'Fertilizers',
+  'Soil & Compost',
+];
 
-  const [formData, setFormData] = useState({
+const ProductListingModal = ({ isOpen, onClose, onProductCreated }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onProductCreated: () => void;
+}) => {
+  const [form, setForm] = useState({
     title: '',
     description: '',
     category: '',
-    aboutInBullets: [''],
-    image_gallery: [],
+    about_in_bullets: [''],
+    image_gallery: [] as string[],
     price: '',
     brand: '',
     quantity: '',
-    discountPercent: '',
+    discount_percent: '',
     variants: [''],
     variantState: false,
-    featured: false
+    featured: false,
   });
-
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageBase64s, setImageBase64s] = useState<string[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'success' | 'error' | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [step, setStep] = useState(1);
+  const [vendorId, setVendorId] = useState<string | null>(null);
+  const [vendorIdLoading, setVendorIdLoading] = useState(false);
+  const [vendorIdError, setVendorIdError] = useState<string | null>(null);
 
-  const categories = [
-    'Indoor Plants',
-    'Outdoor Plants',
-    'Succulents',
-    'Flowering Plants',
-    'Herbs',
-    'Trees',
-    'Seeds',
-    'Plant Care',
-    'Pots & Planters',
-    'Garden Tools',
-    'Fertilizers',
-    'Soil & Compost'
-  ];
+  useEffect(() => {
+    if (!isOpen) return;
+    // Fetch vendorId on open
+    const fetchVendorId = async () => {
+      setVendorIdLoading(true);
+      setVendorIdError(null);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          setVendorIdError('Not authenticated. Please sign in again.');
+          setVendorId(null);
+          setVendorIdLoading(false);
+          return;
+        }
+        const userId = session.user.id;
+        const res = await fetch(API_ENDPOINTS.getAllVendorsAdmin, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) throw new Error('Failed to fetch vendor profiles');
+        const vendorJson = await res.json();
+        if (!vendorJson.success || !Array.isArray(vendorJson.data)) throw new Error(vendorJson.message || 'Vendor data error');
+        const found = vendorJson.data.find((v: any) =>
+          v.user_uuid === userId ||
+          v.user_id === userId ||
+          v.vendor_id === userId
+        );
+        if (!found) {
+          setVendorIdError('Vendor profile not found. Please register as a vendor.');
+          setVendorId(null);
+        } else {
+          setVendorId(found.vendor_id || found.user_uuid || found.user_id);
+        }
+      } catch (err: any) {
+        setVendorIdError(err.message || 'Failed to fetch vendor ID.');
+        setVendorId(null);
+      } finally {
+        setVendorIdLoading(false);
+      }
+    };
+    fetchVendorId();
+  }, [isOpen]);
 
-  const handleInputChange = (e:any) => {
+  // Handle input changes
+  const handleChange = (e: any) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setForm((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  const handleArrayInputChange = (
-    index: number,
-    value: string,
-    arrayName: 'aboutInBullets' | 'variants'
-  ) => {
-    setFormData(prev => ({
+  // Handle array field changes
+  const handleArrayChange = (index: number, value: string, field: 'about_in_bullets' | 'variants') => {
+    setForm((prev) => ({
       ...prev,
-      [arrayName]: prev[arrayName].map((item, i) => i === index ? value : item)
+      [field]: prev[field].map((item, i) => (i === index ? value : item)),
     }));
   };
-
-  const addArrayItem = (arrayName: 'aboutInBullets' | 'variants') => {
-    setFormData(prev => ({
-      ...prev,
-      [arrayName]: [...prev[arrayName], '']
-    }));
+  const addArrayItem = (field: 'about_in_bullets' | 'variants') => {
+    setForm((prev) => ({ ...prev, [field]: [...prev[field], ''] }));
+  };
+  const removeArrayItem = (index: number, field: 'about_in_bullets' | 'variants') => {
+    setForm((prev) => ({ ...prev, [field]: prev[field].filter((_, i) => i !== index) }));
   };
 
-  const removeArrayItem = (
-    index: number,
-    arrayName: 'aboutInBullets' | 'variants'
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [arrayName]: prev[arrayName].filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleImageUpload = (e:any) => {
+  // Image handling (convert to base64)
+  const handleImageUpload = async (e: any) => {
     const files: File[] = Array.from(e.target.files);
     if (files.length + imageFiles.length > 5) {
-      alert('Maximum 5 images allowed');
+      setErrors((prev) => ({ ...prev, images: 'Maximum 5 images allowed' }));
       return;
     }
-    
-    setImageFiles(prev => [...prev, ...files]);
+    setErrors((prev) => ({ ...prev, images: '' }));
+    setLoading(true);
+    try {
+      const newBase64s = await Promise.all(files.map(file => toBase64(file)));
+      setImageFiles((prev) => [...prev, ...files]);
+      setImageBase64s((prev) => [...prev, ...newBase64s]);
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, images: 'Failed to process images.' }));
+    } finally {
+      setLoading(false);
+    }
+  };
+  // Helper to convert file to base64
+  function toBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImageBase64s((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const removeImage = (index:any) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const validateForm = () => {
+  // Validation
+  const validate = () => {
     const newErrors: { [key: string]: string } = {};
-    
-    if (!formData.title.trim()) newErrors.title = 'Product title is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
-    if (!formData.category) newErrors.category = 'Category is required';
-    if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'Valid price is required';
-    if (!formData.brand.trim()) newErrors.brand = 'Brand is required';
-    if (!formData.quantity || parseInt(formData.quantity) < 0) newErrors.quantity = 'Valid quantity is required';
-    if (imageFiles.length === 0) newErrors.images = 'At least one product image is required';
-    
-    // Validate bullets
-    const validBullets = formData.aboutInBullets.filter(bullet => bullet.trim());
-    if (validBullets.length === 0) newErrors.aboutInBullets = 'At least one product feature is required';
-    
+    if (!form.title.trim()) newErrors.title = 'Product title is required';
+    if (!form.description.trim()) newErrors.description = 'Description is required';
+    if (!form.category) newErrors.category = 'Category is required';
+    if (!form.price || parseFloat(form.price) <= 0) newErrors.price = 'Valid price is required';
+    if (!form.brand.trim()) newErrors.brand = 'Brand is required';
+    if (!form.quantity || parseInt(form.quantity) < 0) newErrors.quantity = 'Valid quantity is required';
+    if (imageBase64s.length === 0) newErrors.images = 'At least one product image is required';
+    if (form.about_in_bullets.filter((b) => b.trim()).length === 0) newErrors.about_in_bullets = 'At least one product feature is required';
+    if (!vendorId) newErrors.vendorId = 'Vendor ID is missing. Please refresh.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const uploadImages = async () => {
-    const uploadPromises = imageFiles.map(async (file, index) => {
-      const fileName = `${Date.now()}_${index}_${file.name}`;
-      const { data, error } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file);
-      
-      if (error) throw error;
-      return data.path;
-    });
-    
-    return Promise.all(uploadPromises);
-  };
-
+  // Submit handler
   const handleSubmit = async () => {
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    setSubmitStatus(null);
-    
+    console.log('Add Product clicked', { vendorId, form });
+    if (!validate()) {
+      setStatus('error');
+      setApiError('Please fix the errors above and try again.');
+      alert('Please fix the errors above and try again.');
+      return;
+    }
+    if (!vendorId) {
+      setErrors((prev) => ({ ...prev, vendorId: vendorIdError || 'Vendor ID is missing. Please refresh.' }));
+      setStatus('error');
+      setApiError(vendorIdError || 'Vendor ID is missing. Please refresh.');
+      alert(vendorIdError || 'Vendor ID is missing. Please refresh.');
+      return;
+    }
+    setLoading(true);
+    setApiError(null);
+    setStatus(null);
     try {
-      // Upload images first
-      const imagePaths = await uploadImages();
-      
-      // Generate slug from title
-      const slug = formData.title.toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      
-      // Calculate discount price
-      const discountPrice = formData.discountPercent 
-        ? parseFloat(formData.price) - (parseFloat(formData.price) * parseFloat(formData.discountPercent) / 100)
-        : null;
-      
-      // Prepare product data
-      const productData = {
+      // Use base64 strings for image_gallery
+      const image_gallery = imageBase64s;
+      const slug = slugify(form.title);
+      const product_id = crypto.randomUUID();
+      const payload: any = {
+        product_id,
         slug,
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        category: formData.category,
-        aboutInBullets: formData.aboutInBullets.filter(bullet => bullet.trim()),
-        image_gallery: imagePaths,
-        price: parseFloat(formData.price),
-        brand: formData.brand.trim(),
-        vendorID: vendorID,
-        rating: 0,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        category: form.category,
+        about_in_bullets: form.about_in_bullets.filter((b) => b.trim()),
+        image_gallery,
+        price: parseFloat(form.price),
+        brand: form.brand.trim(),
+        vendorID: vendorId,
+        raiting: 0,
         reviewNumbers: 0,
         reviews: [],
-        quantity: parseInt(formData.quantity),
-        discountPercent: formData.discountPercent ? parseFloat(formData.discountPercent) : null,
-        discountPrice: discountPrice,
-        variants: formData.variantState ? formData.variants.filter(variant => variant.trim()) : null,
-        variantState: formData.variantState,
-        featured: formData.featured,
+        quantity: parseInt(form.quantity),
+        discount_percent: form.discount_percent ? parseFloat(form.discount_percent) : null,
+        discountPrice: form.discount_percent ? (parseFloat(form.price) - (parseFloat(form.price) * parseFloat(form.discount_percent) / 100)) : null,
+        variants: form.variantState ? form.variants.filter((v) => v.trim()) : null,
+        variantState: form.variantState,
+        featured: form.featured,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
-      
-      // Insert into Supabase
-      // biome-ignore lint/correctness/noUnusedVariables: will see while refactoring
-                  const { data, error } = await supabase
-        .from('products_dev')
-        .insert([productData]);
-      
-      if (error) throw error;
-      
-      setSubmitStatus('success');
+      console.log('Submitting payload:', payload);
+      // API call
+      const res = await fetch(API_ENDPOINTS.createProduct, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.success) {
+        setStatus('error');
+        setApiError(json.message || 'Failed to add product.');
+        alert(json.message || 'Failed to add product.');
+        return;
+      }
+      setStatus('success');
       setTimeout(() => {
+        setForm({
+          title: '', description: '', category: '', about_in_bullets: [''], image_gallery: [], price: '', brand: '', quantity: '', discount_percent: '', variants: [''], variantState: false, featured: false
+        });
+        setImageFiles([]);
+        setImageBase64s([]);
+        setErrors({});
+        setStep(1);
+        setStatus(null);
+        setApiError(null);
         onClose();
-        resetForm();
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Error submitting product:', error);
-      setSubmitStatus('error');
+        onProductCreated();
+      }, 1200);
+    } catch (err: any) {
+      setStatus('error');
+      setApiError(err.message || 'Failed to add product.');
+      alert(err.message || 'Failed to add product.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      description: '',
-      category: '',
-      aboutInBullets: [''],
-      image_gallery: [],
-      price: '',
-      brand: '',
-      quantity: '',
-      discountPercent: '',
-      variants: [''],
-      variantState: false,
-      featured: false
-    });
-    setImageFiles([]);
-    setErrors({});
-    setCurrentStep(1);
-    setSubmitStatus(null);
-  };
-
+  // Step navigation
   const nextStep = () => {
-    if (currentStep === 1) {
-      // Validate basic info before proceeding
+    if (step === 1) {
       const basicErrors: { [key: string]: string } = {};
-      if (!formData.title.trim()) basicErrors.title = 'Product title is required';
-      if (!formData.description.trim()) basicErrors.description = 'Description is required';
-      if (!formData.category) basicErrors.category = 'Category is required';
-      
+      if (!form.title.trim()) basicErrors.title = 'Product title is required';
+      if (!form.description.trim()) basicErrors.description = 'Description is required';
+      if (!form.category) basicErrors.category = 'Category is required';
       if (Object.keys(basicErrors).length > 0) {
         setErrors(basicErrors);
         return;
       }
     }
-    setCurrentStep(prev => Math.min(prev + 1, 3));
+    setStep((prev) => Math.min(prev + 1, 3));
   };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
+  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-green-100/80 to-emerald-200/90 p-2 sm:p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg sm:max-w-2xl md:max-w-3xl max-h-[95vh] flex flex-col border-2 border-green-200">
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-6">
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 sm:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Add New Product</h2>
-              <p className="text-green-100 mt-1">Step {currentStep} of 3</p>
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <span className="inline-block"><Image src="/assets/logo_Without_Text.png" alt="logo" width={32} height={32} /></span>
+                Add New Product
+              </h2>
+              <p className="text-green-100 mt-1">Step {step} of 3</p>
             </div>
-            <button
-              type='button'
-              onClick={onClose}
-              className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors"
-            >
+            <button aria-label="Close modal" type="button" onClick={onClose} className="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-lg transition-colors">
               <X className="w-6 h-6" />
             </button>
           </div>
-          
           {/* Progress Bar */}
           <div className="mt-4">
             <div className="bg-white bg-opacity-20 h-2 rounded-full">
-              <div 
-                className="bg-white h-2 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / 3) * 100}%` }}
-              ></div>
+              <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }}></div>
             </div>
-            <div className="flex justify-between mt-2 text-sm text-green-100">
+            <div className="flex justify-between mt-2 text-xs sm:text-sm text-green-100">
               <span>Basic Info</span>
               <span>Images & Features</span>
               <span>Pricing & Inventory</span>
             </div>
           </div>
         </div>
-
         {/* Content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32 plant-scrollbar">
           {/* Step 1: Basic Information */}
-          {currentStep === 1 && (
+          {step === 1 && (
             <div className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Title *
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                      errors.title ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="Enter product title"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Product Title *</label>
+                  <input type="text" name="title" value={form.title} onChange={handleChange} className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.title ? 'border-red-500' : 'border-gray-300'}`} placeholder="Enter product title" />
                   {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category *
-                  </label>
-                  <select
-                    name="category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                      errors.category ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  >
-                    <option value="">Select category</option>
-                    {categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                  <select name="category" value={form.category} onChange={handleChange} className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.category ? 'border-red-500' : 'border-gray-300'}`}> <option value="">Select category</option> {categories.map(cat => (<option key={cat} value={cat}>{cat}</option>))} </select>
                   {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
                 </div>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Description *
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={4}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${
-                    errors.description ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Describe your product in detail..."
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product Description *</label>
+                <textarea name="description" value={form.description} onChange={handleChange} rows={4} className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${errors.description ? 'border-red-500' : 'border-gray-300'}`} placeholder="Describe your product in detail..." />
                 {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Brand *
-                </label>
-                <input
-                  type="text"
-                  name="brand"
-                  value={formData.brand}
-                  onChange={handleInputChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.brand ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="Enter brand name"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Brand *</label>
+                <input type="text" name="brand" value={form.brand} onChange={handleChange} className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.brand ? 'border-red-500' : 'border-gray-300'}`} placeholder="Enter brand name" />
                 {errors.brand && <p className="text-red-500 text-sm mt-1">{errors.brand}</p>}
               </div>
             </div>
           )}
-
           {/* Step 2: Images & Features */}
-          {currentStep === 2 && (
+          {step === 2 && (
             <div className="space-y-6">
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Images * (Max 5 images)
-                </label>
-                {/** biome-ignore lint/a11y/noStaticElementInteractions: will look into while refactoring */}
-                {/** biome-ignore lint/a11y/useKeyWithClickEvents: will look into while refactoring */}
-                <div 
-                  className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-green-500 transition-colors ${
-                    errors.images ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  onClick={() => fileInputRef.current?.click()}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product Images * (Max 5 images)</label>
+                <div className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center cursor-pointer hover:border-green-500 transition-colors ${errors.images ? 'border-red-500' : 'border-gray-300'}`} onClick={() => fileInputRef.current?.click()}>
                   <Camera className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-2">Click to upload product images</p>
-                  <p className="text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
+                  <p className="text-xs sm:text-sm text-gray-500">PNG, JPG, JPEG up to 5MB each</p>
+                  <input type="file" ref={fileInputRef} multiple accept="image/*" onChange={handleImageUpload} className="hidden" />
                 </div>
                 {errors.images && <p className="text-red-500 text-sm mt-1">{errors.images}</p>}
-
+                {loading && (
+                  <div className="flex justify-center items-center py-8">
+                    <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
+                  </div>
+                )}
                 {/* Image Preview */}
-                {imageFiles.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
-                    {imageFiles.map((file, index) => (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: not needed here
-                    <div key={index} className="relative group">
-                        <Image
-                          width={200}
-                          height={200}
-                          src={URL.createObjectURL(file)}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg"
-                        />
-                        <button
-                          type='button'
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                {imageBase64s.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-4">
+                    {imageBase64s.map((base64, index) => (
+                      <div key={index} className="relative group">
+                        <Image width={200} height={200} src={base64} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                        <button aria-label="Remove image" type="button" onClick={() => removeImage(index)} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-4 h-4" /></button>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-
               {/* Product Features */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Features *
-                </label>
-                {formData.aboutInBullets.map((bullet, index) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: not needed here
-                <div key={index} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={bullet}
-                      onChange={(e) => handleArrayInputChange(index, e.target.value, 'aboutInBullets')}
-                      className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder={`Feature ${index + 1}`}
-                    />
-                    {formData.aboutInBullets.length > 1 && (
-                      <button
-                        type='button'
-                        onClick={() => removeArrayItem(index, 'aboutInBullets')}
-                        className="text-red-500 hover:text-red-700 p-2"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Product Features *</label>
+                {form.about_in_bullets.map((bullet, index) => (
+                  <div key={index} className="flex gap-2 mb-2">
+                    <input type="text" value={bullet} onChange={(e) => handleArrayChange(index, e.target.value, 'about_in_bullets')} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder={`Feature ${index + 1}`} />
+                    {form.about_in_bullets.length > 1 && (
+                      <button aria-label="Remove feature" type="button" onClick={() => removeArrayItem(index, 'about_in_bullets')} className="text-red-500 hover:text-red-700 p-2"><Trash2 className="w-4 h-4" /></button>
                     )}
                   </div>
                 ))}
-                <button
-                  type='button'
-                  onClick={() => addArrayItem('aboutInBullets')}
-                  className="text-green-600 hover:text-green-700 flex items-center space-x-1 text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Feature</span>
-                </button>
-                {errors.aboutInBullets && <p className="text-red-500 text-sm mt-1">{errors.aboutInBullets}</p>}
+                <button aria-label="Add feature" type="button" onClick={() => addArrayItem('about_in_bullets')} className="text-green-600 hover:text-green-700 flex items-center space-x-1 text-sm mt-2"><Plus className="w-4 h-4" /><span>Add Feature</span></button>
+                {errors.about_in_bullets && <p className="text-red-500 text-sm mt-1">{errors.about_in_bullets}</p>}
               </div>
-
               {/* Variants */}
               <div>
                 <div className="flex items-center space-x-2 mb-2">
-                  <input
-                    type="checkbox"
-                    name="variantState"
-                    checked={formData.variantState}
-                    onChange={handleInputChange}
-                    className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                  />
-                  <label className="text-sm font-medium text-gray-700">
-                    This product has variants (sizes, colors, etc.)
-                  </label>
+                  <input type="checkbox" name="variantState" checked={form.variantState} onChange={handleChange} className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+                  <label className="text-sm font-medium text-gray-700">This product has variants (sizes, colors, etc.)</label>
                 </div>
-                
-                {formData.variantState && (
+                {form.variantState && (
                   <div className="ml-6 space-y-2">
-                    {formData.variants.map((variant, index) => (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: not needed here
-                    <div key={index} className="flex gap-2">
-                        <input
-                          type="text"
-                          value={variant}
-                          onChange={(e) => handleArrayInputChange(index, e.target.value, 'variants')}
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          placeholder={`Variant ${index + 1} (e.g., Small, Medium, Large)`}
-                        />
-                        {formData.variants.length > 1 && (
-                          <button
-                          type='button'
-                            onClick={() => removeArrayItem(index, 'variants')}
-                            className="text-red-500 hover:text-red-700 p-2"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                    {form.variants.map((variant, index) => (
+                      <div key={index} className="flex gap-2">
+                        <input type="text" value={variant} onChange={(e) => handleArrayChange(index, e.target.value, 'variants')} className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder={`Variant ${index + 1} (e.g., Small, Medium, Large)`} />
+                        {form.variants.length > 1 && (
+                          <button aria-label="Remove variant" type="button" onClick={() => removeArrayItem(index, 'variants')} className="text-red-500 hover:text-red-700 p-2"><Trash2 className="w-4 h-4" /></button>
                         )}
                       </div>
                     ))}
-                    <button
-                    type='button'
-                      onClick={() => addArrayItem('variants')}
-                      className="text-green-600 hover:text-green-700 flex items-center space-x-1 text-sm"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Variant</span>
-                    </button>
+                    <button aria-label="Add variant" type="button" onClick={() => addArrayItem('variants')} className="text-green-600 hover:text-green-700 flex items-center space-x-1 text-sm mt-2"><Plus className="w-4 h-4" /><span>Add Variant</span></button>
                   </div>
                 )}
               </div>
             </div>
           )}
-
           {/* Step 3: Pricing & Inventory */}
-          {currentStep === 3 && (
+          {step === 3 && (
             <div className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price * ($)
-                  </label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    min="0"
-                    step="0.01"
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                      errors.price ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                    placeholder="0.00"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Price * (₹)</label>
+                  <input type="number" name="price" value={form.price} onChange={handleChange} min="0" step="0.01" className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.price ? 'border-red-500' : 'border-gray-300'}`} placeholder="0.00" />
                   {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
                 </div>
-
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Discount Percentage (%)
-                  </label>
-                  <input
-                    type="number"
-                    name="discountPercent"
-                    value={formData.discountPercent}
-                    onChange={handleInputChange}
-                    min="0"
-                    max="100"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="0"
-                  />
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Discount Percentage (%)</label>
+                  <input type="number" name="discount_percent" value={form.discount_percent} onChange={handleChange} min="0" max="100" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" placeholder="0" />
                 </div>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quantity in Stock *
-                </label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={formData.quantity}
-                  onChange={handleInputChange}
-                  min="0"
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.quantity ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                  placeholder="0"
-                />
+                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity in Stock *</label>
+                <input type="number" name="quantity" value={form.quantity} onChange={handleChange} min="0" className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.quantity ? 'border-red-500' : 'border-gray-300'}`} placeholder="0" />
                 {errors.quantity && <p className="text-red-500 text-sm mt-1">{errors.quantity}</p>}
               </div>
-
               <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  name="featured"
-                  checked={formData.featured}
-                  onChange={handleInputChange}
-                  className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                />
-                <label className="text-sm font-medium text-gray-700">
-                  Mark as featured product
-                </label>
+                <input type="checkbox" name="featured" checked={form.featured} onChange={handleChange} className="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" />
+                <label className="text-sm font-medium text-gray-700">Mark as featured product</label>
                 <div className="relative group">
                   <Info className="w-4 h-4 text-gray-400 cursor-help" />
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    Featured products appear in special sections
-                  </div>
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Featured products appear in special sections</div>
                 </div>
               </div>
-
               {/* Price Summary */}
-              {formData.price && (
+              {form.price && (
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
                   <h4 className="font-medium text-gray-800 mb-2">Price Summary</h4>
                   <div className="space-y-1 text-sm">
-                    <div className="flex justify-between">
-                      <span>Original Price:</span>
-                      <span>${parseFloat(formData.price || "0").toFixed(2)}</span>
-                    </div>
-                    {formData.discountPercent && (
+                    <div className="flex justify-between"><span>Original Price:</span><span>₹{parseFloat(form.price || '0').toFixed(2)}</span></div>
+                    {form.discount_percent && (
                       <>
-                        <div className="flex justify-between text-red-600">
-                          <span>Discount ({formData.discountPercent}%):</span>
-                          <span>-${(parseFloat(formData.price || "0") * parseFloat(formData.discountPercent || "0") / 100).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between font-medium text-green-600 pt-1 border-t border-green-200">
-                          <span>Final Price:</span>
-                          <span>${(parseFloat(formData.price || "0") - (parseFloat(formData.price || "0") * parseFloat(formData.discountPercent || "0") / 100)).toFixed(2)}</span>
-                        </div>
+                        <div className="flex justify-between text-red-600"><span>Discount ({form.discount_percent}%):</span><span>-₹{(parseFloat(form.price || '0') * parseFloat(form.discount_percent || '0') / 100).toFixed(2)}</span></div>
+                        <div className="flex justify-between font-medium text-green-600 pt-1 border-t border-green-200"><span>Final Price:</span><span>₹{(parseFloat(form.price || '0') - (parseFloat(form.price || '0') * parseFloat(form.discount_percent || '0') / 100)).toFixed(2)}</span></div>
                       </>
                     )}
                   </div>
@@ -653,72 +445,36 @@ const ProductListingModal = ({ isOpen, onClose, vendorID }:any) => {
               )}
             </div>
           )}
-
-          {/* Submit Status */}
-          {submitStatus && (
-            <div className={`mt-6 p-4 rounded-lg flex items-center space-x-2 ${
-              submitStatus === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-            }`}>
-              {submitStatus === 'success' ? (
-                <CheckCircle className="w-5 h-5" />
-              ) : (
-                <AlertCircle className="w-5 h-5" />
-              )}
-              <span>
-                {submitStatus === 'success' 
-                  ? 'Product added successfully!' 
-                  : 'Failed to add product. Please try again.'
-                }
-              </span>
+          {/* Submit Status & Errors */}
+          {vendorIdLoading && (
+            <div className="mt-6 p-4 rounded-lg flex items-center space-x-2 bg-yellow-50 text-yellow-700">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>Loading vendor profile...</span>
+            </div>
+          )}
+          {vendorIdError && (
+            <div className="mt-6 p-4 rounded-lg flex items-center space-x-2 bg-red-50 text-red-700">
+              <AlertCircle className="w-5 h-5" />
+              <span>{vendorIdError}</span>
+            </div>
+          )}
+          {errors.vendorId && <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">{errors.vendorId}</div>}
+          {status === 'error' && apiError && (
+            <div className="mt-6 p-4 rounded-lg flex items-center space-x-2 bg-red-50 text-red-700">
+              <AlertCircle className="w-5 h-5" />
+              <span>{apiError}</span>
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="bg-gray-50 px-6 py-4 flex justify-between items-center">
+        {/* Sticky Footer */}
+        <div className="sticky bottom-0 left-0 right-0 bg-gray-50 px-4 sm:px-6 py-4 flex justify-between items-center shadow-[0_-2px_8px_-2px_rgba(16,64,16,0.08)] z-10">
+          <div className="flex space-x-3">{step > 1 && (<button aria-label="Previous step" type="button" onClick={prevStep} className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium">Previous</button>)}</div>
           <div className="flex space-x-3">
-            {currentStep > 1 && (
-              <button
-              type='button'
-                onClick={prevStep}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
-              >
-                Previous
-              </button>
-            )}
-          </div>
-          
-          <div className="flex space-x-3">
-            <button
-            type='button'
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium"
-            >
-              Cancel
-            </button>
-            
-            {currentStep < 3 ? (
-              <button
-              type='button'
-                onClick={nextStep}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors"
-              >
-                Next
-              </button>
+            <button aria-label="Cancel" type="button" onClick={onClose} className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium">Cancel</button>
+            {step < 3 ? (
+              <button aria-label="Next step" type="button" onClick={nextStep} className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">Next</button>
             ) : (
-              <button
-              type='button'
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                <span>{isSubmitting ? 'Adding Product...' : 'Add Product'}</span>
-              </button>
+              <button aria-label="Add product" type="button" onClick={handleSubmit} disabled={loading || vendorIdLoading || !vendorId} className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">{loading ? (<Loader2 className="w-4 h-4 animate-spin" />) : (<CheckCircle className="w-4 h-4" />)}<span>{loading ? 'Adding Product...' : 'Add Product'}</span></button>
             )}
           </div>
         </div>
