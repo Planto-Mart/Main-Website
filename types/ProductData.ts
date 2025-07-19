@@ -17,7 +17,7 @@ export default interface ProductDataType {
   discountPercent?: number;
   discountPrice?: number;
   variants?: string[];        // JSON
-  variant_state: boolean;
+  variantState: boolean;
   featured: boolean;
   created_at: string;         // ISO date string
   updated_at: string;         // ISO date string
