@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { supabase } from '../utils/supabase/client';
+import { API_ENDPOINTS } from '../config/api';
 
 import SignIn from './auth/Sign-in';
 
@@ -86,15 +87,55 @@ function Navbar() {
   // Fetch user profile data
   const fetchUserProfile = async (userId: string) => {
     console.log('Fetching user profile for ID:', userId);
-    const { data: profile, error } = await supabase
-      .from('profiles_dev')
-      .select('*')
-      .eq('id', userId)
-      .single();
-
-    if (error) {
-      console.error('Error fetching user profile:', error);
-      // If profile doesn't exist yet, create a basic one from auth data
+    try {
+      // Use the backend API instead of direct Supabase query
+      const res = await fetch(API_ENDPOINTS.getProfileByUUID(userId), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (!res.ok) {
+        console.error('Error fetching user profile:', res.status, res.statusText);
+        // If profile doesn't exist yet, create a basic one from auth data
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUser({
+            id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name,
+            avatar_url: user.user_metadata?.avatar_url || user.identities?.[0]?.identity_data?.avatar_url
+          });
+        }
+        return;
+      }
+      
+      const json = await res.json();
+      if (!json.success || !json.data) {
+        console.error('Error fetching user profile:', json.message);
+        // Fallback to auth data
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          setUser({
+            id: user.id,
+            email: user.email || '',
+            full_name: user.user_metadata?.full_name,
+            avatar_url: user.user_metadata?.avatar_url || user.identities?.[0]?.identity_data?.avatar_url
+          });
+        }
+        return;
+      }
+      
+      // Set user data from backend response
+      setUser({
+        id: json.data.id || json.data.user_uuid || userId,
+        email: json.data.email || '',
+        full_name: json.data.full_name || json.data.name,
+        avatar_url: json.data.avatar_url || json.data.profile_image
+      });
+      
+    } catch (err: any) {
+      console.error('Error fetching user profile:', err);
+      // Fallback to auth data
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser({
@@ -104,8 +145,6 @@ function Navbar() {
           avatar_url: user.user_metadata?.avatar_url || user.identities?.[0]?.identity_data?.avatar_url
         });
       }
-    } else if (profile) {
-      setUser(profile);
     }
   };
 

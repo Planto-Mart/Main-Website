@@ -2,7 +2,7 @@
 /** biome-ignore-all lint/correctness/noUnusedFunctionParameters: will see while refactoring */
 /** biome-ignore-all lint/correctness/noUnusedImports: will look in future */
 import { useState, useRef, useEffect } from 'react';
-import { X, Plus, Trash2, Loader2, CheckCircle, AlertCircle, Camera, Info } from 'lucide-react';
+import { X, Plus, Trash2, Loader2, CheckCircle, AlertCircle, Camera, Info, Building2, Edit } from 'lucide-react';
 import Image from 'next/image';
 import { API_ENDPOINTS } from '@/config/api';
 import { supabase } from '@/utils/supabase/client';
@@ -59,6 +59,8 @@ const ProductListingModal = ({ isOpen, onClose, onProductCreated }: {
   const [vendorId, setVendorId] = useState<string | null>(null);
   const [vendorIdLoading, setVendorIdLoading] = useState(false);
   const [vendorIdError, setVendorIdError] = useState<string | null>(null);
+  const [vendorBrandInfo, setVendorBrandInfo] = useState<any>(null);
+  const [brandInfoLoading, setBrandInfoLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -92,6 +94,8 @@ const ProductListingModal = ({ isOpen, onClose, onProductCreated }: {
           setVendorId(null);
         } else {
           setVendorId(found.vendor_id || found.user_uuid || found.user_id);
+          // Fetch vendor brand information
+          await fetchVendorBrandInfo(userId);
         }
       } catch (err: any) {
         setVendorIdError(err.message || 'Failed to fetch vendor ID.');
@@ -102,6 +106,32 @@ const ProductListingModal = ({ isOpen, onClose, onProductCreated }: {
     };
     fetchVendorId();
   }, [isOpen]);
+
+  // Fetch vendor brand information
+  const fetchVendorBrandInfo = async (userId: string) => {
+    setBrandInfoLoading(true);
+    try {
+      const res = await fetch(API_ENDPOINTS.getVendorByUserUUID(userId), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error('Failed to fetch vendor brand info');
+      const json = await res.json();
+      if (!json.success || !json.data) throw new Error(json.message || 'Vendor brand info not found');
+      
+      setVendorBrandInfo(json.data);
+      // Auto-fill brand field with vendor's business name
+      setForm(prev => ({
+        ...prev,
+        brand: json.data.business_name || json.data.name || ''
+      }));
+    } catch (err: any) {
+      console.error('Failed to fetch vendor brand info:', err);
+      // Don't show error to user, just log it
+    } finally {
+      setBrandInfoLoading(false);
+    }
+  };
 
   // Handle input changes
   const handleChange = (e: any) => {
@@ -311,6 +341,60 @@ const ProductListingModal = ({ isOpen, onClose, onProductCreated }: {
           {/* Step 1: Basic Information */}
           {step === 1 && (
             <div className="space-y-6">
+              {/* Vendor Brand Information */}
+              {vendorBrandInfo && (
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold text-green-800 flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      Your Store Information
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Close modal and navigate to store branding
+                        onClose();
+                        // You can add navigation logic here if needed
+                        alert('Please go to Store Branding tab to update your store information.');
+                      }}
+                      className="text-green-600 hover:text-green-700 text-sm flex items-center gap-1"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Update Store Info
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Store Name</label>
+                      <p className="text-sm text-gray-800 font-medium">{vendorBrandInfo.name || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Business Name</label>
+                      <p className="text-sm text-gray-800 font-medium">{vendorBrandInfo.business_name || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Contact Person</label>
+                      <p className="text-sm text-gray-800">{vendorBrandInfo.contact_person_name || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Contact Email</label>
+                      <p className="text-sm text-gray-800">{vendorBrandInfo.contact_email || 'Not set'}</p>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Business Address</label>
+                      <p className="text-sm text-gray-800">{vendorBrandInfo.business_address || 'Not set'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {brandInfoLoading && (
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 animate-spin text-green-600 mr-2" />
+                    <span className="text-sm text-gray-600">Loading store information...</span>
+                  </div>
+                </div>
+              )}
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Product Title *</label>
@@ -330,7 +414,29 @@ const ProductListingModal = ({ isOpen, onClose, onProductCreated }: {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Brand *</label>
-                <input type="text" name="brand" value={form.brand} onChange={handleChange} className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.brand ? 'border-red-500' : 'border-gray-300'}`} placeholder="Enter brand name" />
+                <div className="relative">
+                  <input 
+                    type="text" 
+                    name="brand" 
+                    value={form.brand} 
+                    onChange={handleChange} 
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.brand ? 'border-red-500' : 'border-gray-300'}`} 
+                    placeholder={vendorBrandInfo?.business_name || vendorBrandInfo?.name || "Enter brand name"} 
+                  />
+                  {vendorBrandInfo && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                      <div className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">
+                        Auto-filled from store
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {vendorBrandInfo ? 
+                    "Brand auto-filled from your store information. You can edit this field or update your store branding." : 
+                    "Enter your brand name or update your store information in the Store Branding section."
+                  }
+                </p>
                 {errors.brand && <p className="text-red-500 text-sm mt-1">{errors.brand}</p>}
               </div>
             </div>

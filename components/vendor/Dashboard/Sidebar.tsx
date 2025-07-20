@@ -214,6 +214,19 @@ function Sidebar({ activeTab, setActiveTab, vendorData, isMenuOpen, onClose }: S
               <Settings className="mr-3 size-5 shrink-0" />
               <span className="truncate">Settings</span>
             </button>
+            {/* Store Branding Tab */}
+            <button
+              type='button'
+              onClick={() => handleTabChange('storeBranding')}
+              className={`flex w-full items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                activeTab === 'storeBranding'
+                  ? 'bg-green-50 text-green-700'
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <span className="mr-3 text-lg">🌿</span>
+              <span className="truncate">Store Branding</span>
+            </button>
           </div>
         </nav>
         {/* Sign Out Button */}

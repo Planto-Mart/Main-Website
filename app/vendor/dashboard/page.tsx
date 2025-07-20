@@ -17,6 +17,7 @@ import OrdersTab from '@/components/vendor/Dashboard/OrdersTab';
 import ReviewsTab from '@/components/vendor/Dashboard/ReviewsTab';
 import CustomersTab from '@/components/vendor/Dashboard/CustomersTab';
 import SettingsTab from '@/components/vendor/Dashboard/SettingsTab';
+import StoreBrandingTab from '@/components/vendor/Dashboard/StoreBrandingTab';
 
 export default function VendorDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -412,6 +413,16 @@ export default function VendorDashboard() {
           isMenuOpen={isMenuOpen}
           onClose={() => setIsMenuOpen(false)}
         />
+        {/* Store Branding Tab Button (for mobile/desktop sidebar) */}
+        <div className="md:hidden flex flex-col border-t border-gray-200 bg-white">
+          <button
+            type="button"
+            onClick={() => setActiveTab('storeBranding')}
+            className={`flex items-center px-4 py-3 text-sm font-medium ${activeTab === 'storeBranding' ? 'bg-green-50 text-green-700' : 'text-gray-700 hover:bg-gray-50'}`}
+          >
+            <span className="mr-3">🌿</span> Store Branding
+          </button>
+        </div>
       </div>
       {/* Main Content */}
       <div className="flex-1 overflow-auto pt-16 md:pt-0">
@@ -446,6 +457,9 @@ export default function VendorDashboard() {
         )}
         {activeTab === 'settings' && (
           <SettingsTab vendorData={vendorData} />
+        )}
+        {activeTab === 'storeBranding' && (
+          <StoreBrandingTab />
         )}
       </div>
     </div>

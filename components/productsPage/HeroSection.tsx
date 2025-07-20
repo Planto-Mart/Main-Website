@@ -14,6 +14,18 @@ interface HeroSectionProps {
   slug: string; // Changed from productId to slug since we'll use slug for routing
 }
 
+interface VendorData {
+  id: number;
+  slug: string;
+  name: string;
+  business_name: string;
+  contact_person_name: string;
+  contact_email: string;
+  business_address: string;
+  is_verified: number;
+  status: string;
+}
+
 const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const [product, setProduct] = useState<ProductDataType | null>(null);
   const [variants, setVariants] = useState<ProductDataType[]>([]);
@@ -24,6 +36,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [vendorData, setVendorData] = useState<VendorData | null>(null);
+  const [vendorLoading, setVendorLoading] = useState(false);
+  const [vendorError, setVendorError] = useState<string | null>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const element_unique_id = useId();
 
@@ -42,12 +57,66 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
       const foundProduct = json.data.find((p: ProductDataType) => p.slug === slug);
       if (!foundProduct) throw new Error('Product not found');
       setProduct(foundProduct);
+      // Fetch vendor data for this product
+      if (foundProduct.vendorID) {
+        await fetchVendorData(foundProduct.vendorID);
+      }
       // Optionally, set variants here if needed
     } catch (err: any) {
       setError(err.message || 'Failed to fetch product');
       setProduct(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch vendor data by user UUID
+  const fetchVendorData = async (vendorId: string) => {
+    setVendorLoading(true);
+    setVendorError(null);
+    try {
+      // First, try to get all vendors and find the one with matching vendor_id
+      const allVendorsRes = await fetch(API_ENDPOINTS.getAllVendorsPublic);
+      if (!allVendorsRes.ok) throw new Error('Failed to fetch vendors');
+      const vendorsJson = await allVendorsRes.json();
+      if (!vendorsJson.success || !Array.isArray(vendorsJson.data)) throw new Error('Vendors data error');
+      
+      const foundVendor = vendorsJson.data.find((v: any) => 
+        v.vendor_id === vendorId || 
+        v.id === vendorId || 
+        v.user_uuid === vendorId
+      );
+      
+      if (foundVendor) {
+        setVendorData(foundVendor);
+        return;
+      }
+      
+      // If not found in public vendors, try to get user UUID and fetch vendor data
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setVendorError('Not authenticated.');
+        return;
+      }
+      
+      // Try to fetch vendor data using the user UUID
+      const res = await fetch(API_ENDPOINTS.getVendorByUserUUID(session.user.id), {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      if (res.ok) {
+        const json = await res.json();
+        if (!json.success || !json.data) throw new Error(json.message || 'Vendor not found');
+         setVendorData(json.data);
+      } else {
+        setVendorError('Vendor not found');
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch vendor data:', err);
+      setVendorError(err.message || 'Failed to fetch vendor data');
+    } finally {
+      setVendorLoading(false);
     }
   };
 
@@ -260,9 +329,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
             <h1 className="mb-2 text-xl font-bold text-blue-600 sm:text-2xl">{product.title}</h1>
             {/* Vendor & Rating */}
             <div className="mb-4">
-              <Link href={`/vendor/${product.vendorID}`} className="text-sm font-medium text-green-600 hover:underline">
-                Visit the {product.brand} Store
-              </Link>
+              {vendorData ? (
+                <Link href={`/vendor/${vendorData.slug}`} className="text-sm font-medium text-green-600 hover:underline">
+                  Visit the {vendorData.name || vendorData.business_name || product.brand} Store
+                </Link>
+              ) : vendorLoading ? (
+                <span className="text-sm text-gray-500">Loading vendor info...</span>
+              ) : (
+                <span className="text-sm text-gray-500">{product.brand} Store</span>
+              )}
               <div className="mt-1 flex items-center">
                 <div className="flex items-center">
                   {renderStars(product.raiting)}
@@ -427,11 +502,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                 </div>
                 <div className="flex">
                   <span className="w-20 font-medium text-gray-500">Sold by</span>
-                  <span className="text-green-600 hover:underline">
-                    <Link href={`/vendor/${product.vendorID}`}>
-                      {product.brand}
-                    </Link>
-                  </span>
+                  {vendorData ? (
+                    <span className="text-green-600 hover:underline">
+                      <Link href={`/vendor/${vendorData.slug}`}>
+                        {vendorData.name || vendorData.business_name || product.brand}
+                      </Link>
+                    </span>
+                  ) : (
+                    <span className="text-gray-700">{product.brand}</span>
+                  )}
                 </div>
               </div>
             </div>
