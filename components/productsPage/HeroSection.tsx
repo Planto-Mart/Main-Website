@@ -330,7 +330,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
             {/* Vendor & Rating */}
             <div className="mb-4">
               {vendorData ? (
-                <Link href={`/vendor/${vendorData.slug}`} className="text-sm font-medium text-green-600 hover:underline">
+                <Link href={`/vendor/store/${vendorData.slug}`} className="text-sm font-medium text-green-600 hover:underline">
                   Visit the {vendorData.name || vendorData.business_name || product.brand} Store
                 </Link>
               ) : vendorLoading ? (

@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
 
     getAllVendorsPublic: `${API_BASE_URL}/vendor/get-all-vendors`,
     getVendorByUserUUID: (user_uuid: string) => `${API_BASE_URL}/vendor/get/${user_uuid}`,
+    getVendorBySlug: (slug: string) => `${API_BASE_URL}/vendor/get-by-slug/${slug}`,
     
     // Admin-only vendor endpoints
     getAllVendorsAdmin: `${API_BASE_URL}/vendor/get-all-vendors-admin`,
