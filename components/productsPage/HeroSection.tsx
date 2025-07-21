@@ -45,6 +45,71 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const imageRef = useRef<HTMLDivElement>(null);
   const element_unique_id = useId();
 
+  // Add this helper above the currentImageGallery definition
+  const normalizeGallery = (gallery: any): string[] => {
+    console.log('normalizeGallery input:', gallery);
+    let arr: any[] = [];
+    if (!gallery) return ['/assets/placeholder.jpg'];
+    if (typeof gallery === 'string') {
+      try {
+        // Try to parse stringified JSON array
+        const parsed = JSON.parse(gallery);
+        if (Array.isArray(parsed)) arr = parsed;
+        else arr = [gallery];
+      } catch {
+        arr = [gallery];
+      }
+    } else if (Array.isArray(gallery)) {
+      arr = gallery.flat();
+    } else {
+      return ['/assets/placeholder.jpg'];
+    }
+    const valid = arr.filter(
+      (img) =>
+        typeof img === 'string' &&
+        (
+          img.startsWith('/') ||
+          img.startsWith('http') ||
+          img.startsWith('data:image/')
+        )
+    );
+    console.log('normalizeGallery output:', valid);
+    return valid.length > 0 ? valid : ['/assets/placeholder.jpg'];
+  };
+
+  // Derived: which image gallery to use (variant or product)
+  const currentImageGallery = (() => {
+    if (selectedVariant) {
+      const v = variants.find(v => v.variant_id === selectedVariant);
+      if (v) return normalizeGallery(v.image_gallery);
+    }
+    return normalizeGallery(product?.image_gallery);
+  })();
+
+  // Derived: which product info to display (variant or main)
+  const displayProduct = (() => {
+    if (selectedVariant) {
+      const v = variants.find(v => v.variant_id === selectedVariant);
+      if (v) {
+        return {
+          ...product!,
+          price: v.price,
+          discountPrice: v.discount_price,
+          discountPercent: v.discount_percent,
+          quantity: v.quantity,
+          title: `${baseTitle} - ${v.variant_name}`,
+          // Use main product's image_gallery as fallback if variant has none
+          image_gallery: v.image_gallery && v.image_gallery.length > 0 ? v.image_gallery : product!.image_gallery,
+        };
+      }
+    }
+    return product!;
+  })();
+
+  // --- Price display helpers ---
+  const getDisplayPrice = (p: typeof displayProduct) => p.discountPrice ?? p.price;
+  const getStrikedPrice = (p: typeof displayProduct) => p.discountPrice ? p.price : undefined;
+
   // Fetch product by slug and get variants
   const fetchProductBySlug = async () => {
     setLoading(true);
@@ -134,6 +199,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
+
+  // When selectedVariant changes, reset selectedImage
+  useEffect(() => {
+    setSelectedImage(0);
+  }, [selectedVariant, currentImageGallery.length]);
 
   const handleQuantityChange = (increment: boolean) => {
     if (!product) return;
@@ -291,15 +361,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                   <Search className="size-5 text-gray-500" />
                 </div>
                 <Image
-                  src={product.image_gallery[selectedImage] || '/assets/placeholder.jpg'}
-                  alt={product.title}
+                  src={currentImageGallery[selectedImage] || '/assets/placeholder.jpg'}
+                  alt={displayProduct.title}
                   fill
                   className="object-cover"
                   priority
                 />
               </div>
               <div className="flex space-x-2 overflow-x-auto pb-2">
-                {product.image_gallery.map((img, index) => (
+                {currentImageGallery.map((img, index) => (
                   <button
                     type='button'
                     // biome-ignore lint/suspicious/noArrayIndexKey: don't need it here
@@ -311,7 +381,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                   >
                     <Image
                       src={img || '/assets/placeholder.jpg'}
-                      alt={`${product.title} - view ${index + 1}`}
+                      alt={`${displayProduct.title} - view ${index + 1}`}
                       fill
                       className="object-cover"
                     />
@@ -331,7 +401,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                   <div 
                     className="size-full" 
                     style={{
-                      backgroundImage: `url(${product.image_gallery[selectedImage] || '/assets/placeholder.jpg'})`,
+                      backgroundImage: `url(${currentImageGallery[selectedImage] || '/assets/placeholder.jpg'})`,
                       backgroundPosition: `${mousePosition.x}% ${mousePosition.y}%`,
                       backgroundSize: '250%',
                       backgroundRepeat: 'no-repeat'
@@ -343,7 +413,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
           </div>
           {/* Middle Column - Product Details */}
           <div className="lg:col-span-5">
-            <h1 className="mb-2 text-xl font-bold text-blue-600 sm:text-2xl">{product.title}</h1>
+            <h1 className="mb-2 text-xl font-bold text-blue-600 sm:text-2xl">{displayProduct.title}</h1>
             {/* Vendor & Rating */}
             <div className="mb-4">
               {vendorData ? (
@@ -367,12 +437,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
             {/* Price */}
             <div className="mb-4 border-b border-gray-200 pb-4">
               <div className="flex items-baseline">
-                <span className="text-xl font-bold text-gray-800">₹{formatIndianPrice(product.price)}</span>
-                {product.discountPrice && (
+                <span className="text-xl font-bold text-gray-800">₹{formatIndianPrice(getDisplayPrice(displayProduct))}</span>
+                {getStrikedPrice(displayProduct) !== undefined && (
                   <>
-                    <span className="ml-2 text-sm text-gray-500 line-through">₹{formatIndianPrice(product.discountPrice)}</span>
-                    {product.discountPercent && (
-                      <span className="ml-2 text-sm font-medium text-green-600">-{product.discountPercent}%</span>
+                    <span className="ml-2 text-sm text-gray-500 line-through">₹{formatIndianPrice(getStrikedPrice(displayProduct)!)}</span>
+                    {displayProduct.discountPercent && (
+                      <span className="ml-2 text-sm font-medium text-green-600">-{displayProduct.discountPercent}%</span>
                     )}
                   </>
                 )}
@@ -396,13 +466,22 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                       }`}
                     >
                       <span className="text-xs font-medium text-gray-600">{variant.variant_name}</span>
-                      <span className="mt-1 text-sm font-bold text-gray-800">₹{formatIndianPrice(variant.price)}</span>
+                      <span className="mt-1 text-sm font-bold text-gray-800">₹{formatIndianPrice(variant.discount_price ?? variant.price)}</span>
                       {variant.discount_price && (
-                        <span className="text-xs text-gray-500 line-through">₹{formatIndianPrice(variant.discount_price)}</span>
+                        <span className="text-xs text-gray-500 line-through">₹{formatIndianPrice(variant.price)}</span>
                       )}
                     </button>
                   ))}
                 </div>
+                {selectedVariant && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedVariant(null)}
+                    className="mt-2 px-2 py-1 text-xs rounded bg-gray-200 hover:bg-gray-300 text-gray-700"
+                  >
+                    Show main product
+                  </button>
+                )}
               </div>
             )}
             {/* About This Item */}
@@ -423,20 +502,20 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
           <div className="lg:col-span-3">
             <div className="sticky top-24 rounded-lg border border-gray-200 bg-white p-4 shadow-md">
               <div className="mb-4">
-                <span className="text-xl font-bold text-gray-800">₹{formatIndianPrice(product.price)}</span>
-                {product.discountPrice && (
+                <span className="text-xl font-bold text-gray-800">₹{formatIndianPrice(getDisplayPrice(displayProduct))}</span>
+                {getStrikedPrice(displayProduct) !== undefined && (
                   <div className="mt-1">
-                    <span className="text-sm text-gray-500 line-through">₹{formatIndianPrice(product.discountPrice)}</span>
-                    {product.discountPercent && (
-                      <span className="ml-2 text-sm font-medium text-green-600">Save {product.discountPercent}%</span>
+                    <span className="text-sm text-gray-500 line-through">₹{formatIndianPrice(getStrikedPrice(displayProduct)!)}</span>
+                    {displayProduct.discountPercent && (
+                      <span className="ml-2 text-sm font-medium text-green-600">Save {displayProduct.discountPercent}%</span>
                     )}
                   </div>
                 )}
                 <p className="mt-1 text-xs text-gray-500">FREE delivery <span className="font-bold text-gray-700">Tuesday, 27 May</span></p>
               </div>
               <div className="mb-4 flex items-center text-sm">
-                <span className={`font-medium ${product.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {product.quantity > 0 ? 'In stock' : 'Out of stock'}
+                <span className={`font-medium ${displayProduct.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {displayProduct.quantity > 0 ? 'In stock' : 'Out of stock'}
                 </span>
               </div>
               {/* Quantity Selector */}
@@ -463,7 +542,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                   <button
                     type='button'
                     onClick={() => handleQuantityChange(true)}
-                    disabled={quantity >= product.quantity}
+                    disabled={quantity >= displayProduct.quantity}
                     className="rounded-md p-1 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <PlusCircle className="size-5" />
@@ -474,7 +553,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               <button
                 type='button'
                 onClick={handleAddToCart}
-                disabled={product.quantity <= 0}
+                disabled={displayProduct.quantity <= 0}
                 className="mb-2 w-full rounded-full bg-yellow-400 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-yellow-500 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Add to Cart
@@ -482,7 +561,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
               {/* Buy Now Button */}
               <button
                 type='button'
-                disabled={product.quantity <= 0}
+                disabled={displayProduct.quantity <= 0}
                 className="mb-4 w-full rounded-full bg-orange-500 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Buy Now

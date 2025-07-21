@@ -107,6 +107,7 @@ const ProductListingModal = ({
   const [formErrorSummary, setFormErrorSummary] = useState<string[]>([]);
   const firstErrorRef = useRef<HTMLInputElement | null>(null);
   const [variantDeleteLoading, setVariantDeleteLoading] = useState<string | null>(null);
+  const variantFileInputRefs = useRef<{ [key: string]: HTMLInputElement }>({});
 
   // Initialize form with product data when editing
   useEffect(() => {
@@ -355,6 +356,41 @@ const ProductListingModal = ({
     }
   };
 
+  const handleVariantImageUpload = async (index: number, e: any) => {
+    const files = Array.from(e.target.files) as File[];
+    if (files.length === 0) return;
+
+    try {
+      const base64Promises = files.map(file => toBase64(file));
+      const base64Results = await Promise.all(base64Promises);
+      
+      setVariants(prev => prev.map((variant, i) => {
+        if (i === index) {
+          const currentImages = variant.image_gallery || [];
+          return {
+            ...variant,
+            image_gallery: [...currentImages, ...base64Results]
+          };
+        }
+        return variant;
+      }));
+    } catch (error) {
+      console.error('Error converting variant images to base64:', error);
+    }
+  };
+
+  const removeVariantImage = (variantIndex: number, imageIndex: number) => {
+    setVariants(prev => prev.map((variant, i) => {
+      if (i === variantIndex && variant.image_gallery) {
+        return {
+          ...variant,
+          image_gallery: variant.image_gallery.filter((_, imgI) => imgI !== imageIndex)
+        };
+      }
+      return variant;
+    }));
+  };
+
   function toBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -371,6 +407,21 @@ const ProductListingModal = ({
       ...prev,
       image_gallery: prev.image_gallery.filter((_, i) => i !== index)
     }));
+  };
+
+  const normalizeVariantGallery = (gallery: any): string[] => {
+    if (!gallery) return [];
+    if (typeof gallery === 'string') {
+      try {
+        const parsed = JSON.parse(gallery);
+        if (Array.isArray(parsed)) return parsed;
+        return [gallery];
+      } catch {
+        return [gallery];
+      }
+    }
+    if (Array.isArray(gallery)) return gallery;
+    return [];
   };
 
   const validate = () => {
@@ -433,6 +484,12 @@ const ProductListingModal = ({
         if (!variant.variant_type || !variant.variant_type.trim()) {
           newErrors[`variant_${index}_type`] = 'Variant type is required';
           errorSummary.push(`Variant ${index + 1}: Type is required`);
+        }
+        
+        // Optional: Require at least one image per variant
+        if (!variant.image_gallery || variant.image_gallery.length === 0) {
+          newErrors[`variant_${index}_images`] = 'At least one image is required for each variant';
+          errorSummary.push(`Variant ${index + 1}: At least one image is required`);
         }
       });
     }
@@ -989,6 +1046,50 @@ const ProductListingModal = ({
                               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" 
                               placeholder="Optional description for this variant..."
                             />
+                          </div>
+
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Variant Images</label>
+                            <div 
+                              className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-blue-500 transition-colors"
+                              onClick={() => variantFileInputRefs.current[`variant-${index}`]?.click()}
+                            >
+                              <Camera className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                              <p className="text-xs text-gray-600">Click to upload variant images</p>
+                              <input
+                                type="file"
+                                ref={el => { variantFileInputRefs.current[`variant-${index}`] = el as HTMLInputElement; }}
+                                multiple
+                                accept="image/*"
+                                onChange={(e) => handleVariantImageUpload(index, e)}
+                                className="hidden"
+                              />
+                            </div>
+
+                            {/* Variant Image Preview */}
+                            {normalizeVariantGallery(variant.image_gallery).length > 0 && (
+                              <div className="grid grid-cols-3 gap-2 mt-2">
+                                {normalizeVariantGallery(variant.image_gallery).map((img, imgIndex) => (
+                                  <div key={imgIndex} className="relative group">
+                                    <Image
+                                      width={100}
+                                      height={100}
+                                      src={img}
+                                      alt={`Variant ${variant.variant_name} image ${imgIndex + 1}`}
+                                      className="w-full h-20 object-cover rounded-lg"
+                                    />
+                                    <button
+                                      aria-label="Remove variant image"
+                                      type="button"
+                                      onClick={() => removeVariantImage(index, imgIndex)}
+                                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
