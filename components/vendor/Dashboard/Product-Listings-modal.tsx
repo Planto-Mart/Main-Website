@@ -88,6 +88,7 @@ const ProductListingModal = ({
     discount_percent: string;
     description: string;
     image_gallery: string[];
+    variant_id?: string; // Added for existing variants
   }>>([]);
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -105,6 +106,7 @@ const ProductListingModal = ({
   const [brandInfoLoading, setBrandInfoLoading] = useState(false);
   const [formErrorSummary, setFormErrorSummary] = useState<string[]>([]);
   const firstErrorRef = useRef<HTMLInputElement | null>(null);
+  const [variantDeleteLoading, setVariantDeleteLoading] = useState<string | null>(null);
 
   // Initialize form with product data when editing
   useEffect(() => {
@@ -143,6 +145,7 @@ const ProductListingModal = ({
           discount_percent: v.discount_percent?.toString() || '',
           description: v.description || '',
           image_gallery: v.image_gallery || [],
+          variant_id: v.variant_id, // Add variant_id
         })));
       } else if (product.variantState && Array.isArray(product.variants) && product.variants.length > 0 && typeof product.variants[0] === 'object') {
         // Fallback: If legacy variants is an array of objects (rare)
@@ -154,6 +157,7 @@ const ProductListingModal = ({
           discount_percent: v.discount_percent?.toString() || '',
           description: v.description || '',
           image_gallery: v.image_gallery || [],
+          variant_id: v.variant_id, // Add variant_id
         })));
       } else {
         setVariants([]);
@@ -300,7 +304,28 @@ const ProductListingModal = ({
     }]);
   };
 
-  const removeVariant = (index: number) => {
+  const removeVariant = async (index: number) => {
+    const variant = variants[index];
+    if (variant.variant_id) {
+      setVariantDeleteLoading(variant.variant_id);
+      try {
+        const res = await fetch(API_ENDPOINTS.deleteProductVariant(variant.variant_id), {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        const json = await res.json();
+        if (!res.ok || !json.success) {
+          alert('Failed to delete variant: ' + (json.message || 'Unknown error'));
+          setVariantDeleteLoading(null);
+          return;
+        }
+      } catch (err) {
+        alert('Error deleting variant.');
+        setVariantDeleteLoading(null);
+        return;
+      }
+      setVariantDeleteLoading(null);
+    }
     setVariants(prev => prev.filter((_, i) => i !== index));
   };
 
@@ -459,7 +484,7 @@ const ProductListingModal = ({
           quantity: parseInt(form.quantity),
           discount_percent: form.discount_percent ? parseFloat(form.discount_percent) : null,
           discountPrice: form.discount_percent ? (parseFloat(form.price) - (parseFloat(form.price) * parseFloat(form.discount_percent) / 100)) : null,
-          variants: form.variantState ? form.variants.filter((v) => v.trim()) : null,
+          variants: form.variantState ? variants : null, // Use variants state (array of objects)
           variantState: form.variantState,
           featured: form.featured,
         };
@@ -542,7 +567,7 @@ const ProductListingModal = ({
           quantity: parseInt(form.quantity),
           discount_percent: form.discount_percent ? parseFloat(form.discount_percent) : null,
           discountPrice: form.discount_percent ? (parseFloat(form.price) - (parseFloat(form.price) * parseFloat(form.discount_percent) / 100)) : null,
-          variants: form.variantState ? form.variants.filter((v) => v.trim()) : null,
+          variants: form.variantState ? variants : null, // Use variants state (array of objects)
           variantState: form.variantState,
           featured: form.featured,
           updatedAt: new Date().toISOString(),
@@ -562,9 +587,9 @@ const ProductListingModal = ({
           return;
         }
         
-        // Create variants if variantState is true and variants exist
+        // Create or update variants if variantState is true and variants exist
         if (form.variantState && variants.length > 0) {
-          let variantCreationSuccess = true;
+          let variantOpsSuccess = true;
           for (const variant of variants) {
             try {
               const variantPayload = {
@@ -577,27 +602,44 @@ const ProductListingModal = ({
                 image_gallery: variant.image_gallery && variant.image_gallery.length > 0 ? variant.image_gallery : null,
                 description: variant.description ? variant.description.trim() : null,
               };
-              console.log('Creating variant with payload:', variantPayload);
-              const variantRes = await fetch(API_ENDPOINTS.createProductVariant, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(variantPayload),
-              });
-              const variantJson = await variantRes.json();
-              if (!variantRes.ok) {
-                console.error('Failed to create variant:', variant.variant_name, variantJson);
-                variantCreationSuccess = false;
-                setApiError(`Failed to create variant: ${variant.variant_name} - ${variantJson.message}`);
+              if (variant.variant_id) {
+                // Update existing variant
+                const variantRes = await fetch(API_ENDPOINTS.updateProductVariant(variant.variant_id), {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(variantPayload),
+                });
+                const variantJson = await variantRes.json();
+                if (!variantRes.ok) {
+                  console.error('Failed to update variant:', variant.variant_name, variantJson);
+                  variantOpsSuccess = false;
+                  setApiError(`Failed to update variant: ${variant.variant_name} - ${variantJson.message}`);
+                } else {
+                  console.log('Variant updated successfully:', variantJson);
+                }
               } else {
-                console.log('Variant created successfully:', variantJson);
+                // Create new variant
+                const variantRes = await fetch(API_ENDPOINTS.createProductVariant, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(variantPayload),
+                });
+                const variantJson = await variantRes.json();
+                if (!variantRes.ok) {
+                  console.error('Failed to create variant:', variant.variant_name, variantJson);
+                  variantOpsSuccess = false;
+                  setApiError(`Failed to create variant: ${variant.variant_name} - ${variantJson.message}`);
+                } else {
+                  console.log('Variant created successfully:', variantJson);
+                }
               }
             } catch (error) {
-              console.error('Error creating variant:', variant.variant_name, error);
-              variantCreationSuccess = false;
-              setApiError(`Error creating variant: ${variant.variant_name}`);
+              console.error('Error creating/updating variant:', variant.variant_name, error);
+              variantOpsSuccess = false;
+              setApiError(`Error creating/updating variant: ${variant.variant_name}`);
             }
           }
-          if (!variantCreationSuccess) {
+          if (!variantOpsSuccess) {
             setStatus('error');
             return;
           }
@@ -857,8 +899,9 @@ const ProductListingModal = ({
                               type="button" 
                               onClick={() => removeVariant(index)} 
                               className="text-red-500 hover:text-red-700 p-1 rounded"
+                              disabled={variantDeleteLoading === variant.variant_id}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              {variantDeleteLoading === variant.variant_id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                             </button>
                           </div>
                           

@@ -32,6 +32,7 @@ function ProductsTab({ products, loading, error, onRefresh, user, vendorId }: Pr
   // Add state for edit modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<ProductDataType | null>(null);
+  const [editModalLoading, setEditModalLoading] = useState(false);
 
   // Filter products based on search term and status
   const filteredProducts = products.filter(product => {
@@ -217,11 +218,28 @@ function ProductsTab({ products, loading, error, onRefresh, user, vendorId }: Pr
                         <button
                           type='button'
                           className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                          onClick={() => {
-                            setProductToEdit(product);
-                            setIsEditModalOpen(true);
+                          onClick={async () => {
+                            setEditModalLoading(true);
+                            try {
+                              const res = await fetch(API_ENDPOINTS.getProductBySlug(product.slug), {
+                                method: 'GET',
+                                headers: { 'Content-Type': 'application/json' },
+                              });
+                              const json = await res.json();
+                              if (json.success && json.data) {
+                                setProductToEdit(json.data);
+                                setIsEditModalOpen(true);
+                              } else {
+                                alert('Failed to load product details for editing.');
+                              }
+                            } catch (err) {
+                              alert('Error loading product details.');
+                            } finally {
+                              setEditModalLoading(false);
+                            }
                           }}
                           title="Edit"
+                          disabled={editModalLoading}
                         >
                           <Edit className="size-4" />
                         </button>
