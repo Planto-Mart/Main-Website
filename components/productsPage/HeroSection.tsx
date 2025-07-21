@@ -7,7 +7,9 @@ import Link from 'next/link';
 import { Star, X, Search, ShieldCheck, Heart, MinusCircle, PlusCircle } from 'lucide-react';
 
 import { supabase } from '@/utils/supabase/client';
-import type ProductDataType from '@/types/ProductData';
+// import  {ProductDataType,ProductVariantType } from '@/types/ProductData';
+import ProductDataType from '@/types/ProductData';
+import { ProductVariantType } from '@/types/ProductData';
 import { API_ENDPOINTS } from '@/config/api';
 
 interface HeroSectionProps {
@@ -28,7 +30,8 @@ interface VendorData {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const [product, setProduct] = useState<ProductDataType | null>(null);
-  const [variants, setVariants] = useState<ProductDataType[]>([]);
+  const [baseTitle, setBaseTitle] = useState<string>('');
+  const [variants, setVariants] = useState<ProductVariantType[]>([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
@@ -42,29 +45,34 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const imageRef = useRef<HTMLDivElement>(null);
   const element_unique_id = useId();
 
-  // Fetch all products and find the one with the matching slug
-  const fetchProductFromAllAPI = async () => {
+  // Fetch product by slug and get variants
+  const fetchProductBySlug = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(API_ENDPOINTS.getAllProducts, {
+      const res = await fetch(API_ENDPOINTS.getProductBySlug(slug), {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      if (!res.ok) throw new Error('Failed to fetch products');
+      if (!res.ok) throw new Error('Failed to fetch product');
       const json = await res.json();
-      if (!json.success || !Array.isArray(json.data)) throw new Error(json.message || 'Products not found');
-      const foundProduct = json.data.find((p: ProductDataType) => p.slug === slug);
-      if (!foundProduct) throw new Error('Product not found');
-      setProduct(foundProduct);
-      // Fetch vendor data for this product
-      if (foundProduct.vendorID) {
-        await fetchVendorData(foundProduct.vendorID);
+      if (!json.success || !json.data) throw new Error(json.message || 'Product not found');
+      setProduct(json.data);
+      setBaseTitle(json.data.title); // Store the original title
+      if (json.data.variants && Array.isArray(json.data.variants)) {
+        setVariants(json.data.variants);
+      } else {
+        setVariants([]);
       }
-      // Optionally, set variants here if needed
+      // Fetch vendor data for this product
+      if (json.data.vendorID) {
+        await fetchVendorData(json.data.vendorID);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to fetch product');
       setProduct(null);
+      setVariants([]);
+      setBaseTitle('');
     } finally {
       setLoading(false);
     }
@@ -122,7 +130,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
 
   useEffect(() => {
     if (slug) {
-      fetchProductFromAllAPI();
+      fetchProductBySlug();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
@@ -140,9 +148,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const handleVariantSelect = (variantId: string) => {
     setSelectedVariant(variantId);
     // Find and set the selected variant as the current product
-    const selectedVariantProduct = variants.find(v => v.product_id === variantId);
-    if (selectedVariantProduct) {
-      setProduct(selectedVariantProduct);
+    const selectedVariantObj = variants.find(v => v.variant_id === variantId);
+    if (selectedVariantObj) {
+      setProduct({
+        ...product!,
+        price: selectedVariantObj.price,
+        discountPrice: selectedVariantObj.discount_price,
+        discountPercent: selectedVariantObj.discount_percent,
+        image_gallery: selectedVariantObj.image_gallery || product!.image_gallery,
+        quantity: selectedVariantObj.quantity,
+        title: `${baseTitle} - ${selectedVariantObj.variant_name}`,
+        // Optionally, add more fields if needed
+      });
       setSelectedImage(0); // Reset selected image when variant changes
       setQuantity(1); // Reset quantity when variant changes
     }
@@ -245,7 +262,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
           </span>
           <h2 className="text-2xl font-bold text-red-700">Oops! Product not found</h2>
           <p className="text-red-600">{error}</p>
-          <button type="button" onClick={fetchProductFromAllAPI} className="mt-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">Retry</button>
+          <button type="button" onClick={fetchProductBySlug} className="mt-2 rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700">Retry</button>
         </div>
       </section>
     );
@@ -370,18 +387,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
                   {variants.map((variant) => (
                     <button
                       type='button'
-                      key={variant.product_id}
-                      onClick={() => handleVariantSelect(variant.product_id)}
+                      key={variant.variant_id}
+                      onClick={() => handleVariantSelect(variant.variant_id)}
                       className={`flex flex-col rounded-md border p-2 text-left transition ${
-                        selectedVariant === variant.product_id 
+                        selectedVariant === variant.variant_id 
                           ? 'border-green-600 bg-green-50 ring-1 ring-green-600' 
                           : 'border-gray-200 bg-white hover:border-green-600'
                       }`}
                     >
-                      <span className="text-xs font-medium text-gray-600">{variant.title}</span>
+                      <span className="text-xs font-medium text-gray-600">{variant.variant_name}</span>
                       <span className="mt-1 text-sm font-bold text-gray-800">₹{formatIndianPrice(variant.price)}</span>
-                      {variant.discountPrice && (
-                        <span className="text-xs text-gray-500 line-through">₹{formatIndianPrice(variant.discountPrice)}</span>
+                      {variant.discount_price && (
+                        <span className="text-xs text-gray-500 line-through">₹{formatIndianPrice(variant.discount_price)}</span>
                       )}
                     </button>
                   ))}

@@ -23,5 +23,23 @@ export default interface ProductDataType {
   updated_at: string;         // ISO date string
 }
 
+// Product Variant Type (matches backend productVariants table)
+export interface ProductVariantType {
+  variant_id: string;
+  parent_product_id: string;
+  slug: string;
+  variant_name: string;
+  variant_type: string;
+  price: number;
+  quantity: number;
+  discount_percent?: number;
+  discount_price?: number;
+  image_gallery?: string[];
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 
 // /products/{vendor-slug}/{product-slug}

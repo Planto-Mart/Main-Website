@@ -28,6 +28,12 @@ export const API_ENDPOINTS = {
     getProductById: (slug: string) => `${API_BASE_URL}/product/get/${slug}`,
     deleteProduct: (product_id: string) => `${API_BASE_URL}/product/delete/${product_id}`,
     updateProduct: (user_uuid: string) => `${API_BASE_URL}/product/update/${user_uuid}`,
+    getProductBySlug: (slug: string) => `${API_BASE_URL}/product/get-by-slug/${slug}`,
+
+    // product variant Endpoints
+    createProductVariant: `${API_BASE_URL}/product/variants/create`,
+    updateProductVariant: (variant_id: string) => `${API_BASE_URL}/product/variants/update/${variant_id}`,
+    deleteProductVariant: (variant_id: string) => `${API_BASE_URL}/product/variants/delete/${variant_id}`,
 
 
 }   

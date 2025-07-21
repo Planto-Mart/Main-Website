@@ -29,6 +29,10 @@ function ProductsTab({ products, loading, error, onRefresh, user, vendorId }: Pr
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [refreshLoading, setRefreshLoading] = useState(false);
 
+  // Add state for edit modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [productToEdit, setProductToEdit] = useState<ProductDataType | null>(null);
+
   // Filter products based on search term and status
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -213,7 +217,10 @@ function ProductsTab({ products, loading, error, onRefresh, user, vendorId }: Pr
                         <button
                           type='button'
                           className="rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                          // TODO: Implement edit logic
+                          onClick={() => {
+                            setProductToEdit(product);
+                            setIsEditModalOpen(true);
+                          }}
                           title="Edit"
                         >
                           <Edit className="size-4" />
@@ -272,12 +279,31 @@ function ProductsTab({ products, loading, error, onRefresh, user, vendorId }: Pr
           </div>
         </div>
       )}
+      {/* Product Listing Modal for Create */}
       <ProductListingModal
         isOpen={isProductListingModalOpen}
         onClose={() => setIsProductListingModalOpen(false)}
         // vendorID={vendorID}
         onProductCreated={onRefresh}
       />
+      {/* Product Listing Modal for Edit */}
+      {productToEdit && (
+        <ProductListingModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setProductToEdit(null);
+          }}
+          productToEdit={productToEdit}
+          mode="edit"
+          onProductCreated={onRefresh}
+          onProductUpdated={() => {
+            setIsEditModalOpen(false);
+            setProductToEdit(null);
+            onRefresh();
+          }}
+        />
+      )}
     </div>
   );
 }
