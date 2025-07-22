@@ -7,8 +7,8 @@ import Features from "@/components/home/Categories_Featured";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Testimonials from "@/components/home/Testimonials";
-// import Hero from "@/components/home/Hero";
-import Hero from "@/components/home/Hero-with-backend"; 
+import Hero from "@/components/home/Hero";
+// import Hero from "@/components/home/Hero-with-backend"; 
 // // can use idb-kevyal even for caching images and all
 
 export default function Home() {
