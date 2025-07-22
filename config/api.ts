@@ -30,6 +30,10 @@ export const API_ENDPOINTS = {
     deleteProduct: (product_id: string) => `${API_BASE_URL}/product/delete/${product_id}`,
     updateProduct: (user_uuid: string) => `${API_BASE_URL}/product/update/${user_uuid}`,
     getProductBySlug: (slug: string) => `${API_BASE_URL}/product/get-by-slug/${slug}`,
+    getProductsByStartingPrice: (price: number, range?: number) => `${API_BASE_URL}/product/starting-price?price=${price}${range !== undefined ? `&range=${range}` : ''}`,
+    getProductsByMinDiscount: (discount: number) => `${API_BASE_URL}/product/discounted/${discount}`,
+    getTopRatedProductsByVendor: (vendorID: string) => `${API_BASE_URL}/product/top-rated?vendorID=${vendorID}`,
+    getFeaturedProductsByCategory: (category: string) => `${API_BASE_URL}/product/featured-on-category/${encodeURIComponent(category)}`,
 
     // product variant Endpoints
     createProductVariant: `${API_BASE_URL}/product/variants/create`,

@@ -1,13 +1,15 @@
 "use client";
 import About from "@/components/home/About";
 import CTA from "@/components/home/CTA";
-import Hero from "@/components/home/Hero";
 import FAQ from "@/components/home/FAQ";
 import Featured from "@/components/home/Featured";
 import Features from "@/components/home/Categories_Featured";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Testimonials from "@/components/home/Testimonials";
+// import Hero from "@/components/home/Hero";
+import Hero from "@/components/home/Hero-with-backend"; 
+// // can use idb-kevyal even for caching images and all
 
 export default function Home() {
   return (
@@ -15,6 +17,7 @@ export default function Home() {
     <>
       <Navbar/>
       {/* Hero Section */}
+      {/* <Hero/> */}
       <Hero/>
       {/* Feature Categories */}
       <Features/>
