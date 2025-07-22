@@ -4,93 +4,104 @@ import { Heart, ShoppingCart, Check, Loader2, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast, Toaster } from 'react-hot-toast';
+import { API_ENDPOINTS } from '@/config/api';
 
-// Define types for our products and cart/wishlist items
+// Utility for localStorage with expiry
+const setWithExpiry = (key: string, value: any, ttl: number) => {
+  const now = new Date();
+  const item = {
+    value,
+    expiry: now.getTime() + ttl,
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+};
+
+const getWithExpiry = (key: string) => {
+  const itemStr = localStorage.getItem(key);
+  if (!itemStr) return null;
+  try {
+    const item = JSON.parse(itemStr);
+    if (!item.expiry || !item.value) return null;
+    const now = new Date();
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return item.value;
+  } catch {
+    localStorage.removeItem(key);
+    return null;
+  }
+};
+
 interface Product {
-  id: string;
+  product_id: string;
   title: string;
-  price: string;
-  image: string;
-  tag: string;
-  numericPrice: number; // For calculations
-  slug?: string; // For URL friendly product name
+  price: number;
+  discountPrice?: number;
+  discountPercent?: number;
+  image_gallery: string[];
+  slug: string;
+  brand: string;
+  featured: boolean;
+  category: string;
+  // ...add more fields as needed
 }
 
-// Define cart item type with quantity
 interface CartItem extends Product {
   quantity: number;
 }
 
-function Featured() {
-  // Sample products with unique IDs and slugs
-  const products: Product[] = [
-    { 
-      id: "prod-1", 
-      title: "Monstera Deliciosa", 
-      price: "₹1,299", 
-      numericPrice: 1299, 
-      image: "/assets/products/monstra.png", 
-      tag: "Bestseller",
-      slug: "monstera-deliciosa"
-    },
-    { 
-      id: "prod-2", 
-      title: "Self-Watering Ceramic Pot", 
-      price: "₹899", 
-      numericPrice: 899, 
-      image: "/assets/products/self-watering.png", 
-      tag: "New",
-      slug: "self-watering-ceramic-pot"
-    },
-    { 
-      id: "prod-3", 
-      title: "Snake Plant", 
-      price: "₹749", 
-      numericPrice: 749, 
-      image: "/assets/products/snake-plant.png", 
-      tag: "Popular",
-      slug: "snake-plant"
-    },
-    { 
-      id: "prod-4", 
-      title: "Organic Plant Food", 
-      price: "₹499", 
-      numericPrice: 499, 
-      image: "/assets/products/organic-plant-food.png", 
-      tag: "Eco-friendly",
-      slug: "organic-plant-food"
-    }
-  ];
+const formatIndianPrice = (price: number) => {
+  return price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
 
-  // State for cart and wishlist
+function Featured() {
+  const [products, setProducts] = useState<Product[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [loadingCart, setLoadingCart] = useState<string | null>(null);
   const [loadingWishlist, setLoadingWishlist] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
-  // Initialize state from localStorage on component mount
+  // Fetch featured products with localStorage caching
+  const fetchFeaturedProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(API_ENDPOINTS.getFeaturedProducts);
+      if (!res.ok) throw new Error('Failed to fetch featured products');
+      const json = await res.json();
+      if (!json.success || !json.data) throw new Error(json.message || 'No featured products found');
+      setProducts(json.data);
+      setWithExpiry('plantomartFeatured', json.data, 2 * 60 * 60 * 1000); // 2 hours
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch featured products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // On mount, check localStorage first
   useEffect(() => {
     setIsClient(true);
+    const cached = getWithExpiry('plantomartFeatured');
+    if (cached && Array.isArray(cached)) {
+      setProducts(cached);
+      setLoading(false);
+    } else {
+      fetchFeaturedProducts();
+    }
+    // Cart/wishlist
     const storedCart = localStorage.getItem('plantomartCart');
     const storedWishlist = localStorage.getItem('plantomartWishlist');
-    
     if (storedCart) {
-      try {
-        setCartItems(JSON.parse(storedCart));
-      } catch (e) {
-        console.error("Failed to parse cart data:", e);
-        localStorage.removeItem('plantomartCart');
-      }
+      try { setCartItems(JSON.parse(storedCart)); } catch { localStorage.removeItem('plantomartCart'); }
     }
-    
     if (storedWishlist) {
-      try {
-        setWishlistItems(JSON.parse(storedWishlist));
-      } catch (e) {
-        console.error("Failed to parse wishlist data:", e);
-        localStorage.removeItem('plantomartWishlist');
-      }
+      try { setWishlistItems(JSON.parse(storedWishlist)); } catch { localStorage.removeItem('plantomartWishlist'); }
     }
   }, []);
 
@@ -98,8 +109,6 @@ function Featured() {
   useEffect(() => {
     if (isClient && cartItems.length >= 0) {
       localStorage.setItem('plantomartCart', JSON.stringify(cartItems));
-      
-      // Optional: Dispatch a custom event that other components can listen for
       const event = new CustomEvent('cartUpdated', { detail: cartItems });
       window.dispatchEvent(event);
     }
@@ -109,46 +118,27 @@ function Featured() {
   useEffect(() => {
     if (isClient && wishlistItems.length >= 0) {
       localStorage.setItem('plantomartWishlist', JSON.stringify(wishlistItems));
-      
-      // Optional: Dispatch a custom event that other components can listen for
       const event = new CustomEvent('wishlistUpdated', { detail: wishlistItems });
       window.dispatchEvent(event);
     }
   }, [wishlistItems, isClient]);
 
-  // Check if product is in cart
-  const isInCart = (productId: string): boolean => {
-    return cartItems.some(item => item.id === productId);
-  };
+  const isInCart = (productId: string): boolean => cartItems.some(item => item.product_id === productId);
+  const isInWishlist = (productId: string): boolean => wishlistItems.some(item => item.product_id === productId);
 
-  // Check if product is in wishlist
-  const isInWishlist = (productId: string): boolean => {
-    return wishlistItems.some(item => item.id === productId);
-  };
-
-  // Handle adding/removing from cart with loading state
   const toggleCart = (product: Product) => {
-    setLoadingCart(product.id);
-    
-    // Simulate network delay for better UX feedback
+    setLoadingCart(product.product_id);
     setTimeout(() => {
       setCartItems(prevItems => {
-        const existingItemIndex = prevItems.findIndex(item => item.id === product.id);
-        
+        const existingItemIndex = prevItems.findIndex(item => item.product_id === product.product_id);
         if (existingItemIndex >= 0) {
-          // Remove from cart
-          const newItems = prevItems.filter(item => item.id !== product.id);
-          // Show toast AFTER state update
+          const newItems = prevItems.filter(item => item.product_id !== product.product_id);
           setTimeout(() => toast.success(`${product.title} removed from cart`), 0);
-          
           return newItems;
         } else {
-          // Add to cart with quantity 1
           const newItem: CartItem = { ...product, quantity: 1 };
           const newItems = [...prevItems, newItem];
-          // Show toast AFTER state update
           setTimeout(() => toast.success(`${product.title} added to cart`), 0);
-          
           return newItems;
         }
       });
@@ -156,28 +146,18 @@ function Featured() {
     }, 600);
   };
 
-  // Handle adding/removing from wishlist with loading state
   const toggleWishlist = (product: Product) => {
-    setLoadingWishlist(product.id);
-    
-    // Simulate network delay for better UX feedback
+    setLoadingWishlist(product.product_id);
     setTimeout(() => {
       setWishlistItems(prevItems => {
-        const existingItemIndex = prevItems.findIndex(item => item.id === product.id);
-        
+        const existingItemIndex = prevItems.findIndex(item => item.product_id === product.product_id);
         if (existingItemIndex >= 0) {
-          // Remove from wishlist
-          const newItems = prevItems.filter(item => item.id !== product.id);
-          // Show toast AFTER state update
+          const newItems = prevItems.filter(item => item.product_id !== product.product_id);
           setTimeout(() => toast.success(`${product.title} removed from wishlist`), 0);
-          
           return newItems;
         } else {
-          // Add to wishlist
           const newItems = [...prevItems, product];
-          // Show toast AFTER state update
           setTimeout(() => toast.success(`${product.title} added to wishlist`), 0);
-          
           return newItems;
         }
       });
@@ -185,9 +165,46 @@ function Featured() {
     }, 400);
   };
 
+  // --- Loading animation ---
+  const LoadingSkeleton = () => (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="animate-pulse flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white">
+          <div className="aspect-square bg-gray-200" />
+          <div className="p-4">
+            <div className="h-4 w-2/3 bg-gray-200 rounded mb-2" />
+            <div className="h-3 w-1/2 bg-gray-100 rounded mb-4" />
+            <div className="h-8 w-full bg-gray-100 rounded mb-2" />
+            <div className="h-8 w-full bg-gray-100 rounded" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // --- Error UI ---
+  if (error) {
+    return (
+      <section className="bg-white py-12 md:py-20">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="text-center py-16">
+            <h2 className="mb-4 text-2xl font-bold text-red-700 md:text-4xl">Oops! Couldn&apos;t load featured products</h2>
+            <p className="mb-6 text-gray-600">{error}</p>
+            <button
+              type="button"
+              onClick={fetchFeaturedProducts}
+              className="rounded-full border-2 border-green-600 px-6 py-2.5 font-medium text-green-600 transition-colors hover:bg-green-50 md:px-8 md:py-3"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <div>
-      {/* Add Toaster directly in the component */}
       <Toaster 
         position="bottom-center"
         toastOptions={{
@@ -212,89 +229,101 @@ function Featured() {
               Explore our most popular plant selections and eco-friendly essentials
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {products.map((product) => (
-              <div 
-                key={product.id} 
-                className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-300 hover:shadow-xl"
-              >
-                <div className="relative">
-                  <div className="aspect-square overflow-hidden">
-                    <Image
-                      width={500}
-                      height={500} 
-                      src={product.image} 
-                      alt={product.title} 
-                      className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
-                  <span className="absolute left-4 top-4 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white">
-                    {product.tag}
-                  </span>
-                  <button 
-                    type='button'
-                    className={`absolute right-4 top-4 rounded-full p-2 shadow-md transition-all duration-200 ${
-                      isInWishlist(product.id) 
-                        ? 'bg-red-50 hover:bg-red-100' 
-                        : 'bg-white hover:bg-gray-50'
-                    }`}
-                    onClick={() => toggleWishlist(product)}
-                    disabled={loadingWishlist === product.id}
-                    aria-label={isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
-                  >
-                    {loadingWishlist === product.id ? (
-                      <Loader2 className="size-5 animate-spin text-gray-600" />
-                    ) : (
-                      <Heart 
-                        className={`size-5 transition-colors ${
-                          isInWishlist(product.id) 
-                            ? 'fill-red-500 text-red-500' 
-                            : 'text-gray-600'
-                        }`} 
+          {loading ? (
+            <LoadingSkeleton />
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {products.map((product) => (
+                <div 
+                  key={product.product_id} 
+                  className="group flex flex-col overflow-hidden rounded-xl border border-gray-100 bg-white transition-all duration-300 hover:shadow-xl"
+                >
+                  <div className="relative">
+                    <div className="aspect-square overflow-hidden">
+                      <Image
+                        width={500}
+                        height={500} 
+                        src={product.image_gallery && product.image_gallery.length > 0 ? product.image_gallery[0] : '/assets/placeholder.jpg'} 
+                        alt={product.title} 
+                        className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
+                    </div>
+                    {product.featured && (
+                      <span className="absolute left-4 top-4 rounded-full bg-green-600 px-3 py-1 text-xs font-medium text-white">
+                        Featured
+                      </span>
                     )}
-                  </button>
+                    <button 
+                      type='button'
+                      className={`absolute right-4 top-4 rounded-full p-2 shadow-md transition-all duration-200 ${
+                        isInWishlist(product.product_id) 
+                          ? 'bg-red-50 hover:bg-red-100' 
+                          : 'bg-white hover:bg-gray-50'
+                      }`}
+                      onClick={() => toggleWishlist(product)}
+                      disabled={loadingWishlist === product.product_id}
+                      aria-label={isInWishlist(product.product_id) ? "Remove from wishlist" : "Add to wishlist"}
+                    >
+                      {loadingWishlist === product.product_id ? (
+                        <Loader2 className="size-5 animate-spin text-gray-600" />
+                      ) : (
+                        <Heart 
+                          className={`size-5 transition-colors ${
+                            isInWishlist(product.product_id) 
+                              ? 'fill-red-500 text-red-500' 
+                              : 'text-gray-600'
+                          }`} 
+                        />
+                      )}
+                    </button>
+                  </div>
+                  <div className="flex grow flex-col p-4 md:p-6">
+                    <h3 className="mb-2 line-clamp-1 text-base font-bold text-gray-900 md:text-lg">{product.title}</h3>
+                    <div className="mb-4 flex items-center gap-2">
+                      <span className="font-bold text-green-600 text-lg">₹{formatIndianPrice(product.discountPrice ?? product.price)}</span>
+                      {product.discountPrice && (
+                        <span className="text-sm text-gray-500 line-through">₹{formatIndianPrice(product.price)}</span>
+                      )}
+                      {product.discountPercent && (
+                        <span className="ml-1 text-xs font-medium text-green-600">-{product.discountPercent}%</span>
+                      )}
+                    </div>
+                    <Link 
+                      href={`/product/${product.slug}`} 
+                      className="mb-3 flex items-center justify-center rounded-lg border border-green-600 bg-white px-4 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 md:text-base"
+                    >
+                      View Details
+                      <ArrowRight className="ml-2 size-4" />
+                    </Link>
+                    <button 
+                      type='button'
+                      className={`flex w-full items-center justify-center rounded-lg px-4 py-2.5 font-medium transition-all duration-200 ${
+                        isInCart(product.product_id)
+                          ? 'bg-green-600 text-white hover:bg-green-700'
+                          : 'bg-gray-100 text-gray-800 hover:bg-green-600 hover:text-white'
+                      }`}
+                      onClick={() => toggleCart(product)}
+                      disabled={loadingCart === product.product_id}
+                    >
+                      {loadingCart === product.product_id ? (
+                        <Loader2 className="mr-2 size-5 animate-spin" />
+                      ) : isInCart(product.product_id) ? (
+                        <>
+                          <Check className="mr-2 size-5" />
+                          <span className="text-sm md:text-base">Added to Cart</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingCart className="mr-2 size-5" />
+                          <span className="text-sm md:text-base">Add to Cart</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex grow flex-col p-4 md:p-6">
-                  <h3 className="mb-2 line-clamp-1 text-base font-bold text-gray-900 md:text-lg">{product.title}</h3>
-                  <p className="mb-4 font-bold text-green-600">{product.price}</p>
-                  {/* View Details Button - NEW */}
-                  <Link 
-                    href={`/featured/products/${product.slug}`} 
-                    className="mb-3 flex items-center justify-center rounded-lg border border-green-600 bg-white px-4 py-2 text-sm font-medium text-green-600 transition-colors hover:bg-green-50 md:text-base"
-                  >
-                    View Details
-                    <ArrowRight className="ml-2 size-4" />
-                  </Link>
-                  {/* Add to Cart Button */}
-                  <button 
-                    type='button'
-                    className={`flex w-full items-center justify-center rounded-lg px-4 py-2.5 font-medium transition-all duration-200 ${
-                      isInCart(product.id)
-                        ? 'bg-green-600 text-white hover:bg-green-700'
-                        : 'bg-gray-100 text-gray-800 hover:bg-green-600 hover:text-white'
-                    }`}
-                    onClick={() => toggleCart(product)}
-                    disabled={loadingCart === product.id}
-                  >
-                    {loadingCart === product.id ? (
-                      <Loader2 className="mr-2 size-5 animate-spin" />
-                    ) : isInCart(product.id) ? (
-                      <>
-                        <Check className="mr-2 size-5" />
-                        <span className="text-sm md:text-base">Added to Cart</span>
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="mr-2 size-5" />
-                        <span className="text-sm md:text-base">Add to Cart</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           <div className="mt-10 text-center md:mt-12">
             <button type='button' className="rounded-full border-2 border-green-600 px-6 py-2.5 font-medium text-green-600 transition-colors hover:bg-green-50 md:px-8 md:py-3">
               View All Products
