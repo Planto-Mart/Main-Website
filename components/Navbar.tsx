@@ -1,4 +1,3 @@
- 
 /* eslint-disable tailwindcss/migration-from-tailwind-2 */
 "use client";
 import { useEffect, useState } from 'react';
@@ -7,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { supabase } from '../utils/supabase/client';
-import { API_ENDPOINTS } from '../config/api';
+import { API_ENDPOINTS } from '@/config/api';
 
 import SignIn from './auth/Sign-in';
 
@@ -367,7 +366,7 @@ function Navbar() {
             <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:space-x-6">
               {/* Vendors Dropdown - FIXED DROPDOWN POSITIONING */}
               <div className="group relative">
-                <Link href="#" className="flex items-center text-gray-700 hover:text-green-600">
+                <Link href="/vendors" className="flex items-center text-gray-700 hover:text-green-600">
                   Vendors
                   <ChevronDown className="ml-1 size-4" />
                 </Link>
@@ -389,12 +388,13 @@ function Navbar() {
                     </div>
                     {/* Product Column */}
                     <div className="w-1/3 border-r border-gray-100 pr-6">
-                      <h3 className="mb-5 text-xs font-semibold uppercase tracking-wide text-gray-400">Product Features</h3>
+                      <h3 className="mb-5 text-xs font-semibold uppercase tracking-wide text-gray-400">GROW WITH PLANTOMART</h3>
+                      {/* <h3 className="mb-5 text-xs font-semibold uppercase tracking-wide text-gray-400">Vendor HUB</h3> */}
                       <ul className="space-y-3">
-                        <li><Link href="#" className="text-gray-700 transition-colors duration-200 hover:text-green-600">Product Sidebar</Link></li>
-                        <li><Link href="#" className="text-gray-700 transition-colors duration-200 hover:text-green-600">Bought Together</Link></li>
-                        <li><Link href="#" className="text-gray-700 transition-colors duration-200 hover:text-green-600">Product Countdown</Link></li>
-                        <li><Link href="#" className="text-gray-700 transition-colors duration-200 hover:text-green-600">Grouped Product</Link></li>
+                        <li><Link href="/vendor" className="text-gray-700 transition-colors duration-200 hover:text-green-600">Browse Vendors</Link></li>
+                        <li><Link href="/vendor/register" className="text-gray-700 transition-colors duration-200 hover:text-green-600">Start Selling</Link></li>
+                        <li><Link href="/guides" className="text-gray-700 transition-colors duration-200 hover:text-green-600">Help & Guides</Link></li>
+                        <li><Link href="/vendor/dashboard" className="text-gray-700 transition-colors duration-200 hover:text-green-600">My Seller Hub</Link></li>
                       </ul>
                     </div>
                     {/* Promo Banner */}
@@ -403,17 +403,16 @@ function Navbar() {
                         <div className="absolute inset-0 bg-[url('/api/placeholder/500/300')] bg-cover bg-center opacity-20"></div>
                         <div className="relative z-10 flex h-full flex-col items-center justify-center p-4 text-center text-green-900">
                           <h3 className="mb-1 text-2xl font-bold">25% OFF</h3>
-                          <p className="text-sm font-medium">Shop at Plant-O-Mart</p>
+                          <p className="text-sm font-medium">Shop at Planto-Mart</p>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <Link href="#" className="text-gray-700 hover:text-green-600">Menu</Link>
-              <Link href="#" className="text-gray-700 hover:text-green-600">About</Link>
+              <Link href="/about" className="text-gray-700 hover:text-green-600">About</Link>
               <div className="group relative">
-                <Link href="#" className="flex items-center text-gray-700 hover:text-green-600">
+                <Link href="/blogs" className="flex items-center text-gray-700 hover:text-green-600">
                   Blog
                   <ChevronDown className="ml-1 size-4" />
                 </Link>
@@ -422,30 +421,33 @@ function Navbar() {
                   {/* Added invisible padding bridge to prevent hover loss */}
                   <div className="absolute -top-4 left-0 h-4 w-full"></div>
                   <ul className="space-y-2">
-                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Blog Grid</Link></li>
-                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Blog List</Link></li>
-                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Blog Details</Link></li>
+                    <li><Link href="/blog/category/green-living" className="block text-gray-700 hover:text-green-600">Green Living</Link></li>
+                    {/* Tips for sustainable living, eco-friendly choices, and mindful consumption. */}
+                    <li><Link href="/blog/category/plant-care-101" className="block text-gray-700 hover:text-green-600">Plant Care 101</Link></li>
+                    {/* Guides for beginners and seasoned plant parents — watering, lighting, soil, etc. */}
+                    <li><Link href="/blog/category/indoor-jungle" className="block text-gray-700 hover:text-green-600">Indoor Jungle</Link></li>
+                    {/* Inspiration for styling homes/offices with plants, trends, and decor hacks. */}
+                    <li><Link href="/blog/category/seasonal-gardening" className="block text-gray-700 hover:text-green-600">Seasonal Gardening</Link></li>
+                    {/* Planting tips by season, climate-specific advice, and garden prep guides. */}
                   </ul>
                 </div>
               </div>
               <div className="group relative">
-                <Link href="#" className="flex items-center text-gray-700 hover:text-green-600">
-                  Page
+                <div  className="flex items-center text-gray-700 hover:text-green-600">
+                  company
                   <ChevronDown className="ml-1 size-4" />
-                </Link>
+                </div>
                 {/* Added dropdown container for Page dropdown */}
                 <div className="absolute left-0 top-full z-50 mt-0 hidden w-48 rounded-lg border border-gray-200 bg-white p-4 shadow-xl group-hover:block">
                   {/* Added invisible padding bridge to prevent hover loss */}
                   <div className="absolute -top-4 left-0 h-4 w-full"></div>
                   <ul className="space-y-2">
-                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">About Us</Link></li>
-                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">FAQ</Link></li>
-                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">Contact</Link></li>
-                    <li><Link href="#" className="block text-gray-700 hover:text-green-600">404 Page</Link></li>
+                    <li><Link href="/about" className="block text-gray-700 hover:text-green-600">About Us</Link></li>
+                    <li><Link href="/faq" className="block text-gray-700 hover:text-green-600">FAQ</Link></li>
                   </ul>
                 </div>
               </div>
-              <Link href="#" className="text-gray-700 hover:text-green-600">Contact</Link>
+              <Link href="/contact-us" className="text-gray-700 hover:text-green-600">Contact</Link>
             </div>
             {/* Desktop Actions Container - Added more separation from menu */}
             <div className="hidden items-center lg:flex lg:space-x-8">
@@ -768,16 +770,39 @@ function Navbar() {
                           </div>
                         )}
                       </div>
-                      <Link href="#" className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600">
-                        Menu
-                      </Link>
-                      <Link href="#" className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600">
+                      <Link href="/about" className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600">
                         About
                       </Link>
-                      <Link href="#" className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600">
+                      {/* <Link href="/blogs" className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600">
                         Blog
-                      </Link>
-                      <Link href="#" className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600">
+                      </Link> */}
+                      <div>
+                        <button 
+                          type='button'
+                          onClick={toggleMobileVendor}
+                          className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600"
+                        >
+                          <span>Blogs</span>
+                            <ChevronRight className="size-4" />
+                        </button>
+                        {isMobileVendorOpen && (
+                          <div className="ml-4 mt-1 space-y-1 border-l border-gray-200 pl-3">
+                            <Link href="/blog/category/green-living" className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-600">
+                              Green Living 
+                            </Link>
+                            <Link href="/blog/category/plant-care-101" className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-600">
+                              Plant Care 101
+                            </Link>
+                            <Link href="/blog/category/indoor-jungle" className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-600">
+                              Indoor Jungle
+                            </Link>
+                            <Link href="/blog/category/seasonal-gardening" className="block rounded-md px-3 py-2 text-sm text-gray-600 hover:bg-green-50 hover:text-green-600">
+                              Seasonal Gardening
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                      <Link href="/contact-us" className="block rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600">
                         Contact
                       </Link>
                     </div>
@@ -801,7 +826,7 @@ function Navbar() {
         {isCartOpen && (
           <>
             {/* Overlay */}
-            {/** biome-ignore lint/a11y/noStaticElementInteractions: will look into this alatetrr */}
+            {/* * biome-ignore lint/a11y/noStaticElementInteractions: will look into this alatetrr */}
             {/** biome-ignore lint/a11y/useKeyWithClickEvents: will look into while refactoring */}
             <div 
               className="fixed inset-0 z-40 bg-black bg-opacity-50 transition-opacity"
