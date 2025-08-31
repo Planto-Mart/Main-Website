@@ -10,10 +10,10 @@ interface FeaturedCategory{
 }
 
 const categories: FeaturedCategory[] =[
-  { title: "Indoor Plants", image: "/assets/indoor_plants.png", description: "Perfect for purifying air and adding natural beauty" ,link: "/indoor-plants"},
-  { title: "Outdoor Plants", image: "/assets/outdoor_plants.png", description: "Transform your garden into a vibrant ecosystem",link: "/outdoor-plants" },
-  { title: "Eco-friendly Planters", image: "/assets/eco-friendly-features.png", description: "Sustainable containers for your green companions",link: "/eco-friendly-plants" },
-  { title: "Green Essentials", image: "/assets/green_essentials_oil.png", description: "Plant-based products for a sustainable lifestyle",link: "/green-essentials" }
+  { title: "Indoor Plants", image: "/assets/indoor_plants.png", description: "Perfect for purifying air and adding natural beauty" ,link: "/collections/indoor-plants"},
+  { title: "Outdoor Plants", image: "/assets/outdoor_plants.png", description: "Transform your garden into a vibrant ecosystem",link: "/collections/outdoor-plants" },
+  { title: "Eco-friendly Planters", image: "/assets/eco-friendly-features.png", description: "Sustainable containers for your green companions",link: "/collections/eco-friendly-plants" },
+  { title: "Green Essentials", image: "/assets/green_essentials_oil.png", description: "Plant-based products for a sustainable lifestyle",link: "/collections/green-essentials" }
 ]
 
 function Features() {
