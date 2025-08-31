@@ -421,13 +421,13 @@ function Navbar() {
                   {/* Added invisible padding bridge to prevent hover loss */}
                   <div className="absolute -top-4 left-0 h-4 w-full"></div>
                   <ul className="space-y-2">
-                    <li><Link href="/blog/category/green-living" className="block text-gray-700 hover:text-green-600">Green Living</Link></li>
+                    <li><Link href="/blog/green-living" className="block text-gray-700 hover:text-green-600">Green Living</Link></li>
                     {/* Tips for sustainable living, eco-friendly choices, and mindful consumption. */}
-                    <li><Link href="/blog/category/plant-care-101" className="block text-gray-700 hover:text-green-600">Plant Care 101</Link></li>
+                    <li><Link href="/blog/plant-care-101" className="block text-gray-700 hover:text-green-600">Plant Care 101</Link></li>
                     {/* Guides for beginners and seasoned plant parents — watering, lighting, soil, etc. */}
-                    <li><Link href="/blog/category/indoor-jungle" className="block text-gray-700 hover:text-green-600">Indoor Jungle</Link></li>
+                    <li><Link href="/blog/indoor-jungle" className="block text-gray-700 hover:text-green-600">Indoor Jungle</Link></li>
                     {/* Inspiration for styling homes/offices with plants, trends, and decor hacks. */}
-                    <li><Link href="/blog/category/seasonal-gardening" className="block text-gray-700 hover:text-green-600">Seasonal Gardening</Link></li>
+                    <li><Link href="/blog/seasonal-gardening" className="block text-gray-700 hover:text-green-600">Seasonal Gardening</Link></li>
                     {/* Planting tips by season, climate-specific advice, and garden prep guides. */}
                   </ul>
                 </div>

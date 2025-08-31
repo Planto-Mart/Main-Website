@@ -1,6 +1,9 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, User, Tag, Eye, ArrowLeft, Share2, Bookmark } from 'lucide-react';
+import Footer from '../Footer';
+import Navbar from '../Navbar';
+import Link from 'next/link';
 
 // Interface for blog data
 interface BlogData {
@@ -189,17 +192,20 @@ const CompletePage: React.FC<CompletePageProps> = ({ slug = "productivity-hacks-
   }
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen bg-gray-50">
       {/* Header/Navigation */}
       <div className="bg-white border-b">
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <button 
-            onClick={() => window.history.back()}
+        <Link href="/blog">
+          <div 
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
           >
             <ArrowLeft size={20} />
             <span>Back to Blog</span>
-          </button>
+          </div>
+        </Link>
         </div>
       </div>
 
@@ -352,6 +358,8 @@ const CompletePage: React.FC<CompletePageProps> = ({ slug = "productivity-hacks-
         {blog.featuredImage && <meta property="og:image" content={blog.featuredImage} />}
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 
