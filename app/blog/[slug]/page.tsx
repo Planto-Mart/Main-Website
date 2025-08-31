@@ -1,4 +1,4 @@
-import CompletePage from "@/components/vendor-store/CompletePage";
+import CompletePage from "@/components/Blog/CompletePage";
 
 export const runtime = 'edge';
 
