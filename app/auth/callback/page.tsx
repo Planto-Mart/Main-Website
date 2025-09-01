@@ -61,6 +61,8 @@ export default function AuthCallback() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: will refactor later
     useEffect(() => {
     const handleAuth = async () => {
+      const storedRedirectUrl = localStorage.getItem('authRedirectUrl');
+
       // Get IP and location information (store only in localStorage)
       const locationInfo = await getIpAndLocation();
       setIpInfo(locationInfo);
@@ -140,7 +142,7 @@ export default function AuthCallback() {
           }
 
           // Check if there's a stored redirect URL
-          let redirectTo = '/';
+          let redirectTo =  storedRedirectUrl || '/';
           if (typeof window !== 'undefined') {
             const storedRedirectUrl = localStorage.getItem('authRedirectUrl');
             if (storedRedirectUrl) {
@@ -150,8 +152,10 @@ export default function AuthCallback() {
           }
           setMessage(`Redirecting to ${redirectTo}...`);
           router.push(redirectTo);
-        } else {
+        } 
+        else {
           // If not authenticated, redirect to home
+          setMessage('Authentication failed. Redirecting to home...');
           router.push('/');
         }
       } catch (err) {

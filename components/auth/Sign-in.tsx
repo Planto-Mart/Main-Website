@@ -72,6 +72,15 @@ const SignIn: React.FC<SignInProps> = ({ isOpen, onClose, redirectUrl }) => {
     };
   }, [isOpen]);
 
+  useEffect(()=>{
+      if (redirectUrl) {
+        localStorage.setItem('authRedirectUrl', redirectUrl);
+      } else {
+        // If no redirectUrl is provided, store the current path
+        localStorage.setItem('authRedirectUrl', window.location.pathname);
+      }
+  })
+
   // Function to get the user's IP address and geolocation
   const getIpAndLocation = async (): Promise<GeoLocation | null> => {
     try {
