@@ -6,6 +6,8 @@ export default interface ProductDataType {
   description: string;
   category: string;
   about_in_bullets: string[]; // JSON
+  content_description: string;
+  content_shipping_delivery: string;
   image_gallery: string[];    // JSON
   price: number;
   brand: string;
