@@ -1,3 +1,4 @@
+import Footer from '../Footer';
 import Navbar from '../Navbar';
 import BundlesProductCombiner from './bundlesProductCombiner';
 
@@ -12,9 +13,7 @@ function CompletePage({ slug }: { slug: string }) {
       <HeroSection slug={slug}/>
       <ProductDetailedDescription slug={slug}/>
       <BundlesProductCombiner slug={slug}/>
-      <p className='text-center text-3xl font-bold text-gray-900'>
-        this is product page of {slug}
-      </p>
+      <Footer/>
     </div>
   )
 }
