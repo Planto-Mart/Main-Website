@@ -26,7 +26,7 @@ export const API_ENDPOINTS = {
     getAllProducts: `${API_BASE_URL}/product/get-all`,
     getFeaturedProducts: `${API_BASE_URL}/product/featured`,
     getProductsByVendor: (vendorID: string) => `${API_BASE_URL}/product/get-products-of/${vendorID}`,
-    getProductById: (slug: string) => `${API_BASE_URL}/product/get/${slug}`,
+    getProductById: (product_id: string) => `${API_BASE_URL}/product/get/${product_id}`,
     deleteProduct: (product_id: string) => `${API_BASE_URL}/product/delete/${product_id}`,
     updateProduct: (user_uuid: string) => `${API_BASE_URL}/product/update/${user_uuid}`,
     getProductBySlug: (slug: string) => `${API_BASE_URL}/product/get-by-slug/${slug}`,
@@ -39,5 +39,17 @@ export const API_ENDPOINTS = {
     createProductVariant: `${API_BASE_URL}/product/variants/create`,
     updateProductVariant: (variant_id: string) => `${API_BASE_URL}/product/variants/update/${variant_id}`,
     deleteProductVariant: (variant_id: string) => `${API_BASE_URL}/product/variants/delete/${variant_id}`,
+
+    // product combinations endpoints 
+    createProductCombination: `${API_BASE_URL}/product/combinations/create`,
+    bulkCreateProductCombinations: `${API_BASE_URL}/product/combinations/bulk-create`,
+    getAllProductCombinations: `${API_BASE_URL}/product/combinations`,
+    getProductCombinationById: (id: string) => `${API_BASE_URL}/product/combinations/${id}`,
+    updateProductCombinationById: (id: string) => `${API_BASE_URL}/product/combinations/${id}`,
+    deleteProductCombinationById: (id: string) => `${API_BASE_URL}/product/combinations/${id}`,
+    getCombinationsForProduct: (productId: string) => `${API_BASE_URL}/product/${productId}/combinations`,
+    deleteCombinationsForProduct: (productId: string) => `${API_BASE_URL}/product/${productId}/combinations`,
+    getCombinationsContainingProduct: (productId: string) => `${API_BASE_URL}/product/${productId}/containing-combinations`
+
 
 }   
