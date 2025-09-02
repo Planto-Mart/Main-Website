@@ -13,7 +13,9 @@ function CompletePage({ slug }: { slug: string }) {
       <Navbar/>
       <HeroSection slug={slug}/>
       <ProductDetailedDescription slug={slug}/>
-      <BundlesProductCombiner slug={slug}/>
+      <div className='my-10 px-4 md:px-8 lg:px-16'>
+        <BundlesProductCombiner slug={slug}/>
+      </div>
       <ProductReviews slug={slug}/>
       <Footer/>
     </div>

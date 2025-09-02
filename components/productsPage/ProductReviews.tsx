@@ -4,6 +4,8 @@ import { Star, ThumbsUp, ThumbsDown, MessageCircle, Send, Filter, Clock, Trendin
 import { supabase } from '@/utils/supabase/client';
 import { API_ENDPOINTS } from '@/config/api';
 import Image from 'next/image';
+import SignIn from '../auth/Sign-in';
+import Link from 'next/link';
 
 interface UserProfile {
   user_uuid: string;
@@ -690,8 +692,12 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
                 <div className="text-center py-8">
                   <User className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">Please sign in to write a review</p>
-                  <button className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all duration-200 font-medium">
-                    Sign In
+                  <button 
+                    // onClick={()=> {<SignIn isOpen={true} onClose={()=>{false}}/>}}
+                    className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all duration-200 font-medium">
+                    <Link href={"/signup"}>
+                        Sign In 
+                    </Link>
                   </button>
                 </div>
               ) : (
@@ -720,7 +726,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
               )}
             </div>
 
-            {/* Most Liked Review */}
+            {/* Most Liked Review
             {reviewStats?.mostLikedReview && (
               <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl shadow-lg p-6 border border-orange-200">
                 <h3 className="text-lg font-bold text-orange-800 mb-4 flex items-center gap-2">
@@ -735,7 +741,7 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Review Guidelines */}
             <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl shadow-lg p-6 border border-emerald-200">
@@ -766,7 +772,9 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
                 <h3 className="text-lg font-bold text-blue-800 mb-4">Join the Community</h3>
                 <p className="text-blue-700 mb-4">Sign in to interact with reviews, share your thoughts, and help other plant lovers make informed decisions!</p>
                 <button className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200 font-medium">
-                  Create Account / Sign In
+                    <Link href={"/signup"}>
+                        Create Account / Sign In
+                    </Link>
                 </button>
               </div>
             )}
