@@ -5,6 +5,12 @@ import { supabase } from '@/utils/supabase/client';
 import { API_ENDPOINTS } from '@/config/api';
 import Image from 'next/image';
 
+interface UserProfile {
+  user_uuid: string;
+  full_name: string;
+  avatar_url?: string;
+  email?: string;
+}
 
 interface Reply {
   user_uuid: string;
@@ -65,6 +71,9 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // User profiles cache
+  const [userProfiles, setUserProfiles] = useState<Map<string, UserProfile>>(new Map());
+
   // Filtering and sorting state
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'likes' | 'dislikes'>('newest');
   const [currentPage, setCurrentPage] = useState(1);
@@ -77,12 +86,46 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
   const [replyText, setReplyText] = useState('');
   const [submittingReply, setSubmittingReply] = useState(false);
 
+  // Fetch user profile by UUID
+  const fetchUserProfile = async (userUuid: string): Promise<UserProfile | null> => {
+    // Check if we already have this user's profile cached
+    if (userProfiles.has(userUuid)) {
+      return userProfiles.get(userUuid)!;
+    }
+
+    try {
+      const response = await fetch(API_ENDPOINTS.getProfileByUUID(userUuid));
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        const profile = data.data;
+        // Cache the profile
+        setUserProfiles(prev => new Map(prev).set(userUuid, profile));
+        return profile;
+      }
+    } catch (error) {
+      console.error(`Error fetching profile for user ${userUuid}:`, error);
+    }
+    
+    return null;
+  };
+
+  // Fetch multiple user profiles
+  const fetchUserProfiles = async (userUuids: string[]) => {
+    const uniqueUuids = [...new Set(userUuids)].filter(uuid => !userProfiles.has(uuid));
+    
+    if (uniqueUuids.length === 0) return;
+
+    const profilePromises = uniqueUuids.map(uuid => fetchUserProfile(uuid));
+    await Promise.all(profilePromises);
+  };
+
   // Fetch user authentication data
   const fetchUserData = async () => {
     try {
       setAuthChecking(true);
       const { data: { session } } = await supabase.auth.getSession();
-      console.log("Got the session as: ", session); // fetched successfully 
+      console.log("Got the session as: ", session);
       
       if (!session) {
         setIsAuthenticated(false);
@@ -104,11 +147,9 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
     try {
       const response = await fetch(API_ENDPOINTS.getProductBySlug(slug));
       const data = await response.json();
-    //   console.log("Product data fetched from slug: ", data);
       
       if (data.success && data.data) {
         setProduct(data.data);
-        // console.log("Product ID gotten:", data.data.product_id);
         return data.data.product_id;
       } else {
         throw new Error(data.message || 'Product not found');
@@ -129,13 +170,25 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
         limit: reviewsPerPage.toString()
       });
 
-    //   const response = await fetch(`${API_ENDPOINTS.getReviewByProductID(productId)}?${params}`);
       const response = await fetch(`${API_ENDPOINTS.getReviewByProductID(productId)}`);
       const data = await response.json();
       console.log("Reviews as product ID: ", data);
       
       if (data.success) {
-        setReviews(data.data || []);
+        const reviewsData = data.data || [];
+        setReviews(reviewsData);
+        
+        // Extract all unique user UUIDs from reviews and replies
+        const userUuids = new Set<string>();
+        reviewsData.forEach((review: Review) => {
+          userUuids.add(review.user_uuid);
+          review.replies.forEach((reply: Reply) => {
+            userUuids.add(reply.user_uuid);
+          });
+        });
+        
+        // Fetch user profiles for all users
+        await fetchUserProfiles(Array.from(userUuids));
       } else {
         throw new Error(data.message || 'Failed to fetch reviews');
       }
@@ -305,6 +358,41 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
     return null;
   };
 
+  // Get user profile for display
+  const getUserProfile = (userUuid: string): UserProfile | null => {
+    return userProfiles.get(userUuid) || null;
+  };
+
+  // Render user avatar and name
+  const renderUserAvatar = (userUuid: string, size: 'small' | 'medium' = 'medium') => {
+    const profile = getUserProfile(userUuid);
+    const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-12 h-12';
+    const iconSize = size === 'small' ? 'w-4 h-4' : 'w-6 h-6';
+    
+    if (profile?.avatar_url) {
+      return (
+        <Image
+          src={profile.avatar_url}
+          alt={profile.full_name || 'User'}
+          width={size === 'small' ? 32 : 48}
+          height={size === 'small' ? 32 : 48}
+          className={`${sizeClasses} rounded-full border-2 border-emerald-200 bg-white object-cover`}
+        />
+      );
+    }
+    
+    return (
+      <div className={`${sizeClasses} bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center`}>
+        <User className={`${iconSize} text-white`} />
+      </div>
+    );
+  };
+
+  const renderUserName = (userUuid: string) => {
+    const profile = getUserProfile(userUuid);
+    return profile?.full_name || 'Anonymous User';
+  };
+
   if (loading && authChecking) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
@@ -447,26 +535,9 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
                       {/* Review Header */}
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-green-500 rounded-full flex items-center justify-center">
-                            {/* Actual Customer Icon should come here instead of generic user  even in the replies section */}
-                            {/* <User className="w-6 h-6 text-white" /> */}
-                             {user?.avatar_url ? (
-                            <Image
-                                src={user.avatar_url}
-                                alt={user.full_name}
-                                width={56}
-                                height={56}
-                                className="size-14 rounded-full border-2 border-yellow-200 bg-white object-cover"
-                            />
-                            ) : (
-                            <div className="flex size-14 items-center justify-center rounded-full bg-yellow-100">
-                                <User className="size-7 text-red-500" />
-                            </div>
-                            )}
-                          </div>
+                          {renderUserAvatar(review.user_uuid)}
                           <div>
-                            {/* Actual User name should come here instead of Customer Review */}
-                            <p className="font-semibold text-gray-800">Customer Review</p>
+                            <p className="font-semibold text-gray-800">{renderUserName(review.user_uuid)}</p>
                             <p className="text-sm text-gray-500">{formatDate(review.created_at)}</p>
                           </div>
                         </div>
@@ -566,10 +637,8 @@ const ProductReviews: React.FC<ProductReviewsProps> = ({ slug }) => {
                           {review.replies.map((reply, index) => (
                             <div key={index} className="bg-emerald-50 rounded-lg p-4">
                               <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 bg-emerald-300 rounded-full flex items-center justify-center">
-                                  <User className="w-4 h-4 text-emerald-700" />
-                                </div>
-                                <span className="text-sm text-emerald-700 font-medium">Reply</span>
+                                {renderUserAvatar(reply.user_uuid, 'small')}
+                                <span className="text-sm text-emerald-700 font-medium">{renderUserName(reply.user_uuid)}</span>
                                 <span className="text-xs text-gray-500">{formatDate(reply.created_at)}</span>
                               </div>
                               <p className="text-gray-700 text-sm">{reply.comment}</p>
