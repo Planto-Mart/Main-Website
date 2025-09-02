@@ -4,6 +4,7 @@ import BundlesProductCombiner from './bundlesProductCombiner';
 
 import HeroSection from './HeroSection';
 import ProductDetailedDescription from './markdownContentDesc';
+import ProductReviews from './ProductReviews';
 
 function CompletePage({ slug }: { slug: string }) {
   return (
@@ -13,6 +14,7 @@ function CompletePage({ slug }: { slug: string }) {
       <HeroSection slug={slug}/>
       <ProductDetailedDescription slug={slug}/>
       <BundlesProductCombiner slug={slug}/>
+      <ProductReviews slug={slug}/>
       <Footer/>
     </div>
   )

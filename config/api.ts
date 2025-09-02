@@ -49,7 +49,22 @@ export const API_ENDPOINTS = {
     deleteProductCombinationById: (id: string) => `${API_BASE_URL}/product/combinations/${id}`,
     getCombinationsForProduct: (productId: string) => `${API_BASE_URL}/product/${productId}/combinations`,
     deleteCombinationsForProduct: (productId: string) => `${API_BASE_URL}/product/${productId}/combinations`,
-    getCombinationsContainingProduct: (productId: string) => `${API_BASE_URL}/product/${productId}/containing-combinations`
+    getCombinationsContainingProduct: (productId: string) => `${API_BASE_URL}/product/${productId}/containing-combinations`,
+
+    // ===== Product Review Endpoints =====
+    createProductReview: `${API_BASE_URL}/product/reviews/create`,
+    getReviewByProductID: (productId: string) => `${API_BASE_URL}/product/reviews/product/${productId}`,
+    getProductReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}`,
+    updateProductReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}`,
+    deleteProductReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}`,
+    likeReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}/like`,
+    dislikeReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}/dislike`,
+    removeLikeDislike: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}/remove-reaction`,
+    addReplyToReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}/replies`,
+    deleteAllReviewsForProduct: (productId: string) => `${API_BASE_URL}/reviews/product/${productId}`,
+    getReviewStats: (productId: string) => `${API_BASE_URL}/product/reviews/product/${productId}/stats`,
+    bulkDeleteReviews: `${API_BASE_URL}/product/reviews/bulk-delete`,
+    getRecentReviews: `${API_BASE_URL}/product/reviews/recent`  
 
 
 }   
