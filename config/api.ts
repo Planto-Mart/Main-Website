@@ -55,7 +55,7 @@ export const API_ENDPOINTS = {
     createProductReview: `${API_BASE_URL}/product/reviews/create`,
     getReviewByProductID: (productId: string) => `${API_BASE_URL}/product/reviews/product/${productId}`,
     getProductReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}`,
-    updateProductReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}`,
+    updateProductReview: (reviewId: string) => `${API_BASE_URL}/product/update-review/${reviewId}`,// 
     deleteProductReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}`,
     likeReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}/like`,
     dislikeReview: (reviewId: string) => `${API_BASE_URL}/product/reviews/${reviewId}/dislike`,
