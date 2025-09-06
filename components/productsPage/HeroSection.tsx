@@ -11,6 +11,8 @@ import { supabase } from '@/utils/supabase/client';
 import ProductDataType from '@/types/ProductData';
 import { ProductVariantType } from '@/types/ProductData';
 import { API_ENDPOINTS } from '@/config/api';
+import BuyBox from './BuyBox';
+import Script from 'next/script';
 
 interface HeroSectionProps {
   slug: string; // Changed from productId to slug since we'll use slug for routing
@@ -44,6 +46,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   const [vendorError, setVendorError] = useState<string | null>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const element_unique_id = useId();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Add this helper above the currentImageGallery definition
   const normalizeGallery = (gallery: any): string[] => {
@@ -295,6 +298,87 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
     });
   };
 
+  const handlePayment = async (amount: number, productName: string) => {
+    if (amount <= 0) return;
+
+    setIsProcessing(true);
+
+    try {
+      // Create order directly
+      const res = await fetch('/api/razorpay/createOrder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ amount: amount * 100 }),
+      });
+      
+      const data = await res.json();
+      
+      // Setup Razorpay payment
+      const PaymentData = {
+        key: process.env.RAZORPAY_LIVE_KEY_ID,
+        amount: amount * 100,
+        currency: "INR",
+        name: "payNex",
+        description: "Payment testing or support",
+        order_id: data.id,
+        
+        handler: async function (response: any) {
+          // Verify payment
+          const res = await fetch("/api/razorpay/verifyOrder", {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              orderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            }),
+          });
+          
+          const data = await res.json();
+          
+          if (data.isOk) {
+            // Payment successful - 
+            alert("Payment successful!");
+          } else {
+            alert("Payment failed");
+          }
+        },
+        prefill: {
+          name: "payNex",
+        },
+        theme: {
+          color: "#6366f1",
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      // Check if Razorpay is loaded
+      if (typeof window !== 'undefined' && (window as any).Razorpay) {
+        const payment = new (window as any).Razorpay(PaymentData);
+        payment.open();
+      } else {
+        throw new Error('Razorpay SDK not loaded');
+      }
+      
+      // Reset processing state after Razorpay modal opens
+      setIsProcessing(false);
+        
+    } catch (error) {
+        console.error("Payment error:", error);
+        alert("There was an error processing your payment. Please try again.");
+        setIsProcessing(false);
+    }
+    
+  };
+
   const handleAddToWishlist = () => {
     if (!product) return;
     
@@ -343,6 +427,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
   }
 
   return (
+     <>
+      <Script
+        id="razorpay-checkout-js"
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
     <section className="bg-white text-gray-800">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
@@ -499,121 +589,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slug }) => {
             </div>
           </div>
           {/* Right Column - Buy Box */}
-          <div className="lg:col-span-3">
-            <div className="sticky top-24 rounded-lg border border-gray-200 bg-white p-4 shadow-md">
-              <div className="mb-4">
-                <span className="text-xl font-bold text-gray-800">₹{formatIndianPrice(getDisplayPrice(displayProduct))}</span>
-                {getStrikedPrice(displayProduct) !== undefined && (
-                  <div className="mt-1">
-                    <span className="text-sm text-gray-500 line-through">₹{formatIndianPrice(getStrikedPrice(displayProduct)!)}</span>
-                    {displayProduct.discountPercent && (
-                      <span className="ml-2 text-sm font-medium text-green-600">Save {displayProduct.discountPercent}%</span>
-                    )}
-                  </div>
-                )}
-                <p className="mt-1 text-xs text-gray-500">FREE delivery <span className="font-bold text-gray-700">Tuesday, 27 May</span></p>
-              </div>
-              <div className="mb-4 flex items-center text-sm">
-                <span className={`font-medium ${displayProduct.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {displayProduct.quantity > 0 ? 'In stock' : 'Out of stock'}
-                </span>
-              </div>
-              {/* Quantity Selector */}
-              <div className="mb-4">
-                <label htmlFor="quantity" className="block text-sm font-medium text-gray-600">
-                  Quantity:
-                </label>
-                <div className="mt-1 flex items-center">
-                  <button
-                    type='button'
-                    onClick={() => handleQuantityChange(false)}
-                    disabled={quantity <= 1}
-                    className="rounded-md p-1 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <MinusCircle className="size-5" />
-                  </button>
-                  <input
-                    type="text"
-                    id={element_unique_id}
-                    value={quantity}
-                    readOnly
-                    className="w-12 border-0 bg-transparent text-center text-sm text-gray-800"
-                  />
-                  <button
-                    type='button'
-                    onClick={() => handleQuantityChange(true)}
-                    disabled={quantity >= displayProduct.quantity}
-                    className="rounded-md p-1 text-gray-500 hover:text-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <PlusCircle className="size-5" />
-                  </button>
-                </div>
-              </div>
-              {/* Add to Cart Button */}
-              <button
-                type='button'
-                onClick={handleAddToCart}
-                disabled={displayProduct.quantity <= 0}
-                className="mb-2 w-full rounded-full bg-yellow-400 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-yellow-500 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Add to Cart
-              </button>
-              {/* Buy Now Button */}
-              <button
-                type='button'
-                disabled={displayProduct.quantity <= 0}
-                className="mb-4 w-full rounded-full bg-orange-500 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Buy Now
-              </button>
-              {/* Add to Wishlist */}
-              <div className="mb-4 flex items-center">
-                <input
-                  id={element_unique_id}
-                  type="checkbox"
-                  className="size-4 rounded border-gray-300 bg-white text-green-600 focus:ring-green-500"
-                />
-                <label htmlFor="add-gift-options" className="ml-2 text-sm text-gray-600">
-                  Add gift options
-                </label>
-              </div>
-              <button
-                type='button'
-                onClick={handleAddToWishlist}
-                className="mb-4 flex w-full items-center justify-center rounded-md border border-gray-300 bg-gray-50 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-100"
-              >
-                <Heart className="mr-2 size-4" />
-                Add to Wish List
-              </button>
-              {/* Secure Transaction */}
-              <div className="flex items-center text-xs text-gray-500">
-                <ShieldCheck className="mr-1 size-4" />
-                <span>Secure transaction</span>
-              </div>
-              {/* Shipping Info */}
-              <div className="mt-4 space-y-2 text-xs">
-                <div className="flex">
-                  <span className="w-20 font-medium text-gray-500">Ships from</span>
-                  <span className="text-gray-700">PlantoMart</span>
-                </div>
-                <div className="flex">
-                  <span className="w-20 font-medium text-gray-500">Sold by</span>
-                  {vendorData ? (
-                    <span className="text-green-600 hover:underline">
-                      <Link href={`/vendor/${vendorData.slug}`}>
-                        {vendorData.name || vendorData.business_name || product.brand}
-                      </Link>
-                    </span>
-                  ) : (
-                    <span className="text-gray-700">{product.brand}</span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <BuyBox
+            product={displayProduct}
+            vendorData={vendorData || undefined}
+            quantity={quantity}
+            onQuantityChange={handleQuantityChange}
+            onAddToCart={handleAddToCart}
+            onAddToWishlist={handleAddToWishlist}
+            inputId={`quantity-input-${element_unique_id}`}
+            deliveryDate="Tuesday, 27 May"
+            sellerName={vendorData?.name || vendorData?.business_name || 'PlantoMart'}
+            pricePerUnit={Math.round(getDisplayPrice(displayProduct))}
+            // onBuyNow={() => handlePayment(Math.round(getDisplayPrice(displayProduct)), displayProduct.title)}
+          />
         </div>
       </div>
     </section>
+    </>
   );
 };
 

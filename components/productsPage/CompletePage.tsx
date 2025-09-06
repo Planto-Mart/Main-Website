@@ -12,10 +12,10 @@ function CompletePage({ slug }: { slug: string }) {
       {/* {slug} */}
       <Navbar/>
       <HeroSection slug={slug}/>
-      <ProductDetailedDescription slug={slug}/>
       <div className='my-10 px-4 md:px-8 lg:px-16'>
         <BundlesProductCombiner slug={slug}/>
       </div>
+      <ProductDetailedDescription slug={slug}/>
       <ProductReviews slug={slug}/>
       <Footer/>
     </div>
